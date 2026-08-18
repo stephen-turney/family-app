@@ -1,0 +1,387 @@
+:root {
+  --bg: #e8ecf5;          /* tinted so white cards separate clearly */
+  --panel: #ffffff;
+  --panel-2: #e3e8f3;
+  --text: #0e1420;        /* near-black for strong text contrast */
+  --muted: #4f5a70;       /* darkened so secondary text stays legible */
+  --border: #ccd4e3;      /* more defined edges */
+  --accent: #4a63e7;      /* soft indigo, still safe under white text */
+  --accent-soft: #e7ebfd; /* pastel tint of the accent */
+  --good: #2b9968;
+  --danger: #cf3d3d;
+  --shadow: 0 1px 3px rgba(16, 24, 40, 0.08), 0 1px 2px rgba(16, 24, 40, 0.05);
+  --radius: 14px;
+  /* Checklist geometry. The time-of-day panel is exactly as tall as its block's
+     rows, so its edges land on the first and last one. --block-rows is set per
+     block inline by TasksPage from the real step count; the value here is only a
+     fallback. --block-panel-min keeps a short block's panel tall enough for the
+     190px icon (5 rows = 310px), at the cost of overhanging the rows a little. */
+  --row-h: 62px;
+  --block-rows: 8;
+  --block-panel-min: calc(var(--row-h) * 5);
+  --block-panel-w: 360px;                                  /* width, set independently */
+  /* Height of a routine's heading row. The panel is pushed down by exactly this
+     much so its top edge lines up with the first checkbox rather than the
+     heading, and its bottom lands on the last row. Pinned as a height (not left
+     to the text) so the offset is exact instead of approximately right. */
+  --routine-head-h: 28px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--text); }
+
+.app { display: flex; flex-direction: column; height: 100vh; }
+
+/* Top bar */
+.topbar {
+  display: flex; align-items: center; gap: 24px;
+  padding: 14px 24px; background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+.brand { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+/* The brand is a link to the home page — keep it looking like a title, not a link. */
+a.brand { color: inherit; text-decoration: none; }
+a.brand:hover { opacity: .7; }
+.brand-dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), #a06bff);
+}
+.nav { display: flex; gap: 8px; flex: 1; }
+.nav a {
+  color: var(--muted); text-decoration: none; padding: 10px 16px;
+  border-radius: 10px; font-weight: 600; font-size: 15px;
+}
+.nav a:hover { background: var(--panel-2); color: var(--text); }
+.nav a.active { background: var(--accent); color: #fff; }
+/* A person's tab carries their photo, the same way every other view identifies
+   them — a name alone reads as another section rather than a person. */
+.nav a.tab-member { display: flex; align-items: center; gap: 8px; padding-left: 12px; }
+.nav a.tab-member > :first-child { flex-shrink: 0; }
+
+/* Settings is an icon on the hard right, in the space the date used to hold.
+   44px square keeps a finger-sized target around the 26px glyph. */
+.nav-gear {
+  flex-shrink: 0; width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; line-height: 1; text-decoration: none;
+  /* The glyph renders as colour emoji, so it can't be recoloured to match the
+     muted tab text — a slight dim is the nearest equivalent. Don't go much below
+     this: at .55 it read as a disabled control, and it's the only way into
+     Settings now that the label is gone. */
+  opacity: .8; transition: opacity .15s ease, background .15s ease;
+}
+.nav-gear:hover { background: var(--panel-2); opacity: 1; }
+.nav-gear.active { background: var(--accent-soft); opacity: 1; }
+
+.content { flex: 1; overflow: auto; padding: 24px; }
+
+/* Generic */
+h1 { font-size: 22px; margin: 0 0 16px; }
+h2 { font-size: 17px; margin: 0 0 12px; }
+.muted { color: var(--muted); }
+.row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.spacer { flex: 1; }
+
+.btn {
+  background: var(--accent); color: #fff; border: none; cursor: pointer;
+  padding: 9px 16px; border-radius: 10px; font-weight: 600; font-size: 14px;
+}
+.btn:hover { filter: brightness(1.08); }
+/* .btn is used on <Link>s too — drop the default anchor underline. */
+a.btn { text-decoration: none; display: inline-block; }
+.btn.ghost { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); }
+.btn.danger { background: transparent; color: var(--danger); border: 1px solid #f0cfcf; }
+.btn.danger:hover { background: #fdf2f2; filter: none; }
+.btn.small { padding: 5px 10px; font-size: 13px; }
+
+input, select, textarea {
+  background: var(--bg); color: var(--text); border: 1px solid var(--border);
+  border-radius: 9px; padding: 9px 11px; font-size: 14px; font-family: inherit;
+}
+label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px; }
+
+.card {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow);
+}
+.grid { display: grid; gap: 16px; }
+
+/* Member badges / chips */
+.badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 12px; border-radius: 999px; font-weight: 600; font-size: 14px;
+  background: var(--panel-2); border: 1px solid var(--border);
+}
+.badge .swatch { width: 12px; height: 12px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(14, 20, 32, 0.18); }
+.badge.selectable { cursor: pointer; }
+.badge.dim { opacity: 0.4; }
+
+/* Progress bar */
+.progress { height: 10px; border-radius: 999px; background: var(--panel-2); overflow: hidden; }
+.progress > span { display: block; height: 100%; background: var(--good); transition: width .3s; }
+
+/* Home page: one large photo tile per family member */
+.home-head { text-align: center; margin-bottom: 24px; }
+.home-head h1 { margin-bottom: 2px; }
+.home-head p { margin: 0; }
+/* Two big tiles per row (2×2 for a family of four). The narrow max-width is what
+   caps it at 2 columns — auto-fit then still collapses to 1 on a phone. */
+.home-grid {
+  display: grid; gap: 24px; max-width: 860px; margin: 0 auto;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+}
+.home-tile {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  padding: 28px 22px; color: var(--text); text-decoration: none;
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.home-tile:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(16, 24, 40, .13); }
+.home-tile:active { transform: translateY(0); }
+.home-avatar {
+  width: 220px; height: 220px; border-radius: 50%; border: 4px solid;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.home-name { font-size: 26px; }
+.home-tile .progress { width: 100%; }
+
+/* Tasks page. auto-*fit* with a max track width, not auto-fill with 1fr: with only
+   two people in the family, auto-fill kept four 325px tracks and left the right half
+   of the screen empty, while 1fr would stretch two cards to ~660px each — wide enough
+   to trip the 600px container query into the side-by-side panel layout with barely any
+   room left for labels. Capping at 420 and centring keeps any family size tidy. */
+.member-columns {
+  display: grid; gap: 18px; justify-content: center;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 420px));
+}
+/* Single-member view (/tasks/:id): one centered column instead of a full-width
+   stretch. Width is set by the longest real task name: 740px leaves 206px of label
+   room, against Everett's longest ("Play Outside (30 min.)") at 177px — 29px of slack.
+   Below ~660 five of the rows wrapped. A longer name later needs 800px, which buys
+   266px; wrapping is cosmetic rather than structural either way, since two 17px lines
+   still fit a 62px row and the panel stays aligned. */
+.member-columns.single { grid-template-columns: minmax(0, 740px); justify-content: center; }
+/* Single-member header: the person's photo large and centred, title underneath.
+   The back link is absolutely placed so it can't pull the photo off-centre. */
+.checklist-head {
+  position: relative; display: flex; flex-direction: column; align-items: center;
+  gap: 12px; margin-bottom: 22px;
+}
+.checklist-back { position: absolute; left: 0; top: 0; }
+.checklist-avatar {
+  width: 170px; height: 170px; border-radius: 50%; border: 4px solid;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.checklist-title { margin: 0; font-size: 30px; font-weight: 700; text-align: center; }
+
+/* Which day the list is for, with a step either side of it. The arrows are 46px —
+   the same size as the row checkboxes, since it's the same finger on a tablet. */
+.checklist-daynav { display: flex; align-items: center; gap: 14px; }
+.daynav-btn {
+  width: 46px; height: 46px; flex-shrink: 0;
+  border-radius: 13px; border: 1px solid var(--border); background: var(--panel);
+  display: flex; align-items: center; justify-content: center;
+  font: inherit; font-size: 27px; line-height: 1; color: var(--text); cursor: pointer;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+}
+.daynav-btn:hover { border-color: var(--accent); color: var(--accent); }
+.daynav-btn:active { background: var(--panel-2); }
+/* Fixed centre width so stepping between days doesn't slide the arrows about.
+   Measured worst case is 297px — "Wednesday, September 30" with the Today tag, a
+   real date (2026-09-30) — so 320px holds every label with 23px to spare. */
+.daynav-date {
+  display: flex; align-items: baseline; justify-content: center; gap: 9px;
+  min-width: 320px; font-size: 18px; font-weight: 600; color: var(--muted);
+}
+.daynav-tag {
+  font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em;
+  color: var(--accent); background: var(--accent-soft); border-radius: 7px; padding: 3px 8px;
+}
+/* Mirrors .checklist-back on the other side, and for the same reason: in the
+   centred row it would shift the date sideways each time it appeared. */
+.daynav-today { position: absolute; right: 0; top: 0; }
+
+@media (max-width: 560px) {
+  .checklist-avatar { width: 128px; height: 128px; }
+  .checklist-title { font-size: 23px; }
+  /* No room for a fixed centre here; a little arrow drift beats overflowing. */
+  .daynav-date { min-width: 0; font-size: 16px; }
+  .checklist-daynav { gap: 10px; }
+}
+
+/* --- Daily checklist blocks (morning / afternoon / evening) ---------------
+   Each time of day is a block: a tinted icon panel beside that block's routines.
+   Side-by-side needs ~460px of *card* width, which depends on how many members
+   share the grid rather than on the viewport — so this keys off a container
+   query, not a media query. Scoped to .checklist (not .card) because the
+   containment it creates would trap a position:fixed modal backdrop. */
+.checklist { container-type: inline-size; }
+
+.checklist-block { display: flex; flex-direction: column; margin-top: 16px; }
+/* With the panel a fixed square rather than a full-height spine, nothing else
+   marks where one block ends — without this the afternoon rows read as a
+   continuation of the morning list. */
+.checklist-block + .checklist-block { margin-top: 20px; padding-top: 20px; border-top: 2px solid var(--border); }
+
+/* Narrow default: the panel is a slim tinted strip capping the rows below it. */
+.block-panel {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 12px; border-radius: 12px 12px 0 0;
+}
+.block-icon { font-size: 30px; line-height: 1; }
+.block-label {
+  background: rgba(255, 255, 255, .92); border-radius: 7px; padding: 3px 10px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .11em;
+}
+.block-body {
+  border: 1px solid var(--border); border-top: none;
+  border-radius: 0 0 12px 12px; padding: 2px 12px 6px;
+}
+/* Wide card: the paper-sheet layout, panel to the left of the rows. As tall as
+   that block's own rows (--block-rows comes in inline from TasksPage), so blocks
+   of different lengths each stay aligned; the width is set on its own (360px), so
+   it's a tall rectangle rather than a square.
+   The threshold is compared against the container's *content* box — a 660px card
+   is 622px inside its padding and border — so it has to sit below 622, not 660.
+   Keep it above ~300 so the narrow member columns on /tasks still stack. */
+@container (min-width: 600px) {
+  .checklist-block { flex-direction: row; align-items: flex-start; gap: 14px; }
+  .block-panel {
+    flex-direction: column; justify-content: center; gap: 18px;
+    width: var(--block-panel-w);
+    /* Not var(--block-panel): a custom property's own var()s are substituted where
+       it's *declared*, so a :root shorthand would freeze :root's --block-rows and
+       ignore the per-block value. The calc has to live here, at the point of use. */
+    height: max(calc(var(--row-h) * var(--block-rows)), var(--block-panel-min));
+    flex-shrink: 0; padding: 24px 16px; border-radius: 14px;
+  }
+  .block-icon { font-size: 190px; }
+  .block-label { font-size: 15px; padding: 6px 18px; letter-spacing: .14em; }
+  .block-body { flex: 1; min-width: 0; border: none; border-radius: 0; padding: 0; }
+
+  /* Drop the panel past the block's first heading so it starts level with the
+     first checkbox. Only the first group's heading is pinned to a fixed height —
+     later ones keep their natural height, and in the stacked layout nothing is
+     pinned at all, so a long routine name is still free to wrap there. */
+  .block-panel { margin-top: var(--routine-head-h); }
+  .routine-group:first-child .routine-head {
+    height: var(--routine-head-h); box-sizing: border-box; align-items: center;
+  }
+
+  /* A block with no routines yet keeps the narrow layout's tinted strip: there's
+     nothing for a 310px panel to sit beside except one dashed "add" button.
+     Specificity (.checklist-block.empty …) is what beats the rules above, so
+     these don't depend on staying below them. */
+  /* align-items has to come back to stretch as well as the direction: the row
+     layout's flex-start would leave the strip and its dashed button shrunk to
+     their content width instead of spanning the card. */
+  .checklist-block.empty { flex-direction: column; align-items: stretch; }
+  .checklist-block.empty .block-panel {
+    flex-direction: row; justify-content: flex-start; gap: 10px;
+    width: auto; height: auto; margin-top: 0;
+    padding: 7px 12px; border-radius: 12px 12px 0 0;
+  }
+  .checklist-block.empty .block-icon { font-size: 30px; }
+  .checklist-block.empty .block-label { font-size: 11px; padding: 3px 10px; letter-spacing: .11em; }
+  .checklist-block.empty .block-body {
+    border: 1px solid var(--border); border-top: none;
+    border-radius: 0 0 12px 12px; padding: 2px 12px 6px;
+  }
+}
+
+/* The routine's own name is the block's bold caps heading, as on the sheet. */
+.routine-group + .routine-group { margin-top: 14px; }
+.routine-head {
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 6px 2px 4px; border-bottom: 1px solid var(--border);
+}
+.routine-name { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; }
+.routine-count { margin-left: auto; font-size: 12px; color: var(--muted); flex-shrink: 0; }
+
+/* An empty block is its own "add" affordance rather than a dead line of text. */
+.block-empty {
+  display: block; width: 100%; margin: 8px 0; padding: 13px 14px; text-align: left;
+  font: inherit; font-size: 14px; color: var(--muted); cursor: pointer;
+  background: transparent; border: 1px dashed var(--border); border-radius: 11px;
+}
+.block-empty:hover { border-color: var(--accent); color: var(--accent); }
+
+.checklist-foot { margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--border); }
+/* Sized for kids tapping on a tablet: a 46px box inside a 62px row still clears
+   the 44px minimum touch target, and the whole row is the target — so eight rows
+   per block fit on screen without scrolling away the later blocks. */
+.checkline {
+  display: flex; align-items: center; gap: 12px; padding: 6px 6px; min-height: var(--row-h);
+  border-bottom: 1px solid var(--border); cursor: pointer; user-select: none;
+  border-radius: 10px; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+}
+.checkline:last-child { border-bottom: none; }
+.checkline:active { background: var(--panel-2); }
+.checkline .box {
+  width: 46px; height: 46px; border-radius: 13px; border: 3px solid var(--border);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  font-size: 29px; line-height: 1; background: var(--panel);
+}
+.checkline.done .box { background: var(--good); border-color: var(--good); color: #fff; }
+.checkline.done .label { text-decoration: line-through; color: var(--muted); }
+/* The picture a pre-reader recognises the task by. */
+.checkline .task-icon { font-size: 34px; line-height: 1; flex-shrink: 0; width: 40px; text-align: center; }
+.checkline.done .task-icon { opacity: .45; }
+.checkline .label { font-size: 17px; font-weight: 600; }
+.checkline .pts { margin-left: auto; font-size: 13px; color: var(--muted); flex-shrink: 0; }
+
+/* In a narrow member column the label wraps onto a second line and leaves the
+   rows visibly uneven, so give the title back some width. Must come after the
+   rules above: a container query adds no specificity, only source order breaks the tie. */
+@container (max-width: 459px) {
+  .checkline { gap: 9px; }
+  .checkline .task-icon { font-size: 29px; width: 33px; }
+  .checkline .label { font-size: 15px; }
+  .checkline .box { width: 42px; height: 42px; font-size: 26px; }
+}
+.section-title { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 14px 0 4px; }
+
+/* Modal */
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,.55);
+  display: flex; align-items: center; justify-content: center; z-index: 50;
+}
+.modal { width: 440px; max-width: calc(100vw - 32px); max-height: calc(100vh - 32px); overflow: auto; }
+.modal .field { margin-bottom: 12px; }
+.modal .field input, .modal .field select, .modal .field textarea { width: 100%; }
+
+/* Picture picker (chores + routine steps) */
+.icon-current {
+  display: flex; align-items: center; gap: 10px; width: 100%; cursor: pointer;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 9px;
+  padding: 6px 10px; font: inherit; color: var(--text); text-align: left;
+}
+.icon-current:hover { background: var(--panel-2); }
+.icon-current-glyph { font-size: 32px; line-height: 1; }
+.icon-picker.compact { position: relative; }
+.icon-picker.compact .icon-current { width: auto; padding: 4px 8px; }
+.icon-picker.compact .icon-current-glyph { font-size: 26px; }
+/* In a step row the picker sits beside a text input, so its panel floats over the
+   form instead of squeezing into the narrow flex item. */
+.icon-picker.compact .icon-panel {
+  position: absolute; z-index: 5; top: calc(100% + 6px); left: 0;
+  width: 300px; max-width: 78vw; background: var(--panel);
+  box-shadow: 0 10px 24px rgba(16, 24, 40, .18);
+}
+.icon-panel {
+  margin-top: 8px; padding: 10px; background: var(--bg);
+  border: 1px solid var(--border); border-radius: 11px;
+}
+.icon-panel > input { width: 100%; margin-bottom: 8px; }
+.icon-scroll { max-height: 210px; overflow-y: auto; }
+.icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); gap: 6px; }
+.icon-choice {
+  font-size: 26px; line-height: 1; padding: 7px 0; cursor: pointer;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+}
+.icon-choice:hover { background: var(--accent-soft); border-color: var(--accent); }
+.icon-choice.selected { background: var(--accent-soft); border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }

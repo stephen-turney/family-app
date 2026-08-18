@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Nightly backup of server/data.sqlite, the app's entire state.
+
+  Installed alongside the server agent by hosting/install-agent.command. See
+  hosting/backup-db.mjs for what it actually does (node:sqlite backup(), verify,
+  gzip, prune) and where it writes (iCloud Drive by default).
+
+  It runs under node, not /bin/bash, and that is not a style choice: launchd
+  starting /bin/bash gets "Operation not permitted" on anything under ~/Desktop
+  (macOS TCC), which killed the shell version of this job with exit 126. node
+  is allowed, and is already reading this directory as the server agent.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.familyhub.backup</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/bin/node</string>
+    <string>/Users/stephen.turney/Desktop/family-app/hosting/backup-db.mjs</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/stephen.turney/Desktop/family-app</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <!-- The backup filename is a local date; keep it from drifting. -->
+    <key>TZ</key>
+    <string>America/Chicago</string>
+  </dict>
+
+  <!-- 3:17am rather than 3:00 — nothing else wants that minute. If the Mac is
+       asleep at the time, launchd runs the job once it wakes. -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>3</integer>
+    <key>Minute</key>
+    <integer>17</integer>
+  </dict>
+
+  <!-- Deliberately NOT RunAtLoad: a backup on every login adds nothing over a
+       daily one (same filename, same day). The installer runs one by hand to
+       prove the setup works. -->
+  <key>RunAtLoad</key>
+  <false/>
+
+  <key>LowPriorityIO</key>
+  <true/>
+  <key>Nice</key>
+  <integer>5</integer>
+
+  <key>StandardOutPath</key>
+  <string>/Users/stephen.turney/Desktop/family-app/logs/launchd-backup.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/stephen.turney/Desktop/family-app/logs/launchd-backup.log</string>
+</dict>
+</plist>

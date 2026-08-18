@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Family Hub as a background service on this Mac.
+
+  Runs `node server/src/index.js`, which serves BOTH the API and the built
+  frontend from client/dist, so the whole app is one process on one port and
+  any tablet on the home network can open http://<this-mac>:3001/.
+
+  Install with hosting/install-agent.command (it copies this file to
+  ~/Library/LaunchAgents and bootstraps it). Paths below must be absolute —
+  launchd does not expand ~ or $HOME.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.familyhub.server</string>
+
+  <!-- Homebrew's node, by absolute path: launchd agents get a minimal PATH
+       (/usr/bin:/bin:/usr/sbin:/sbin), so a bare `node` would not be found. -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/bin/node</string>
+    <string>/Users/stephen.turney/Desktop/family-app/server/src/index.js</string>
+  </array>
+
+  <!-- db.js resolves data.sqlite relative to the process cwd. -->
+  <key>WorkingDirectory</key>
+  <string>/Users/stephen.turney/Desktop/family-app/server</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PORT</key>
+    <string>3001</string>
+    <key>NODE_ENV</key>
+    <string>production</string>
+    <!-- Explicit, because several routes derive "today" from toISOString(). It
+         matches this Mac's zone; change it if you move house. -->
+    <key>TZ</key>
+    <string>America/Chicago</string>
+  </dict>
+
+  <!-- Start at login and restart if it ever exits. ThrottleInterval keeps a
+       crash-on-startup from spinning: launchd waits 10s between attempts. -->
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+
+  <!-- Separate from logs/server.log, which start.command owns. -->
+  <key>StandardOutPath</key>
+  <string>/Users/stephen.turney/Desktop/family-app/logs/launchd-server.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/stephen.turney/Desktop/family-app/logs/launchd-server.log</string>
+</dict>
+</plist>
