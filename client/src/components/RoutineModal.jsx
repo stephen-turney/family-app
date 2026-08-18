@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { api, useApiMutation } from '../api/client.js';
 import Modal from './Modal.jsx';
 import IconPicker from './IconPicker.jsx';
+import { DEFAULT_COMPLETED_ICON } from '../lib/taskIcons.js';
 
-const emptyStep = () => ({ title: '', icon: null });
+const emptyStep = () => ({ title: '', icon: null, completed_icon: null });
 
 // `timeOfDay` preselects the block — set when the add came from an empty
 // morning/afternoon/evening block rather than the card's generic add button.
@@ -24,7 +25,11 @@ export default function RoutineModal({ memberId, timeOfDay: initialTimeOfDay, on
     title,
     time_of_day: timeOfDay,
     steps: steps
-      .map((s) => ({ title: s.title.trim(), icon: s.icon }))
+      .map((s) => ({
+        title: s.title.trim(),
+        icon: s.icon,
+        completed_icon: s.completed_icon,
+      }))
       .filter((s) => s.title),
   };
 
@@ -61,7 +66,11 @@ export default function RoutineModal({ memberId, timeOfDay: initialTimeOfDay, on
         </select>
       </div>
       <div className="field">
-        <label>Steps — tap a picture to change it</label>
+        <label>Steps — choose a picture for before and after it is done</label>
+        <div className="routine-step-key" aria-hidden="true">
+          <span>To do</span>
+          <span>Done</span>
+        </div>
         {steps.map((s, i) => (
           <div key={i} className="row" style={{ marginBottom: 6, flexWrap: 'nowrap' }}>
             <IconPicker
@@ -69,6 +78,17 @@ export default function RoutineModal({ memberId, timeOfDay: initialTimeOfDay, on
               value={s.icon}
               title={s.title}
               onChange={(icon) => updateStep(i, { icon })}
+              pickerLabel={`Choose the to-do picture for step ${i + 1}`}
+              allowUpload
+            />
+            <IconPicker
+              compact
+              value={s.completed_icon}
+              onChange={(completed_icon) => updateStep(i, { completed_icon })}
+              matchTitle={false}
+              fallback={DEFAULT_COMPLETED_ICON}
+              pickerLabel={`Choose the done picture for step ${i + 1}`}
+              allowUpload
             />
             <input
               style={{ flex: 1, minWidth: 0 }}

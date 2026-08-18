@@ -1,24 +1,56 @@
 import { useState } from 'react';
-import { ICON_GROUPS, iconForTitle, searchIcons, DEFAULT_ICON } from '../lib/taskIcons.js';
+import {
+  ICON_GROUPS,
+  iconForTitle,
+  searchIcons,
+  DEFAULT_ICON,
+  isUploadedImage,
+} from '../lib/taskIcons.js';
+import { fileToTaskImageDataUrl } from '../lib/image.js';
 
 // Picture chooser for a chore or routine step.
 //
 // `value` is the explicitly chosen icon (null = let the title decide). We show the
 // automatic match as the preview when nothing is chosen, so most tasks never need
 // touching — the picker is for the ones the keyword matcher can't guess.
-export default function IconPicker({ value, title = '', onChange, compact = false }) {
+export default function IconPicker({
+  value,
+  title = '',
+  onChange,
+  compact = false,
+  matchTitle = true,
+  fallback = DEFAULT_ICON,
+  pickerLabel = 'Choose a picture',
+  allowUpload = false,
+}) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [uploadError, setUploadError] = useState('');
 
-  const auto = iconForTitle(title);
-  const shown = value || auto || DEFAULT_ICON;
+  const auto = matchTitle ? iconForTitle(title) : null;
+  const shown = value || auto || fallback;
   const results = query.trim() ? searchIcons(query) : null;
 
   const choose = (icon) => {
     onChange(icon);
     setOpen(false);
     setQuery('');
+    setUploadError('');
   };
+
+  const upload = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    try {
+      choose(await fileToTaskImageDataUrl(file));
+    } catch (err) {
+      setUploadError(err.message || 'Could not read that image file');
+    }
+  };
+
+  const preview = (picture) =>
+    isUploadedImage(picture) ? <img src={picture} alt="" /> : picture;
 
   const grid = (items) => (
     <div className="icon-grid">
@@ -43,13 +75,13 @@ export default function IconPicker({ value, title = '', onChange, compact = fals
         type="button"
         className="icon-current"
         onClick={() => setOpen((o) => !o)}
-        title="Choose a picture"
-        aria-label="Choose a picture"
+        title={pickerLabel}
+        aria-label={pickerLabel}
       >
-        <span className="icon-current-glyph">{shown}</span>
+        <span className="icon-current-glyph">{preview(shown)}</span>
         {!compact && (
           <span className="muted" style={{ fontSize: 13 }}>
-            {value ? 'Picture chosen' : auto ? 'Matched from the name' : 'No match — pick one'}
+            {value ? 'Picture chosen' : auto ? 'Matched from the name' : 'Using the default picture'}
           </span>
         )}
         {!compact && <span className="spacer" />}
@@ -64,11 +96,18 @@ export default function IconPicker({ value, title = '', onChange, compact = fals
             placeholder="Search pictures…"
             aria-label="Search pictures"
           />
+          {allowUpload && (
+            <label className="btn ghost small icon-upload">
+              {isUploadedImage(value) ? 'Replace uploaded image' : 'Upload an image'}
+              <input type="file" accept="image/*" hidden onChange={upload} />
+            </label>
+          )}
           {value && (
             <button type="button" className="btn ghost small" onClick={() => choose(null)}>
-              Use the automatic picture{auto ? ` (${auto})` : ''}
+              {auto ? `Use the automatic picture (${auto})` : `Use the default picture (${fallback})`}
             </button>
           )}
+          {uploadError && <p className="icon-upload-error">{uploadError}</p>}
           <div className="icon-scroll">
             {results ? (
               results.length ? (

@@ -47,10 +47,13 @@ routinesRouter.post('/', (req, res) => {
     (Array.isArray(steps) ? steps : []).forEach((s, i) => {
       const label = typeof s === 'string' ? s : s?.title;
       const icon = typeof s === 'string' ? null : s?.icon || null;
+      const completedIcon = typeof s === 'string' ? null : s?.completed_icon || null;
       if (label?.trim())
         db.prepare(
-          'INSERT INTO routine_steps (routine_id, title, sort_order, icon) VALUES (?, ?, ?, ?)'
-        ).run(rid, label.trim(), i, icon);
+          `INSERT INTO routine_steps
+             (routine_id, title, sort_order, icon, completed_icon)
+           VALUES (?, ?, ?, ?, ?)`
+        ).run(rid, label.trim(), i, icon, completedIcon);
     });
     return rid;
   });
@@ -79,15 +82,31 @@ routinesRouter.delete('/:id', (req, res) => {
 routinesRouter.post('/:id/steps', (req, res) => {
   const routine = db.prepare('SELECT * FROM routines WHERE id = ?').get(req.params.id);
   if (!routine) return res.status(404).json({ error: 'routine not found' });
-  const { title, icon } = req.body || {};
+  const { title, icon, completed_icon } = req.body || {};
   if (!title?.trim()) return res.status(400).json({ error: 'title is required' });
   const max = db
     .prepare('SELECT COALESCE(MAX(sort_order), -1) AS m FROM routine_steps WHERE routine_id = ?')
     .get(req.params.id).m;
   const info = db
-    .prepare('INSERT INTO routine_steps (routine_id, title, sort_order, icon) VALUES (?, ?, ?, ?)')
-    .run(req.params.id, title.trim(), max + 1, icon || null);
+    .prepare(
+      `INSERT INTO routine_steps
+         (routine_id, title, sort_order, icon, completed_icon)
+       VALUES (?, ?, ?, ?, ?)`
+    )
+    .run(req.params.id, title.trim(), max + 1, icon || null, completed_icon || null);
   res.status(201).json(db.prepare('SELECT * FROM routine_steps WHERE id = ?').get(info.lastInsertRowid));
+});
+
+routinesRouter.patch('/steps/:stepId', (req, res) => {
+  const existing = db.prepare('SELECT * FROM routine_steps WHERE id = ?').get(req.params.stepId);
+  if (!existing) return res.status(404).json({ error: 'not found' });
+  const { icon, completed_icon } = req.body || {};
+  db.prepare('UPDATE routine_steps SET icon = ?, completed_icon = ? WHERE id = ?').run(
+    icon === undefined ? existing.icon : icon || null,
+    completed_icon === undefined ? existing.completed_icon : completed_icon || null,
+    req.params.stepId
+  );
+  res.json(db.prepare('SELECT * FROM routine_steps WHERE id = ?').get(req.params.stepId));
 });
 
 routinesRouter.delete('/steps/:stepId', (req, res) => {

@@ -14,12 +14,12 @@
   /* Checklist geometry. The time-of-day panel is exactly as tall as its block's
      rows, so its edges land on the first and last one. --block-rows is set per
      block inline by TasksPage from the real step count; the value here is only a
-     fallback. --block-panel-min keeps a short block's panel tall enough for the
-     190px icon (5 rows = 310px), at the cost of overhanging the rows a little. */
-  --row-h: 62px;
+     fallback. --block-panel-min keeps a one-row block tall enough for the large
+     time-of-day artwork. */
+  --row-h: 87px;
   --block-rows: 8;
-  --block-panel-min: calc(var(--row-h) * 5);
-  --block-panel-w: 360px;                                  /* width, set independently */
+  --block-panel-min: 260px;
+  --block-panel-w: 260px;                                  /* width, set independently */
   /* Height of a routine's heading row. The panel is pushed down by exactly this
      much so its top edge lines up with the first checkbox rather than the
      heading, and its bottom lands on the last row. Pinned as a height (not left
@@ -158,13 +158,9 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
   display: grid; gap: 18px; justify-content: center;
   grid-template-columns: repeat(auto-fit, minmax(300px, 420px));
 }
-/* Single-member view (/tasks/:id): one centered column instead of a full-width
-   stretch. Width is set by the longest real task name: 740px leaves 206px of label
-   room, against Everett's longest ("Play Outside (30 min.)") at 177px — 29px of slack.
-   Below ~660 five of the rows wrapped. A longer name later needs 800px, which buys
-   266px; wrapping is cosmetic rather than structural either way, since two 17px lines
-   still fit a 62px row and the panel stays aligned. */
-.member-columns.single { grid-template-columns: minmax(0, 740px); justify-content: center; }
+/* Single-member view (/tasks/:id): wide enough for the 75px task pictures and
+   labels beside the time-of-day panel without dominating the whole screen. */
+.member-columns.single { grid-template-columns: minmax(0, 800px); justify-content: center; }
 /* Single-member header: the person's photo large and centred, title underneath.
    The back link is absolutely placed so it can't pull the photo off-centre. */
 .checklist-head {
@@ -243,7 +239,7 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 }
 /* Wide card: the paper-sheet layout, panel to the left of the rows. As tall as
    that block's own rows (--block-rows comes in inline from TasksPage), so blocks
-   of different lengths each stay aligned; the width is set on its own (360px), so
+   of different lengths each stay aligned; the width is set on its own, so
    it's a tall rectangle rather than a square.
    The threshold is compared against the container's *content* box — a 660px card
    is 622px inside its padding and border — so it has to sit below 622, not 660.
@@ -251,7 +247,7 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 @container (min-width: 600px) {
   .checklist-block { flex-direction: row; align-items: flex-start; gap: 14px; }
   .block-panel {
-    flex-direction: column; justify-content: center; gap: 18px;
+    flex-direction: column; justify-content: flex-start; gap: 18px;
     width: var(--block-panel-w);
     /* Not var(--block-panel): a custom property's own var()s are substituted where
        it's *declared*, so a :root shorthand would freeze :root's --block-rows and
@@ -259,7 +255,7 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
     height: max(calc(var(--row-h) * var(--block-rows)), var(--block-panel-min));
     flex-shrink: 0; padding: 24px 16px; border-radius: 14px;
   }
-  .block-icon { font-size: 190px; }
+  .block-icon { font-size: 150px; }
   .block-label { font-size: 15px; padding: 6px 18px; letter-spacing: .14em; }
   .block-body { flex: 1; min-width: 0; border: none; border-radius: 0; padding: 0; }
 
@@ -301,6 +297,13 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 }
 .routine-name { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; }
 .routine-count { margin-left: auto; font-size: 12px; color: var(--muted); flex-shrink: 0; }
+.routine-head-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.routine-pictures-button {
+  padding: 3px 7px; border: 1px solid var(--border); border-radius: 7px;
+  background: var(--panel-2); color: var(--text); font: inherit; font-size: 11px;
+  font-weight: 700; cursor: pointer;
+}
+.routine-pictures-button:hover { border-color: var(--accent); color: var(--accent); }
 
 /* An empty block is its own "add" affordance rather than a dead line of text. */
 .block-empty {
@@ -311,9 +314,8 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 .block-empty:hover { border-color: var(--accent); color: var(--accent); }
 
 .checklist-foot { margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--border); }
-/* Sized for kids tapping on a tablet: a 46px box inside a 62px row still clears
-   the 44px minimum touch target, and the whole row is the target — so eight rows
-   per block fit on screen without scrolling away the later blocks. */
+/* The entire row is a generous tablet touch target. Its height is driven by the
+   75px task picture plus 6px of padding above and below. */
 .checkline {
   display: flex; align-items: center; gap: 12px; padding: 6px 6px; min-height: var(--row-h);
   border-bottom: 1px solid var(--border); cursor: pointer; user-select: none;
@@ -328,9 +330,16 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 }
 .checkline.done .box { background: var(--good); border-color: var(--good); color: #fff; }
 .checkline.done .label { text-decoration: line-through; color: var(--muted); }
-/* The picture a pre-reader recognises the task by. */
-.checkline .task-icon { font-size: 34px; line-height: 1; flex-shrink: 0; width: 40px; text-align: center; }
-.checkline.done .task-icon { opacity: .45; }
+/* The picture a pre-reader recognises the task by. Uploaded images are cropped
+   square when selected and fill this 75px frame; emoji stay centered within it. */
+.checkline .task-icon {
+  width: 75px; height: 75px; flex-shrink: 0; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 12px; background: var(--panel-2);
+  font-size: 54px; line-height: 1; text-align: center;
+}
+.checkline .task-icon img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.checkline.done .task-icon { opacity: 1; }
 .checkline .label { font-size: 17px; font-weight: 600; }
 .checkline .pts { margin-left: auto; font-size: 13px; color: var(--muted); flex-shrink: 0; }
 
@@ -339,7 +348,7 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
    rules above: a container query adds no specificity, only source order breaks the tie. */
 @container (max-width: 459px) {
   .checkline { gap: 9px; }
-  .checkline .task-icon { font-size: 29px; width: 33px; }
+  .checkline .task-icon { width: 70px; height: 70px; font-size: 50px; }
   .checkline .label { font-size: 15px; }
   .checkline .box { width: 42px; height: 42px; font-size: 26px; }
 }
@@ -354,6 +363,24 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 .modal .field { margin-bottom: 12px; }
 .modal .field input, .modal .field select, .modal .field textarea { width: 100%; }
 
+/* Labels above the two compact picture pickers in each new routine step. */
+.routine-step-key {
+  display: grid; grid-template-columns: 45px 45px; gap: 10px; margin: 2px 0 3px;
+  color: var(--muted); font-size: 11px; font-weight: 700; text-align: center;
+}
+.routine-pictures-help { margin: 0 0 12px; font-size: 13px; }
+.routine-picture-columns, .routine-picture-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) 46px 46px;
+  align-items: center; gap: 10px;
+}
+.routine-picture-columns {
+  margin-bottom: 4px; color: var(--muted); font-size: 11px;
+  font-weight: 700; text-align: center;
+}
+.routine-picture-columns span:first-child { text-align: left; }
+.routine-picture-row { padding: 7px 0; border-top: 1px solid var(--border); }
+.routine-picture-row > strong { min-width: 0; font-size: 14px; }
+
 /* Picture picker (chores + routine steps) */
 .icon-current {
   display: flex; align-items: center; gap: 10px; width: 100%; cursor: pointer;
@@ -362,9 +389,13 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 }
 .icon-current:hover { background: var(--panel-2); }
 .icon-current-glyph { font-size: 32px; line-height: 1; }
+.icon-current-glyph img { width: 32px; height: 32px; display: block; border-radius: 5px; object-fit: cover; }
 .icon-picker.compact { position: relative; }
-.icon-picker.compact .icon-current { width: auto; padding: 4px 8px; }
-.icon-picker.compact .icon-current-glyph { font-size: 26px; }
+.icon-picker.compact .icon-current { width: 46px; height: 42px; padding: 4px; justify-content: center; }
+.icon-picker.compact .icon-current-glyph {
+  width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+}
 /* In a step row the picker sits beside a text input, so its panel floats over the
    form instead of squeezing into the narrow flex item. */
 .icon-picker.compact .icon-panel {
@@ -377,6 +408,8 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
   border: 1px solid var(--border); border-radius: 11px;
 }
 .icon-panel > input { width: 100%; margin-bottom: 8px; }
+.icon-upload { display: inline-block; margin: 0 8px 8px 0; cursor: pointer; }
+.icon-upload-error { margin: 4px 0 8px; color: var(--danger); font-size: 12px; }
 .icon-scroll { max-height: 210px; overflow-y: auto; }
 .icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); gap: 6px; }
 .icon-choice {

@@ -96,10 +96,12 @@ function ensureColumn(table, column, type) {
   }
 }
 ensureColumn('members', 'avatar', 'TEXT'); // base64 data URL for a profile photo
-// Optional picture for a task. NULL means "work it out from the title" — the client
-// keyword-matches its icon library, so existing rows need no backfill.
+// Optional pictures for a task. NULL `icon` means "work it out from the title";
+// NULL `completed_icon` uses the client's standard done picture. Existing rows
+// therefore gain the completed-state treatment without a data backfill.
 ensureColumn('chores', 'icon', 'TEXT');
 ensureColumn('routine_steps', 'icon', 'TEXT');
+ensureColumn('routine_steps', 'completed_icon', 'TEXT');
 
 // ---------------------------------------------------------------------------
 // Seed (only when the DB is empty) so a fresh install isn't a blank page.

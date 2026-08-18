@@ -1,15 +1,19 @@
 // Picture library for chores and routine steps.
 //
 // Young kids who can't read yet navigate their list by picture, so every row gets
-// one. Icons are emoji on purpose: no dependency to install, they render sharply
-// at any size (we show them at 40px+), and they're already colourful and
-// recognisable — a line-art icon set would be less legible to a pre-reader.
+// one. The built-in library uses emoji, and a picker value may instead be an
+// uploaded image data URL.
 //
 // A task's picture is resolved in three steps: an explicitly chosen `icon`, else a
 // keyword match against the title, else DEFAULT_ICON. That means existing chores
 // light up with sensible pictures with no migration or data entry.
 
 export const DEFAULT_ICON = '📋';
+export const DEFAULT_COMPLETED_ICON = '✅';
+
+export function isUploadedImage(value) {
+  return typeof value === 'string' && value.startsWith('data:image/');
+}
 
 // `keywords` are matched as whole words, so multi-word keys ('make bed') are more
 // specific than single words ('bed') and win. Avoid giving the same single word to
@@ -213,6 +217,12 @@ export function iconForTitle(title) {
 // match on the title, then the generic fallback.
 export function resolveIcon(task) {
   return task?.icon || iconForTitle(task?.title) || DEFAULT_ICON;
+}
+
+// A completed step may have its own chosen picture. Older steps have no value
+// in this column, so they use one consistent, unmistakable done image.
+export function resolveCompletedIcon(task) {
+  return task?.completed_icon || DEFAULT_COMPLETED_ICON;
 }
 
 // Free-text search over labels and keywords, for the picker's search box.

@@ -10,8 +10,13 @@ import {
   localDate,
 } from '../api/client.js';
 import RoutineModal from '../components/RoutineModal.jsx';
+import RoutinePicturesModal from '../components/RoutinePicturesModal.jsx';
 import Avatar from '../components/Avatar.jsx';
-import { resolveIcon } from '../lib/taskIcons.js';
+import { isUploadedImage, resolveCompletedIcon, resolveIcon } from '../lib/taskIcons.js';
+
+function TaskPicture({ picture }) {
+  return isUploadedImage(picture) ? <img src={picture} alt="" /> : picture;
+}
 
 // A local YYYY-MM-DD back to a Date at local midnight. Built by hand rather than
 // with parseISO/new Date(iso), which read a bare date as UTC and land on the wrong
@@ -48,6 +53,7 @@ function displayGroups(routines) {
     rows: r.steps,
     done: r.steps.filter((s) => s.done).length,
     total: r.steps.length,
+    routine: r,
   }));
 }
 
@@ -71,6 +77,7 @@ export default function TasksPage() {
 
   // {memberId, timeOfDay?} — timeOfDay preselects the block that was tapped.
   const [routineModal, setRoutineModal] = useState(null);
+  const [picturesRoutine, setPicturesRoutine] = useState(null);
 
   // Ticks land on the day being viewed, not on today, so yesterday's list can be
   // finished off. Both queries key off the date, so the right day refetches.
@@ -243,8 +250,14 @@ export default function TasksPage() {
                             {g.title && (
                               <div className="routine-head">
                                 <span className="routine-name">{g.title}</span>
-                                <span className="routine-count">
-                                  {g.done}/{g.total}
+                                <span className="routine-head-actions">
+                                  <button
+                                    className="routine-pictures-button"
+                                    onClick={() => setPicturesRoutine(g.routine)}
+                                  >
+                                    🖼️ Pictures
+                                  </button>
+                                  <span className="routine-count">{g.done}/{g.total}</span>
                                 </span>
                               </div>
                             )}
@@ -257,7 +270,9 @@ export default function TasksPage() {
                                 <span className="box">{s.done ? '✓' : ''}</span>
                                 {/* Pre-readers find their task by picture. */}
                                 <span className="task-icon" aria-hidden="true">
-                                  {resolveIcon(s)}
+                                  <TaskPicture
+                                    picture={s.done ? resolveCompletedIcon(s) : resolveIcon(s)}
+                                  />
                                 </span>
                                 <span className="label">{s.title}</span>
                               </div>
@@ -290,6 +305,12 @@ export default function TasksPage() {
           memberId={routineModal.memberId}
           timeOfDay={routineModal.timeOfDay}
           onClose={() => setRoutineModal(null)}
+        />
+      )}
+      {picturesRoutine && (
+        <RoutinePicturesModal
+          routine={picturesRoutine}
+          onClose={() => setPicturesRoutine(null)}
         />
       )}
     </div>
