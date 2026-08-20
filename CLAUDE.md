@@ -141,6 +141,17 @@ through, and `kill -9` brought it back on its own (`runs = 2`).
 Addresses: `http://<lan-ip>:3001` or `http://MNWRMQV72.local:3001` (this Mac's mDNS name — no
 config, and it survives a DHCP lease change, which a bookmarked IP does not).
 
+**The iOS 10 iPad must use this hosted build, not Vite on port 5173.** The client uses Vite's
+official legacy plugin with an `iOS >= 10` target, so `npm run build` emits a SystemJS legacy
+bundle and usage-based core-js polyfills alongside the modern bundle. It also explicitly bundles
+an AbortController DOM shim: TanStack Query constructs one before every query, while iOS 10 lacks
+that API; without the shim the shell renders but every data request fails. The dev server
+intentionally remains modern-only. iOS 10 also lacks container queries, so a guarded 650px
+viewport-query fallback reproduces the left-hand time-of-day panel on single-member tablet pages;
+overview cards and genuinely narrow screens remain stacked. The same legacy guard replaces flex
+`gap` with explicit margins between the panel, checkbox, task picture, and label—iOS 10 otherwise
+runs those elements together even though their individual sizes are correct.
+
 **Backups exist now too** (2026-08-17). The same installer adds a second agent,
 `com.familyhub.backup`, running `hosting/backup-db.mjs` nightly at 3:17am: `node:sqlite`'s
 `backup()` → `PRAGMA integrity_check` on the copy → gzip → `familyhub-YYYY-MM-DD.sqlite.gz` in

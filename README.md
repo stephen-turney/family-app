@@ -55,9 +55,10 @@ Ctrl-C — or just closing the window — stops both.
 ./start.command --help
 ```
 
-By default the web server is bound to your local network, so phones and tablets can open
-the hub at the `http://<your-mac-ip>:5173` address it prints on startup. Full logs are kept
-in `logs/server.log` and `logs/client.log`.
+By default the development web server is bound to your local network, so current phones and
+tablets can open the hub at the `http://<your-mac-ip>:5173` address it prints on startup. Full
+logs are kept in `logs/server.log` and `logs/client.log`. The old iOS 10 iPad must use the
+production build on port 3001 instead; see the next section.
 
 If the API is already running when you launch, it's reused as-is and left running on exit.
 
@@ -83,6 +84,24 @@ npm run dev
 ```
 
 Then open http://localhost:5173. The Vite dev server proxies `/api/*` to the backend.
+
+### Old iPad / iOS 10
+
+Vite's development server on port 5173 sends modern JavaScript that Safari on iOS 10 cannot
+parse. The production build includes a separate legacy bundle and polyfills targeted at iOS 10.
+Build the client, then let the Express server serve both the app and API from port 3001:
+
+```bash
+cd client
+npm run build
+
+cd ../server
+npm start
+```
+
+On the iPad, open `http://<your-mac-ip>:3001` (not port 5173). Re-run `npm run build` after client
+changes. If the launchd hosting agent is installed, it already serves this built version on port
+3001; rebuilding `client/dist` is enough to publish a client-only change.
 
 ## Setting up a child's checklist
 

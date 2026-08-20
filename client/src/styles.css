@@ -76,7 +76,12 @@ a.brand:hover { opacity: .7; }
 .nav-gear:hover { background: var(--panel-2); opacity: 1; }
 .nav-gear.active { background: var(--accent-soft); opacity: 1; }
 
-.content { flex: 1; overflow: auto; padding: 24px; }
+.content {
+  flex: 1; overflow: auto; padding: 24px;
+  /* iOS 10 otherwise paints this nested scroll container synchronously, which
+     feels noticeably jagged on the old wall-mounted iPad. */
+  -webkit-overflow-scrolling: touch;
+}
 
 /* Generic */
 h1 { font-size: 22px; margin: 0 0 16px; }
@@ -262,10 +267,9 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
   .block-panel {
     flex-direction: column; justify-content: flex-start; gap: 18px;
     width: var(--block-panel-w);
-    /* Not var(--block-panel): a custom property's own var()s are substituted where
-       it's *declared*, so a :root shorthand would freeze :root's --block-rows and
-       ignore the per-block value. The calc has to live here, at the point of use. */
-    height: max(calc(var(--row-h) * var(--block-rows)), var(--block-panel-min));
+    /* TasksPage supplies a direct pixel value. Besides keeping every block exact,
+       this also avoids unsupported calc multiplication in iOS 10's fallback. */
+    height: var(--block-panel-h);
     flex-shrink: 0; padding: 24px 16px; border-radius: 14px;
   }
   .block-icon { font-size: 150px; }
@@ -299,6 +303,40 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
   .checklist-block.empty .block-body {
     border: 1px solid var(--border); border-top: none;
     border-radius: 0 0 12px 12px; padding: 2px 12px 6px;
+  }
+}
+
+/* Safari on iOS 10 understands neither container queries nor the modern CSS
+   arithmetic used by the primary wide layout. On a single-person tablet page,
+   the viewport is a safe proxy for the card width, so reproduce that layout
+   with an ordinary media query. Overview cards are deliberately excluded: they
+   remain narrow even when the viewport itself is wide. */
+@supports not (container-type: inline-size) {
+  /* iOS 10 ignores `gap` on flex containers. Recreate the task-row spacing
+     with margins so the checkbox, picture, and label do not touch. */
+  .checkline .box { margin-right: 12px; }
+  .checkline .task-icon { margin-right: 12px; }
+
+  @media (min-width: 650px) {
+    .member-columns.single .checklist-block:not(.empty) {
+      flex-direction: row; align-items: flex-start; gap: 14px;
+    }
+    .member-columns.single .checklist-block:not(.empty) .block-panel {
+      flex-direction: column; justify-content: flex-start; gap: 18px;
+      width: var(--block-panel-w); height: var(--block-panel-h);
+      flex-shrink: 0; padding: 24px 16px; border-radius: 14px;
+      margin-top: var(--routine-head-h); margin-right: 14px;
+    }
+    .member-columns.single .checklist-block:not(.empty) .block-icon { font-size: 150px; }
+    .member-columns.single .checklist-block:not(.empty) .block-label {
+      font-size: 15px; padding: 6px 18px; letter-spacing: .14em;
+    }
+    .member-columns.single .checklist-block:not(.empty) .block-body {
+      flex: 1; min-width: 0; border: none; border-radius: 0; padding: 0;
+    }
+    .member-columns.single .checklist-block:not(.empty) .routine-group:first-child .routine-head {
+      height: var(--routine-head-h); box-sizing: border-box; align-items: center;
+    }
   }
 }
 

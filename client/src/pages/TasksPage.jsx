@@ -227,7 +227,13 @@ export default function TasksPage() {
                     // An empty block keeps the compact stacked form even in a wide
                     // card: a full-height panel beside one "add" button looks broken.
                     className={`checklist-block${blockRows === 0 ? ' empty' : ''}`}
-                    style={{ '--block-rows': blockRows }}
+                    style={{
+                      '--block-rows': blockRows,
+                      // Direct pixels are also consumed by the iOS 10 fallback.
+                      // That browser supports custom properties but cannot parse
+                      // the newer multiplication syntax in CSS calc().
+                      '--block-panel-h': `${Math.max(blockRows * 87, 260)}px`,
+                    }}
                   >
                     <div className="block-panel" style={{ background: block.tint }}>
                       <span className="block-icon" aria-hidden="true">{block.icon}</span>
