@@ -61,6 +61,11 @@ export function useSettings() {
   return useQuery({ queryKey: ['settings'], queryFn: () => api.get('/settings') });
 }
 
+// ---- Reports ----
+export function useReports() {
+  return useQuery({ queryKey: ['reports'], queryFn: () => api.get('/reports') });
+}
+
 // ---- Progress ----
 export function useProgress(from, to) {
   return useQuery({

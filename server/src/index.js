@@ -9,6 +9,10 @@ import { choresRouter } from './routes/chores.js';
 import { routinesRouter } from './routes/routines.js';
 import { progressRouter } from './routes/progress.js';
 import { settingsRouter } from './routes/settings.js';
+import { reportsRouter } from './routes/reports.js';
+import { startWeeklyReportScheduler } from './weeklyReports.js';
+
+process.env.TZ ||= 'America/Chicago';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -24,6 +28,7 @@ app.use('/api/chores', choresRouter);
 app.use('/api/routines', routinesRouter);
 app.use('/api/progress', progressRouter);
 app.use('/api/settings', settingsRouter);
+app.use('/api/reports', reportsRouter);
 
 // Serve the built frontend, so one process on one port is the whole app — that's
 // what makes hosting it on the home network a single `node src/index.js`. In dev
@@ -58,4 +63,5 @@ app.use((err, req, res, next) => {
 // can reach it by this Mac's IP or .local name, not just localhost.
 app.listen(PORT, () => {
   console.log(`[server] Daily checklist listening on http://localhost:${PORT}`);
+  startWeeklyReportScheduler();
 });

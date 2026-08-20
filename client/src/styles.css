@@ -109,6 +109,19 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 }
 .grid { display: grid; gap: 16px; }
 
+.report-list { display: grid; gap: 8px; }
+.report-row { display: flex; align-items: stretch; gap: 8px; }
+.report-link {
+  display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;
+  padding: 11px 13px; border: 1px solid var(--border); border-radius: 10px;
+  background: var(--bg); color: var(--accent); font-weight: 600;
+  text-decoration: none; overflow-wrap: anywhere;
+}
+.report-link:hover { border-color: var(--accent); background: var(--accent-soft); }
+.report-delete { flex-shrink: 0; }
+.report-message { margin: 0 0 12px; color: var(--good); font-size: 13px; font-weight: 600; }
+.report-message.error { color: var(--danger); }
+
 /* Member badges / chips */
 .badge {
   display: inline-flex; align-items: center; gap: 8px;

@@ -38,6 +38,7 @@ db.exec(`
     name       TEXT NOT NULL,
     color      TEXT NOT NULL DEFAULT '#4f7cff',
     emoji      TEXT NOT NULL DEFAULT '🙂',
+    weekly_allowance_cents INTEGER,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
@@ -96,12 +97,25 @@ function ensureColumn(table, column, type) {
   }
 }
 ensureColumn('members', 'avatar', 'TEXT'); // base64 data URL for a profile photo
+ensureColumn('members', 'weekly_allowance_cents', 'INTEGER');
 // Optional pictures for a task. NULL `icon` means "work it out from the title";
 // NULL `completed_icon` uses the client's standard done picture. Existing rows
 // therefore gain the completed-state treatment without a data backfill.
 ensureColumn('chores', 'icon', 'TEXT');
 ensureColumn('routine_steps', 'icon', 'TEXT');
 ensureColumn('routine_steps', 'completed_icon', 'TEXT');
+
+// Configure the two existing children without tying report calculations to
+// member ids. The value remains editable in Settings and is left alone once set.
+db.prepare(
+  `UPDATE members
+      SET weekly_allowance_cents = CASE lower(name)
+        WHEN 'everett' THEN 1200
+        WHEN 'beau' THEN 750
+      END
+    WHERE weekly_allowance_cents IS NULL
+      AND lower(name) IN ('everett', 'beau')`
+).run();
 
 // ---------------------------------------------------------------------------
 // Seed (only when the DB is empty) so a fresh install isn't a blank page.

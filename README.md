@@ -18,9 +18,18 @@ Built as an MVP with a React (Vite) frontend and a Node/Express + SQLite backend
 - **Day navigation** — step back and forward a day at a time on a person's checklist; ticks land on
   the day you're looking at, so an unfinished yesterday can still be completed.
 - **Progress** — each member's completion count and % for the day, on their card and on Home.
+- **Weekly allowance reports** — every Sunday at 2:00 a.m. Central, the server totals Monday–Friday
+  completions (10 points each, capped at 20 per day), calculates each child's completion percentage
+  and pro-rata allowance, rounds the payout up to the nearest dime, and adds a downloadable text
+  report under Settings → Reports. Reports can also be generated on demand there; manual files use
+  `user-report_YYYY-MM-DD.txt`, then `_001`, `_002`, and so on for additional runs that day. Any
+  report can be downloaded or deleted from the same list. Each child's final payout is prominently
+  divided into spending (50%), savings (30%), giving (10%), and taxes (10%). Each category is
+  rounded upward to the nearest $0.05, with the extra rounding and resulting grand total shown.
 - **Task pictures** — ~90 emoji in 12 groups, matched from the task's own wording, or chosen
   explicitly per step from a searchable picker.
-- **Members** — name, colour, emoji, and an optional photo avatar (resized in the browser).
+- **Members** — name, colour, emoji, optional photo avatar (resized in the browser), and full weekly
+  allowance. Members without an allowance are omitted from allowance reports.
 - Data lives in a local SQLite file so every device on your network shares it in real time.
 
 Calendar merging and iCal sync were removed in August 2026 to keep this focused on the checklist.
@@ -92,7 +101,8 @@ right first; fixing it currently means editing the database directly.
 ```
 server/   Express API + SQLite (node:sqlite)
   src/db.js              schema, migrations, seed
-  src/routes/            members, routines, progress, settings, chores (hidden)
+  src/weeklyReports.js   weekly allowance calculation, file generation, Sunday scheduler
+  src/routes/            members, routines, progress, settings, reports, chores (hidden)
 client/   React + Vite
   src/pages/             HomePage, TasksPage, FamilyPage (= Settings)
   src/components/        Modal, RoutineModal, Avatar, IconPicker

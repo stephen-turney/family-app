@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { api, useMembers, useSettings, useApiMutation } from '../api/client.js';
+import { api, useMembers, useSettings, useReports, useApiMutation } from '../api/client.js';
 import Modal from '../components/Modal.jsx';
 import Avatar from '../components/Avatar.jsx';
 import { fileToAvatarDataUrl } from '../lib/image.js';
@@ -14,6 +14,79 @@ export default function FamilyPage() {
       <h1>Settings</h1>
       <FamilyNameCard />
       <MembersCard />
+      <ReportsCard />
+    </div>
+  );
+}
+
+function ReportsCard() {
+  const { data: reports = [], isLoading, error } = useReports();
+  const generate = useApiMutation(() => api.post('/reports'), ['reports']);
+  const remove = useApiMutation(
+    (filename) => api.del(`/reports/${encodeURIComponent(filename)}`),
+    ['reports']
+  );
+
+  const deleteReport = (filename) => {
+    if (window.confirm(`Delete ${filename}? This cannot be undone.`)) {
+      remove.mutate(filename);
+    }
+  };
+
+  return (
+    <div className="card">
+      <div className="row">
+        <h2 style={{ margin: 0 }}>Reports</h2>
+        <div className="spacer" />
+        <button
+          className="btn small"
+          disabled={generate.isPending}
+          onClick={() => generate.mutate()}
+        >
+          {generate.isPending ? 'Generating…' : 'Generate report now'}
+        </button>
+      </div>
+      <p className="muted" style={{ margin: '0 0 14px' }}>
+        Allowance totals are generated every Sunday at 2:00 a.m. Central.
+      </p>
+      {generate.isError && (
+        <p className="report-message error">The report could not be generated.</p>
+      )}
+      {generate.isSuccess && (
+        <p className="report-message">Created {generate.data.filename}</p>
+      )}
+      {isLoading && <span className="muted">Loading reports…</span>}
+      {error && <span className="muted">Reports could not be loaded.</span>}
+      {!isLoading && !error && reports.length === 0 && (
+        <span className="muted">The first report will appear here Sunday morning.</span>
+      )}
+      {reports.length > 0 && (
+        <div className="report-list">
+          {reports.map((report) => (
+            <div className="report-row" key={report.filename}>
+              <a
+                className="report-link"
+                href={`/api/reports/${encodeURIComponent(report.filename)}`}
+                download
+              >
+                <span aria-hidden="true">📄</span>
+                {report.filename}
+              </a>
+              <button
+                className="btn danger small report-delete"
+                disabled={remove.isPending && remove.variables === report.filename}
+                onClick={() => deleteReport(report.filename)}
+                aria-label={`Delete ${report.filename}`}
+              >
+                {remove.isPending && remove.variables === report.filename ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      {remove.isError && (
+        <p className="report-message error">The report could not be deleted.</p>
+      )}
     </div>
   );
 }
@@ -104,6 +177,9 @@ function MemberModal({ member, onClose }) {
   const [color, setColor] = useState(member.color || COLORS[2]);
   const [emoji, setEmoji] = useState(member.emoji || EMOJIS[0]);
   const [avatar, setAvatar] = useState(member.avatar || null);
+  const [allowance, setAllowance] = useState(
+    member.weekly_allowance_cents == null ? '' : (member.weekly_allowance_cents / 100).toFixed(2)
+  );
 
   const handleFile = async (e) => {
     const file = e.target.files?.[0];
@@ -148,7 +224,13 @@ function MemberModal({ member, onClose }) {
           <button
             className="btn"
             disabled={!name.trim()}
-            onClick={() => save.mutate({ name, color, emoji, avatar }, { onSuccess: onClose })}
+            onClick={() => save.mutate({
+              name,
+              color,
+              emoji,
+              avatar,
+              weekly_allowance_cents: allowance === '' ? null : Math.round(Number(allowance) * 100),
+            }, { onSuccess: onClose })}
           >
             Save
           </button>
@@ -158,6 +240,20 @@ function MemberModal({ member, onClose }) {
       <div className="field">
         <label>Name</label>
         <input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
+      </div>
+      <div className="field">
+        <label>Full weekly allowance</label>
+        <input
+          type="number"
+          min="0"
+          step="0.10"
+          value={allowance}
+          onChange={(e) => setAllowance(e.target.value)}
+          placeholder="0.00"
+        />
+        <p className="muted" style={{ margin: '6px 0 0', fontSize: 12 }}>
+          The amount earned for 1,000 points. Leave blank to exclude this member from reports.
+        </p>
       </div>
       <div className="field">
         <label>Photo</label>
@@ -239,4 +335,3 @@ function MemberModal({ member, onClose }) {
     </Modal>
   );
 }
-
