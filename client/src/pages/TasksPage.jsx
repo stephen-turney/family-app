@@ -131,24 +131,28 @@ export default function TasksPage() {
               46px like the checkboxes — the same finger is doing the tapping. */}
           <div className="checklist-daynav">
             <button
-              className="daynav-btn"
+              className="daynav-btn previous"
               onClick={() => setDate(shiftDate(date, -1))}
               aria-label="Previous day"
               title="Previous day"
             >
-              ‹
+              <svg className="daynav-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
             </button>
             <span className="daynav-date">
               {format(parseLocalDate(date), 'EEEE, MMMM d')}
               {date === today && <span className="daynav-tag">Today</span>}
             </span>
             <button
-              className="daynav-btn"
+              className="daynav-btn next"
               onClick={() => setDate(shiftDate(date, 1))}
               aria-label="Next day"
               title="Next day"
             >
-              ›
+              <svg className="daynav-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
             </button>
           </div>
           {/* Absolutely placed, like the ← Family link it mirrors: in the centred
@@ -159,9 +163,6 @@ export default function TasksPage() {
             </button>
           )}
 
-          {statFor(focusMember.id)?.points > 0 && (
-            <span className="badge">⭐ {statFor(focusMember.id).points}</span>
-          )}
         </div>
       ) : (
         <h1>Daily Checklist · Today</h1>
@@ -176,12 +177,12 @@ export default function TasksPage() {
             groups: displayGroups(memberRoutines.filter((r) => r.time_of_day === block.key)),
           }));
 
-          // Derived from the rows on screen rather than /api/progress, so the bar
-          // can't disagree with the list under it. Home still uses the server's
-          // numbers.
+          // Each completed routine step is worth 10 points, capped at the daily
+          // 200-point target. Use the visible rows while progress is still loading.
           const rows = blocks.flatMap(({ groups }) => groups.flatMap((g) => g.rows));
           const shownDone = rows.filter((s) => s.done).length;
-          const shownPct = rows.length ? Math.round((shownDone / rows.length) * 100) : 0;
+          const shownPoints = Math.min(stat?.points ?? shownDone * 10, 200);
+          const shownPct = Math.round(shownPoints / 2);
 
           return (
             <div key={m.id} className="card checklist">
@@ -191,7 +192,6 @@ export default function TasksPage() {
                   <Avatar member={m} size={28} />
                   <strong style={{ fontSize: 17 }}>{m.name}</strong>
                   <div className="spacer" />
-                  {stat && stat.points > 0 && <span className="badge">⭐ {stat.points}</span>}
                 </div>
               )}
 
@@ -205,7 +205,7 @@ export default function TasksPage() {
                         : `${format(parseLocalDate(shownDate), 'EEEE')}'s progress`}
                     </span>
                     <span className="muted">
-                      {shownDone}/{rows.length} · {shownPct}%
+                      {shownPoints}/200 points
                     </span>
                   </div>
                   <div className="progress">

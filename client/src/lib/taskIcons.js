@@ -24,7 +24,7 @@ export const ICON_GROUPS = [
     items: [
       { icon: '⏰', label: 'Wake up', keywords: ['wake up', 'wake', 'alarm', 'get up'] },
       { icon: '🛏️', label: 'Make the bed', keywords: ['make bed', 'bed', 'blankets', 'sheets', 'tidy bed'] },
-      { icon: '🪥', label: 'Brush teeth', keywords: ['brush teeth', 'teeth', 'tooth', 'toothbrush', 'brush'] },
+      { icon: '😁', label: 'Brush teeth', keywords: ['brush teeth', 'teeth', 'tooth', 'toothbrush', 'brush'] },
       { icon: '🧼', label: 'Wash up', keywords: ['wash hands', 'wash face', 'soap', 'wash'] },
       { icon: '🚿', label: 'Shower', keywords: ['shower'] },
       { icon: '🛁', label: 'Take a bath', keywords: ['bath', 'bathe', 'tub'] },
@@ -48,7 +48,7 @@ export const ICON_GROUPS = [
     group: 'School',
     items: [
       { icon: '🎒', label: 'Pack backpack', keywords: ['pack backpack', 'backpack', 'book bag', 'bookbag'] },
-      { icon: '🥪', label: 'Pack lunch', keywords: ['pack lunch', 'lunch', 'lunchbox', 'lunch box', 'sandwich'] },
+      { icon: '🍱', label: 'Pack lunch', keywords: ['pack lunch', 'lunch', 'lunchbox', 'lunch box', 'sandwich'] },
       { icon: '🚌', label: 'Catch the bus', keywords: ['bus', 'school bus'] },
       { icon: '🏫', label: 'Go to school', keywords: ['school', 'go to school'] },
       { icon: '📝', label: 'Homework', keywords: ['homework', 'schoolwork', 'worksheet', 'study'] },
@@ -68,7 +68,7 @@ export const ICON_GROUPS = [
       { icon: '🚰', label: 'Drink water', keywords: ['drink water', 'water bottle', 'hydrate', 'drink'] },
       { icon: '🧑‍🍳', label: 'Help cook', keywords: ['cook', 'help cook', 'make dinner', 'baking', 'bake'] },
       { icon: '🍴', label: 'Set the table', keywords: ['set table', 'set the table', 'silverware', 'napkins'] },
-      { icon: '🧽', label: 'Dishes', keywords: ['dishes', 'wash dishes', 'dishwasher', 'load dishwasher', 'unload dishwasher'] },
+      { icon: '🍽️', label: 'Dishes', keywords: ['dishes', 'wash dishes', 'dishwasher', 'load dishwasher', 'unload dishwasher'] },
       { icon: '🫧', label: 'Clear the table', keywords: ['clear table', 'clear the table', 'wipe table', 'wipe counter'] },
       { icon: '🛒', label: 'Groceries', keywords: ['groceries', 'grocery', 'shopping', 'store'] },
     ],
@@ -76,12 +76,12 @@ export const ICON_GROUPS = [
   {
     group: 'Cleaning up',
     items: [
-      { icon: '🧸', label: 'Pick up toys', keywords: ['toys', 'pick up toys', 'clean up toys', 'tidy toys', 'blocks'] },
+      { icon: '🚂', label: 'Pick up toys', keywords: ['toys', 'pick up toys', 'clean up toys', 'tidy toys', 'blocks'] },
       { icon: '🧹', label: 'Sweep', keywords: ['sweep', 'broom', 'clean', 'tidy', 'clean up'] },
       { icon: '🪣', label: 'Mop', keywords: ['mop', 'bucket', 'scrub floor'] },
       { icon: '🗑️', label: 'Take out trash', keywords: ['trash', 'garbage', 'take out trash', 'bin', 'rubbish'] },
       { icon: '♻️', label: 'Recycling', keywords: ['recycling', 'recycle', 'bottles', 'cans'] },
-      { icon: '🧺', label: 'Laundry', keywords: ['laundry', 'wash clothes', 'hamper', 'dirty clothes'] },
+      { icon: '👕', label: 'Laundry', keywords: ['laundry', 'wash clothes', 'hamper', 'dirty clothes'] },
       { icon: '🧷', label: 'Fold laundry', keywords: ['fold laundry', 'fold clothes', 'folding', 'fold'] },
       { icon: '🛋️', label: 'Tidy the room', keywords: ['tidy room', 'clean room', 'living room', 'straighten'] },
       { icon: '🪟', label: 'Clean windows', keywords: ['windows', 'window', 'mirrors'] },

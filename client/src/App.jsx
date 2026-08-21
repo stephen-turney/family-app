@@ -1,17 +1,32 @@
-import { Link, NavLink, Route, Routes, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, NavLink, Route, Routes, Navigate, useNavigate } from 'react-router-dom';
 import HomePage from './pages/HomePage.jsx';
 import TasksPage from './pages/TasksPage.jsx';
 import FamilyPage from './pages/FamilyPage.jsx';
-import { useSettings, useMembers } from './api/client.js';
+import { useSettings } from './api/client.js';
 import { pluralizeFamily } from './lib/familyName.js';
-import Avatar from './components/Avatar.jsx';
 
 export default function App() {
   const { data: settings } = useSettings();
-  // One tab per person, so adding someone in Settings gives them a tab — no
-  // hardcoded Everett/Beau to fall out of step with the family.
-  const { data: members = [] } = useMembers();
   const brand = pluralizeFamily(settings?.family_name) || 'Family Hub';
+  const navigate = useNavigate();
+
+  // This is a shared wall tablet, so abandon whichever detail/settings page was
+  // left open after 90 seconds without a touch, click, keypress, or scroll.
+  useEffect(() => {
+    let timer;
+    const reset = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => navigate('/home', { replace: true }), 90_000);
+    };
+    const events = ['touchstart', 'mousedown', 'keydown', 'scroll'];
+    events.forEach((event) => document.addEventListener(event, reset, true));
+    reset();
+    return () => {
+      clearTimeout(timer);
+      events.forEach((event) => document.removeEventListener(event, reset, true));
+    };
+  }, [navigate]);
 
   return (
     <div className="app">
@@ -26,16 +41,6 @@ export default function App() {
           <NavLink to="/tasks" end className={({ isActive }) => (isActive ? 'active' : '')}>
             ✅ Overview
           </NavLink>
-          {members.map((m) => (
-            <NavLink
-              key={m.id}
-              to={`/tasks/${m.id}`}
-              className={({ isActive }) => `tab-member${isActive ? ' active' : ''}`}
-            >
-              <Avatar member={m} size={24} />
-              {m.name}
-            </NavLink>
-          ))}
         </nav>
         {/* Icon only, hard right, in the space the date used to hold. */}
         <NavLink

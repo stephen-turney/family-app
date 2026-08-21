@@ -33,13 +33,13 @@ export default function HomePage() {
     <div>
       <div className="home-head">
         <h1>{format(new Date(), 'EEEE, MMMM d')}</h1>
-        <p className="muted">Tap a photo to open that person's daily checklist.</p>
       </div>
 
       <div className="home-grid">
         {members.map((m) => {
           const stat = statFor(m.id);
           const hasTasks = stat && stat.expected > 0;
+          const points = Math.min(stat?.points || 0, 200);
           return (
             <Link key={m.id} to={`/tasks/${m.id}`} className="home-tile">
               <span
@@ -54,11 +54,10 @@ export default function HomePage() {
               {hasTasks ? (
                 <>
                   <div className="progress">
-                    <span style={{ width: `${stat.percent}%`, background: m.color }} />
+                    <span style={{ width: `${Math.round(points / 2)}%`, background: m.color }} />
                   </div>
                   <span className="muted" style={{ fontSize: 13 }}>
-                    {stat.completed}/{stat.expected} done
-                    {stat.points > 0 && ` · ⭐ ${stat.points}`}
+                    {points}/200 points
                   </span>
                 </>
               ) : (

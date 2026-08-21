@@ -3,7 +3,7 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, '..', 'data.sqlite');
+export const DB_PATH = process.env.DB_PATH || path.join(__dirname, '..', 'data.sqlite');
 
 // Node 26's built-in SQLite — no native build step required.
 export const db = new DatabaseSync(DB_PATH);

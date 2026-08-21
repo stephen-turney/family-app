@@ -73,10 +73,16 @@ progressRouter.get('/', (req, res) => {
       for (const day of days) {
         for (const step of rSteps) {
           expected += 1;
-          if (stepDone.has(`${step.id}|${day}`)) completed += 1;
+          if (stepDone.has(`${step.id}|${day}`)) {
+            completed += 1;
+            points += 10;
+          }
         }
       }
     }
+
+    const pointTarget = days.length * 200;
+    points = Math.min(points, pointTarget);
 
     return {
       member_id: m.id,
@@ -86,6 +92,8 @@ progressRouter.get('/', (req, res) => {
       expected,
       completed,
       points,
+      point_target: pointTarget,
+      point_percent: pointTarget === 0 ? 0 : Math.round((points / pointTarget) * 100),
       percent: expected === 0 ? 0 : Math.round((completed / expected) * 100),
     };
   });

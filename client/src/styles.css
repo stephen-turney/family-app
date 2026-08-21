@@ -151,6 +151,7 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
   display: grid; gap: 24px; max-width: 860px; margin: 0 auto;
   grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
 }
+.members-list { justify-content: center; }
 .home-tile {
   display: flex; flex-direction: column; align-items: center; gap: 12px;
   padding: 28px 22px; color: var(--text); text-decoration: none;
@@ -198,12 +199,19 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 .daynav-btn {
   width: 46px; height: 46px; flex-shrink: 0;
   border-radius: 13px; border: 1px solid var(--border); background: var(--panel);
-  display: flex; align-items: center; justify-content: center;
+  position: relative; display: block; padding: 0;
   font: inherit; font-size: 27px; line-height: 1; color: var(--text); cursor: pointer;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation;
 }
 .daynav-btn:hover { border-color: var(--accent); color: var(--accent); }
 .daynav-btn:active { background: var(--panel-2); }
+.daynav-arrow {
+  position: absolute; left: 50%; top: 50%;
+  display: block; width: 22px; height: 22px;
+  transform: translate(-50%, -50%);
+  fill: none; stroke: currentColor; stroke-width: 3;
+  stroke-linecap: round; stroke-linejoin: round;
+}
 /* Fixed centre width so stepping between days doesn't slide the arrows about.
    Measured worst case is 297px — "Wednesday, September 30" with the Today tag, a
    real date (2026-09-30) — so 320px holds every label with 23px to spare. */
@@ -265,7 +273,7 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 @container (min-width: 600px) {
   .checklist-block { flex-direction: row; align-items: flex-start; gap: 14px; }
   .block-panel {
-    flex-direction: column; justify-content: flex-start; gap: 18px;
+    flex-direction: column; justify-content: center; gap: 18px;
     width: var(--block-panel-w);
     /* TasksPage supplies a direct pixel value. Besides keeping every block exact,
        this also avoids unsupported calc multiplication in iOS 10's fallback. */
@@ -312,6 +320,10 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
    with an ordinary media query. Overview cards are deliberately excluded: they
    remain narrow even when the viewport itself is wide. */
 @supports not (container-type: inline-size) {
+  /* Safari 10.3 supports CSS Grid, but only the older grid-gap property. */
+  .home-grid { grid-row-gap: 24px; grid-column-gap: 24px; }
+  .member-editor + .member-editor { margin-left: 24px; }
+
   /* iOS 10 ignores `gap` on flex containers. Recreate the task-row spacing
      with margins so the checkbox, picture, and label do not touch. */
   .checkline .box { margin-right: 12px; }
@@ -322,11 +334,12 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
       flex-direction: row; align-items: flex-start; gap: 14px;
     }
     .member-columns.single .checklist-block:not(.empty) .block-panel {
-      flex-direction: column; justify-content: flex-start; gap: 18px;
+      flex-direction: column; justify-content: center; gap: 18px;
       width: var(--block-panel-w); height: var(--block-panel-h);
       flex-shrink: 0; padding: 24px 16px; border-radius: 14px;
       margin-top: var(--routine-head-h); margin-right: 14px;
     }
+    .member-columns.single .checklist-block:not(.empty) .block-icon { margin-bottom: 18px; }
     .member-columns.single .checklist-block:not(.empty) .block-icon { font-size: 150px; }
     .member-columns.single .checklist-block:not(.empty) .block-label {
       font-size: 15px; padding: 6px 18px; letter-spacing: .14em;
@@ -339,6 +352,8 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
     }
   }
 }
+
+.backup-actions + .report-message { margin-top: 12px; }
 
 /* The routine's own name is the block's bold caps heading, as on the sheet. */
 .routine-group + .routine-group { margin-top: 14px; }

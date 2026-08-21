@@ -81,8 +81,8 @@ reasoning behind each number are under *Features* and *Key decisions* below.
 
 Outstanding, in rough priority order:
 
-The user's current UI and feature punch list is maintained in `PUNCH_LIST.md`. Read it before
-starting the next round of work; its items were captured on 2026-08-19 and are not yet implemented.
+The user's August 19 UI and feature punch list is maintained in `PUNCH_LIST.md`. Its items were
+implemented and user-reviewed on `codex/punch-list-updates`.
 
 1. **Routines can't be edited or deleted from the UI.** `RoutineModal` only creates. This is the
    biggest gap by a distance — both kids' routines had to be entered with one-off scripts against

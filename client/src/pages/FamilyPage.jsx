@@ -15,6 +15,7 @@ export default function FamilyPage() {
       <FamilyNameCard />
       <MembersCard />
       <ReportsCard />
+      <BackupRestoreCard />
     </div>
   );
 }
@@ -46,9 +47,6 @@ function ReportsCard() {
           {generate.isPending ? 'Generating…' : 'Generate report now'}
         </button>
       </div>
-      <p className="muted" style={{ margin: '0 0 14px' }}>
-        Allowance totals are generated every Sunday at 2:00 a.m. Central.
-      </p>
       {generate.isError && (
         <p className="report-message error">The report could not be generated.</p>
       )}
@@ -57,9 +55,6 @@ function ReportsCard() {
       )}
       {isLoading && <span className="muted">Loading reports…</span>}
       {error && <span className="muted">Reports could not be loaded.</span>}
-      {!isLoading && !error && reports.length === 0 && (
-        <span className="muted">The first report will appear here Sunday morning.</span>
-      )}
       {reports.length > 0 && (
         <div className="report-list">
           {reports.map((report) => (
@@ -86,6 +81,80 @@ function ReportsCard() {
       )}
       {remove.isError && (
         <p className="report-message error">The report could not be deleted.</p>
+      )}
+    </div>
+  );
+}
+
+function BackupRestoreCard() {
+  const [restoreState, setRestoreState] = useState({ status: 'idle', message: '' });
+
+  const waitForRestart = async () => {
+    for (let attempt = 0; attempt < 30; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      try {
+        const response = await fetch('/api/health', { cache: 'no-store' });
+        if (response.ok) {
+          window.location.assign('/home');
+          return;
+        }
+      } catch {
+        // The expected restart window: keep polling until launchd brings it back.
+      }
+    }
+    setRestoreState({
+      status: 'error',
+      message: 'The database was restored, but the server has not restarted yet.',
+    });
+  };
+
+  const restoreDatabase = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    if (!window.confirm(
+      `Restore Family Hub from ${file.name}? The current database will be backed up first.`
+    )) return;
+
+    setRestoreState({ status: 'working', message: 'Validating and restoring…' });
+    try {
+      const response = await fetch('/api/backups/restore', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/vnd.sqlite3' },
+        body: file,
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Restore failed');
+      setRestoreState({ status: 'working', message: 'Restored. Restarting Family Hub…' });
+      waitForRestart();
+    } catch (error) {
+      setRestoreState({ status: 'error', message: error.message });
+    }
+  };
+
+  return (
+    <div className="card">
+      <div className="row backup-actions">
+        <h2 style={{ margin: 0 }}>Backup/Restore</h2>
+        <div className="spacer" />
+        <a className="btn ghost small" href="/api/backups/database" download>
+          Download backup
+        </a>
+        <label className="btn small" style={{ cursor: 'pointer' }}>
+          Restore database
+          <input
+            type="file"
+            accept=".sqlite,.sqlite3,.db,application/vnd.sqlite3,application/x-sqlite3"
+            hidden
+            disabled={restoreState.status === 'working'}
+            onChange={restoreDatabase}
+          />
+        </label>
+      </div>
+      {restoreState.message && (
+        <p className={`report-message${restoreState.status === 'error' ? ' error' : ''}`}>
+          {restoreState.message}
+        </p>
       )}
     </div>
   );
@@ -134,10 +203,11 @@ function MembersCard() {
           + Add member
         </button>
       </div>
-      <div className="row" style={{ marginTop: 18, gap: 24 }}>
+      <div className="row members-list" style={{ marginTop: 18, gap: 24 }}>
         {members.length === 0 && <span className="muted">No members yet.</span>}
         {members.map((m) => (
           <button
+            className="member-editor"
             key={m.id}
             onClick={() => setEditing(m)}
             title={`Edit ${m.name}`}

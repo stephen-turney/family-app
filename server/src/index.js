@@ -10,12 +10,14 @@ import { routinesRouter } from './routes/routines.js';
 import { progressRouter } from './routes/progress.js';
 import { settingsRouter } from './routes/settings.js';
 import { reportsRouter } from './routes/reports.js';
+import { backupsRouter } from './routes/backups.js';
 import { startWeeklyReportScheduler } from './weeklyReports.js';
 
 process.env.TZ ||= 'America/Chicago';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const HOST = process.env.HOST || '0.0.0.0';
 
 app.use(cors());
 app.use(express.json({ limit: '5mb' })); // room for base64 avatar images
@@ -29,6 +31,7 @@ app.use('/api/routines', routinesRouter);
 app.use('/api/progress', progressRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/reports', reportsRouter);
+app.use('/api/backups', backupsRouter);
 
 // Serve the built frontend, so one process on one port is the whole app — that's
 // what makes hosting it on the home network a single `node src/index.js`. In dev
@@ -59,9 +62,9 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: String(err.message || err) });
 });
 
-// No host argument: bind every interface, so other devices on the home network
-// can reach it by this Mac's IP or .local name, not just localhost.
-app.listen(PORT, () => {
-  console.log(`[server] Daily checklist listening on http://localhost:${PORT}`);
+// The normal default stays reachable throughout the home network. Tests can set
+// HOST=127.0.0.1 so disposable copies of family data never leave this Mac.
+app.listen(PORT, HOST, () => {
+  console.log(`[server] Daily checklist listening on http://${HOST}:${PORT}`);
   startWeeklyReportScheduler();
 });
