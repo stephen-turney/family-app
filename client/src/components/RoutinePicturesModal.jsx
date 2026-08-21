@@ -36,6 +36,7 @@ export default function RoutinePicturesModal({ routine, onClose }) {
     <Modal
       title={`Pictures for ${routine.title}`}
       onClose={onClose}
+      className="picture-edit-modal"
       footer={
         <>
           <div className="spacer" />
@@ -68,6 +69,7 @@ export default function RoutinePicturesModal({ routine, onClose }) {
             onChange={(icon) => updateStep(step.id, { icon })}
             pickerLabel={`Choose the to-do picture for ${step.title}`}
             allowUpload
+            expandedPanel
           />
           <IconPicker
             compact
@@ -77,6 +79,7 @@ export default function RoutinePicturesModal({ routine, onClose }) {
             fallback={DEFAULT_COMPLETED_ICON}
             pickerLabel={`Choose the done picture for ${step.title}`}
             allowUpload
+            expandedPanel
           />
         </div>
       ))}

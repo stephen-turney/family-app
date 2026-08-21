@@ -382,14 +382,6 @@ export default function TasksPage() {
                               <div className="routine-head">
                                 <span className="routine-name">{g.title}</span>
                                 <span className="routine-head-actions">
-                                  {!editingRoutines && (
-                                    <button
-                                      className="routine-pictures-button"
-                                      onClick={() => setPicturesRoutine(g.routine)}
-                                    >
-                                      🖼️ Pictures
-                                    </button>
-                                  )}
                                   <span className="routine-count">{g.done}/{g.total}</span>
                                 </span>
                               </div>
@@ -465,22 +457,16 @@ export default function TasksPage() {
                 );
               })}
 
-              <div className="checklist-foot">
-                <button
-                  className="btn ghost small"
-                  onClick={() => setRoutineModal({ memberId: m.id })}
-                >
-                  + Add a routine
-                </button>
-                {focusMember && (
+              {focusMember && (
+                <div className="checklist-foot">
                   <button
                     className={`btn ghost small edit-routines-button${editingRoutines ? ' active' : ''}`}
                     onClick={() => setEditingRoutines((editing) => !editing)}
                   >
                     {editingRoutines ? 'Done editing' : 'Edit routines'}
                   </button>
-                )}
-              </div>
+                </div>
+              )}
               {deleteStep.isError && (
                 <p className="completion-error" role="alert">
                   That task could not be deleted. Please try again.

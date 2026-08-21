@@ -22,6 +22,7 @@ export default function IconPicker({
   fallback = DEFAULT_ICON,
   pickerLabel = 'Choose a picture',
   allowUpload = false,
+  expandedPanel = false,
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -70,7 +71,7 @@ export default function IconPicker({
   );
 
   return (
-    <div className={`icon-picker${compact ? ' compact' : ''}`}>
+    <div className={`icon-picker${compact ? ' compact' : ''}${expandedPanel ? ' expanded-panel' : ''}`}>
       <button
         type="button"
         className="icon-current"
@@ -115,6 +116,8 @@ export default function IconPicker({
               ) : (
                 <p className="muted" style={{ margin: '8px 4px' }}>No pictures match “{query}”.</p>
               )
+            ) : expandedPanel ? (
+              grid(ICON_GROUPS.flatMap((group) => group.items))
             ) : (
               ICON_GROUPS.map((g) => (
                 <div key={g.group}>

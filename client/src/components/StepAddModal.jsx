@@ -29,6 +29,7 @@ export default function StepAddModal({ routine, onClose }) {
     <Modal
       title={`Add task to ${routine.title}`}
       onClose={onClose}
+      className="picture-edit-modal"
       footer={
         <>
           <div className="spacer" />
@@ -66,6 +67,7 @@ export default function StepAddModal({ routine, onClose }) {
             onChange={setIcon}
             pickerLabel="Choose the to-do picture for the new task"
             allowUpload
+            expandedPanel
           />
           <IconPicker
             compact
@@ -75,6 +77,7 @@ export default function StepAddModal({ routine, onClose }) {
             fallback={DEFAULT_COMPLETED_ICON}
             pickerLabel="Choose the done picture for the new task"
             allowUpload
+            expandedPanel
           />
         </div>
       </div>

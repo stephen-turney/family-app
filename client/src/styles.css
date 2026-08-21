@@ -366,13 +366,6 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 .routine-name { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; }
 .routine-count { margin-left: auto; font-size: 12px; color: var(--muted); flex-shrink: 0; }
 .routine-head-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-.routine-pictures-button {
-  padding: 3px 7px; border: 1px solid var(--border); border-radius: 7px;
-  background: var(--panel-2); color: var(--text); font: inherit; font-size: 11px;
-  font-weight: 700; cursor: pointer;
-}
-.routine-pictures-button:hover { border-color: var(--accent); color: var(--accent); }
-
 /* An empty block is its own "add" affordance rather than a dead line of text. */
 .block-empty {
   display: block; width: 100%; margin: 8px 0; padding: 13px 14px; text-align: left;
@@ -528,3 +521,26 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 }
 .icon-choice:hover { background: var(--accent-soft); border-color: var(--accent); }
 .icon-choice.selected { background: var(--accent-soft); border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+
+/* Picture editing gets the tablet's available canvas. A wide, flattened grid
+   keeps every built-in choice visible at once, while the panel is positioned
+   inward from either compact picker so the modal never clips it. */
+@media (min-width: 700px) {
+  .picture-edit-modal {
+    width: calc(100vw - 64px); height: calc(100vh - 48px);
+    max-width: 920px; max-height: none; overflow: visible;
+    display: flex; flex-direction: column;
+  }
+  .picture-edit-modal .modal-footer { margin-top: auto !important; }
+  .picture-edit-modal .icon-picker.expanded-panel .icon-panel {
+    width: 700px; max-width: calc(100vw - 112px);
+  }
+  .picture-edit-modal .routine-picture-row .icon-panel { left: auto; right: 0; }
+  .picture-edit-modal .new-step-pictures .icon-panel { left: 0; right: auto; }
+  .picture-edit-modal .expanded-panel .icon-scroll { max-height: none; overflow: visible; }
+  .picture-edit-modal .expanded-panel .icon-grid {
+    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+    gap: 4px; grid-gap: 4px;
+  }
+  .picture-edit-modal .expanded-panel .icon-choice { font-size: 24px; padding: 6px 0; }
+}
