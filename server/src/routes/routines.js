@@ -114,6 +114,35 @@ routinesRouter.delete('/steps/:stepId', (req, res) => {
   res.status(204).end();
 });
 
+// Set (rather than toggle) a step's completion so duplicate or retried requests
+// are harmless. The client uses this for immediate optimistic checklist taps;
+// the toggle route below remains for compatibility with older built clients.
+routinesRouter.post('/steps/:stepId/completion', (req, res) => {
+  const step = db.prepare('SELECT id FROM routine_steps WHERE id = ?').get(req.params.stepId);
+  if (!step) return res.status(404).json({ error: 'not found' });
+
+  const { date = new Date().toISOString().slice(0, 10), done } = req.body || {};
+  if (typeof done !== 'boolean') {
+    return res.status(400).json({ error: 'done must be true or false' });
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return res.status(400).json({ error: 'date must be YYYY-MM-DD' });
+  }
+
+  if (done) {
+    db.prepare(
+      `INSERT OR IGNORE INTO routine_step_completions (step_id, due_date)
+       VALUES (?, ?)`
+    ).run(step.id, date);
+  } else {
+    db.prepare(
+      'DELETE FROM routine_step_completions WHERE step_id = ? AND due_date = ?'
+    ).run(step.id, date);
+  }
+
+  res.json({ done, date });
+});
+
 // Toggle a step's completion for a given day.
 routinesRouter.post('/steps/:stepId/toggle', (req, res) => {
   const step = db.prepare('SELECT * FROM routine_steps WHERE id = ?').get(req.params.stepId);

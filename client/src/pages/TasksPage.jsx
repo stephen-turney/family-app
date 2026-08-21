@@ -1,12 +1,12 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { format } from 'date-fns';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   api,
   useMembers,
   useRoutines,
   useProgress,
-  useApiMutation,
   localDate,
 } from '../api/client.js';
 import RoutineModal from '../components/RoutineModal.jsx';
@@ -74,17 +74,120 @@ export default function TasksPage() {
   const { data: members = [] } = useMembers();
   const { data: routines = [] } = useRoutines(shownDate);
   const { data: progress } = useProgress(shownDate, shownDate);
+  const queryClient = useQueryClient();
+
+  // The old iPad needs immediate feedback rather than waiting for a POST and two
+  // refetches. If a save fails, undo only that step's optimistic change so
+  // simultaneous taps on other rows remain intact.
+  const pendingSteps = useRef(new Set());
+  const [, renderPendingSteps] = useState(0);
+  const [completionError, setCompletionError] = useState('');
+
+  const setStepPending = (stepId, pending) => {
+    if (pending) pendingSteps.current.add(stepId);
+    else pendingSteps.current.delete(stepId);
+    renderPendingSteps((version) => version + 1);
+  };
+
+  const setCompletion = useMutation({
+    mutationFn: ({ stepId, date: completionDate, done }) =>
+      api.post(`/routines/steps/${stepId}/completion`, { date: completionDate, done }),
+    onMutate: ({ stepId, memberId, date: completionDate, done }) => {
+      const routinesKey = ['routines', completionDate];
+      const progressKey = ['progress', completionDate, completionDate];
+      // Stop an older background refresh from repainting the pre-tap state over
+      // this optimistic change. Cancellation is intentionally not awaited: the
+      // checkmark should render in the same turn as the click.
+      queryClient.cancelQueries({ queryKey: routinesKey });
+      queryClient.cancelQueries({ queryKey: progressKey });
+
+      queryClient.setQueryData(routinesKey, (old = []) => old.map((routine) => ({
+        ...routine,
+        steps: routine.steps.map((step) =>
+          step.id === stepId ? { ...step, done } : step
+        ),
+      })));
+
+      const delta = done ? 1 : -1;
+      let pointsDelta = 0;
+      queryClient.setQueryData(progressKey, (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          members: old.members.map((member) => {
+            if (member.member_id !== memberId) return member;
+            const target = member.point_target || 200;
+            const completed = Math.max(0, member.completed + delta);
+            const points = Math.max(0, Math.min(target, member.points + delta * 10));
+            pointsDelta = points - member.points;
+            return {
+              ...member,
+              completed,
+              points,
+              point_percent: Math.round((points / target) * 100),
+              percent: member.expected
+                ? Math.round((completed / member.expected) * 100)
+                : 0,
+            };
+          }),
+        };
+      });
+
+      return { delta, pointsDelta };
+    },
+    onError: (_error, variables, optimistic) => {
+      const routinesKey = ['routines', variables.date];
+      const progressKey = ['progress', variables.date, variables.date];
+      queryClient.setQueryData(routinesKey, (old = []) => old.map((routine) => ({
+        ...routine,
+        steps: routine.steps.map((step) =>
+          step.id === variables.stepId ? { ...step, done: !variables.done } : step
+        ),
+      })));
+      queryClient.setQueryData(progressKey, (old) => {
+        if (!old || !optimistic) return old;
+        return {
+          ...old,
+          members: old.members.map((member) => {
+            if (member.member_id !== variables.memberId) return member;
+            const target = member.point_target || 200;
+            const completed = Math.max(0, member.completed - optimistic.delta);
+            const points = Math.max(0, Math.min(target, member.points - optimistic.pointsDelta));
+            return {
+              ...member,
+              completed,
+              points,
+              point_percent: Math.round((points / target) * 100),
+              percent: member.expected
+                ? Math.round((completed / member.expected) * 100)
+                : 0,
+            };
+          }),
+        };
+      });
+      setCompletionError('That check could not be saved. Please try again.');
+    },
+    onSuccess: () => setCompletionError(''),
+    onSettled: (_data, _error, variables) => {
+      const routinesKey = ['routines', variables.date];
+      const progressKey = ['progress', variables.date, variables.date];
+      setStepPending(variables.stepId, false);
+      queryClient.invalidateQueries({ queryKey: routinesKey });
+      queryClient.invalidateQueries({ queryKey: progressKey });
+    },
+  });
+
+  const completeStep = (step, memberId) => {
+    // A native disabled button handles ordinary double taps after the render;
+    // this ref also closes the tiny same-frame gap before disabled reaches DOM.
+    if (pendingSteps.current.has(step.id)) return;
+    setStepPending(step.id, true);
+    setCompletion.mutate({ stepId: step.id, memberId, date: shownDate, done: !step.done });
+  };
 
   // {memberId, timeOfDay?} — timeOfDay preselects the block that was tapped.
   const [routineModal, setRoutineModal] = useState(null);
   const [picturesRoutine, setPicturesRoutine] = useState(null);
-
-  // Ticks land on the day being viewed, not on today, so yesterday's list can be
-  // finished off. Both queries key off the date, so the right day refetches.
-  const toggleStep = useApiMutation(
-    (id) => api.post(`/routines/steps/${id}/toggle`, { date: shownDate }),
-    ['routines', 'progress']
-  );
 
   if (members.length === 0) {
     return (
@@ -166,6 +269,10 @@ export default function TasksPage() {
         </div>
       ) : (
         <h1>Daily Checklist · Today</h1>
+      )}
+
+      {completionError && (
+        <p className="completion-error" role="alert">{completionError}</p>
       )}
 
       <div className={`member-columns${focusMember ? ' single' : ''}`}>
@@ -268,20 +375,26 @@ export default function TasksPage() {
                               </div>
                             )}
                             {g.rows.map((s) => (
-                              <div
+                              <button
+                                type="button"
                                 key={s.id}
                                 className={`checkline ${s.done ? 'done' : ''}`}
-                                onClick={() => toggleStep.mutate(s.id)}
+                                role="checkbox"
+                                aria-checked={s.done}
+                                disabled={pendingSteps.current.has(s.id)}
+                                onClick={() => completeStep(s, m.id)}
                               >
-                                <span className="box">{s.done ? '✓' : ''}</span>
-                                {/* Pre-readers find their task by picture. */}
-                                <span className="task-icon" aria-hidden="true">
-                                  <TaskPicture
-                                    picture={s.done ? resolveCompletedIcon(s) : resolveIcon(s)}
-                                  />
+                                <span className="checkline-content">
+                                  <span className="box">{s.done ? '✓' : ''}</span>
+                                  {/* Pre-readers find their task by picture. */}
+                                  <span className="task-icon" aria-hidden="true">
+                                    <TaskPicture
+                                      picture={s.done ? resolveCompletedIcon(s) : resolveIcon(s)}
+                                    />
+                                  </span>
+                                  <span className="label">{s.title}</span>
                                 </span>
-                                <span className="label">{s.title}</span>
-                              </div>
+                              </button>
                             ))}
                           </div>
                         ))

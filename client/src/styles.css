@@ -383,12 +383,20 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 /* The entire row is a generous tablet touch target. Its height is driven by the
    75px task picture plus 6px of padding above and below. */
 .checkline {
-  display: flex; align-items: center; gap: 12px; padding: 6px 6px; min-height: var(--row-h);
-  border-bottom: 1px solid var(--border); cursor: pointer; user-select: none;
-  border-radius: 10px; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  width: 100%; display: block; padding: 0 6px; min-height: var(--row-h);
+  border: 0; border-bottom: 1px solid var(--border); cursor: pointer;
+  border-radius: 10px; background: transparent; color: inherit;
+  font: inherit; text-align: left; -webkit-appearance: none; appearance: none;
+  user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
 }
 .checkline:last-child { border-bottom: none; }
 .checkline:active { background: var(--panel-2); }
+.checkline:disabled { color: inherit; cursor: wait; opacity: 1; }
+.checkline-content {
+  width: 100%; min-height: var(--row-h);
+  display: flex; align-items: center; gap: 12px;
+}
 .checkline .box {
   width: 46px; height: 46px; border-radius: 13px; border: 3px solid var(--border);
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
@@ -408,6 +416,7 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 .checkline.done .task-icon { opacity: 1; }
 .checkline .label { font-size: 17px; font-weight: 600; }
 .checkline .pts { margin-left: auto; font-size: 13px; color: var(--muted); flex-shrink: 0; }
+.completion-error { margin: 8px 0 0; color: var(--danger); font-size: 13px; }
 
 /* In a narrow member column the label wraps onto a second line and leaves the
    rows visibly uneven, so give the title back some width. Must come after the
