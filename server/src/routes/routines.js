@@ -100,8 +100,14 @@ routinesRouter.post('/:id/steps', (req, res) => {
 routinesRouter.patch('/steps/:stepId', (req, res) => {
   const existing = db.prepare('SELECT * FROM routine_steps WHERE id = ?').get(req.params.stepId);
   if (!existing) return res.status(404).json({ error: 'not found' });
-  const { icon, completed_icon } = req.body || {};
-  db.prepare('UPDATE routine_steps SET icon = ?, completed_icon = ? WHERE id = ?').run(
+  const { title, icon, completed_icon } = req.body || {};
+  if (title !== undefined && (typeof title !== 'string' || !title.trim())) {
+    return res.status(400).json({ error: 'title cannot be empty' });
+  }
+  db.prepare(
+    'UPDATE routine_steps SET title = ?, icon = ?, completed_icon = ? WHERE id = ?'
+  ).run(
+    title === undefined ? existing.title : title.trim(),
     icon === undefined ? existing.icon : icon || null,
     completed_icon === undefined ? existing.completed_icon : completed_icon || null,
     req.params.stepId

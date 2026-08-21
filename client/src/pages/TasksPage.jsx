@@ -7,10 +7,13 @@ import {
   useMembers,
   useRoutines,
   useProgress,
+  useApiMutation,
   localDate,
 } from '../api/client.js';
 import RoutineModal from '../components/RoutineModal.jsx';
 import RoutinePicturesModal from '../components/RoutinePicturesModal.jsx';
+import StepAddModal from '../components/StepAddModal.jsx';
+import StepRenameModal from '../components/StepRenameModal.jsx';
 import Avatar from '../components/Avatar.jsx';
 import { isUploadedImage, resolveCompletedIcon, resolveIcon } from '../lib/taskIcons.js';
 
@@ -188,6 +191,19 @@ export default function TasksPage() {
   // {memberId, timeOfDay?} — timeOfDay preselects the block that was tapped.
   const [routineModal, setRoutineModal] = useState(null);
   const [picturesRoutine, setPicturesRoutine] = useState(null);
+  const [renamingStep, setRenamingStep] = useState(null);
+  const [addingTaskTo, setAddingTaskTo] = useState(null);
+  const [editingRoutines, setEditingRoutines] = useState(false);
+  const deleteStep = useApiMutation(
+    (stepId) => api.del(`/routines/steps/${stepId}`),
+    ['routines', 'progress']
+  );
+
+  const removeStep = (step) => {
+    if (window.confirm(`Delete “${step.title}” from this routine? This cannot be undone.`)) {
+      deleteStep.mutate(step.id);
+    }
+  };
 
   if (members.length === 0) {
     return (
@@ -244,7 +260,9 @@ export default function TasksPage() {
               </svg>
             </button>
             <span className="daynav-date">
-              {format(parseLocalDate(date), 'EEEE, MMMM d')}
+              <span className="daynav-date-text">
+                {format(parseLocalDate(date), 'EEEE, MMMM d')}
+              </span>
               {date === today && <span className="daynav-tag">Today</span>}
             </span>
             <button
@@ -364,38 +382,81 @@ export default function TasksPage() {
                               <div className="routine-head">
                                 <span className="routine-name">{g.title}</span>
                                 <span className="routine-head-actions">
-                                  <button
-                                    className="routine-pictures-button"
-                                    onClick={() => setPicturesRoutine(g.routine)}
-                                  >
-                                    🖼️ Pictures
-                                  </button>
+                                  {!editingRoutines && (
+                                    <button
+                                      className="routine-pictures-button"
+                                      onClick={() => setPicturesRoutine(g.routine)}
+                                    >
+                                      🖼️ Pictures
+                                    </button>
+                                  )}
                                   <span className="routine-count">{g.done}/{g.total}</span>
                                 </span>
                               </div>
                             )}
                             {g.rows.map((s) => (
+                              <div
+                                key={s.id}
+                                className={`checkline-row${editingRoutines ? ' editing' : ''}`}
+                              >
+                                <button
+                                  type="button"
+                                  className={`checkline ${s.done ? 'done' : ''}`}
+                                  role="checkbox"
+                                  aria-checked={s.done}
+                                  disabled={pendingSteps.current.has(s.id)}
+                                  onClick={() => completeStep(s, m.id)}
+                                >
+                                  <span className="checkline-content">
+                                    <span className="box">{s.done ? '✓' : ''}</span>
+                                    {/* Pre-readers find their task by picture. */}
+                                    <span className="task-icon" aria-hidden="true">
+                                      <TaskPicture
+                                        picture={s.done ? resolveCompletedIcon(s) : resolveIcon(s)}
+                                      />
+                                    </span>
+                                    <span className="label">{s.title}</span>
+                                  </span>
+                                </button>
+                                {editingRoutines && (
+                                  <span className="task-edit-actions">
+                                    <button
+                                      type="button"
+                                      className="task-edit-button"
+                                      onClick={() => setRenamingStep(s)}
+                                    >
+                                      Rename
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="task-edit-button"
+                                      onClick={() => setPicturesRoutine({ title: s.title, steps: [s] })}
+                                    >
+                                      Image
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="task-edit-button delete"
+                                      disabled={deleteStep.isPending && deleteStep.variables === s.id}
+                                      onClick={() => removeStep(s)}
+                                    >
+                                      {deleteStep.isPending && deleteStep.variables === s.id
+                                        ? 'Deleting…'
+                                        : 'Delete'}
+                                    </button>
+                                  </span>
+                                )}
+                              </div>
+                            ))}
+                            {editingRoutines && (
                               <button
                                 type="button"
-                                key={s.id}
-                                className={`checkline ${s.done ? 'done' : ''}`}
-                                role="checkbox"
-                                aria-checked={s.done}
-                                disabled={pendingSteps.current.has(s.id)}
-                                onClick={() => completeStep(s, m.id)}
+                                className="add-task-button"
+                                onClick={() => setAddingTaskTo(g.routine)}
                               >
-                                <span className="checkline-content">
-                                  <span className="box">{s.done ? '✓' : ''}</span>
-                                  {/* Pre-readers find their task by picture. */}
-                                  <span className="task-icon" aria-hidden="true">
-                                    <TaskPicture
-                                      picture={s.done ? resolveCompletedIcon(s) : resolveIcon(s)}
-                                    />
-                                  </span>
-                                  <span className="label">{s.title}</span>
-                                </span>
+                                + Add task
                               </button>
-                            ))}
+                            )}
                           </div>
                         ))
                       )}
@@ -411,7 +472,20 @@ export default function TasksPage() {
                 >
                   + Add a routine
                 </button>
+                {focusMember && (
+                  <button
+                    className={`btn ghost small edit-routines-button${editingRoutines ? ' active' : ''}`}
+                    onClick={() => setEditingRoutines((editing) => !editing)}
+                  >
+                    {editingRoutines ? 'Done editing' : 'Edit routines'}
+                  </button>
+                )}
               </div>
+              {deleteStep.isError && (
+                <p className="completion-error" role="alert">
+                  That task could not be deleted. Please try again.
+                </p>
+              )}
             </div>
           );
         })}
@@ -431,6 +505,12 @@ export default function TasksPage() {
           routine={picturesRoutine}
           onClose={() => setPicturesRoutine(null)}
         />
+      )}
+      {renamingStep && (
+        <StepRenameModal step={renamingStep} onClose={() => setRenamingStep(null)} />
+      )}
+      {addingTaskTo && (
+        <StepAddModal routine={addingTaskTo} onClose={() => setAddingTaskTo(null)} />
       )}
     </div>
   );
