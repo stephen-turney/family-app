@@ -1,5 +1,36 @@
 # Family Hub Punch List
 
+---------AUGUST 21, 2026------------------------------------------------------------
+
+[ ]   1. Allow task list items to be moved around (dragged and dropped).
+         Right now onlyway to change the order is to delete the routine
+         and start over again.
+
+[ ]   2. On Saturday - remove the usual routines and task items.
+         [ ] make an overview that gives some key highlights
+             aka - which tasks were most missed
+             provide some encouragement on things they did well
+
+         [ ] put a small list of items they can do to make up for any misses earlier
+             in the week
+
+[ ]   3. Save custom photos in the database and add them to the list of available images
+
+[ ]   4. Add some little animations with +10 points! bubbles that pop up
+         and other cutesy things like that to get the dopamine going
+
+[ ]   5. Add a mini progress bar for each routine section (0-20)
+         Prompt that encourages them pops up if they do everything in that block
+
+[ ]   6. If they get all the checks done in the day - a pop up animation occurs.
+         Holy Guacamole gif of becca (+ sound if possible)
+
+[ ]   7. Running report generates a pop up thats formatted better
+
+[ ]   8. Parent notifications - sends out email/text at end of week with report
+
+-----------------------------------------------------------------------------------
+
 Captured August 19, 2026. Implemented and user-reviewed on `codex/punch-list-updates`.
 
 ## iOS 10 layout and compatibility
