@@ -1,5 +1,7 @@
+import { createPortal } from 'react-dom';
+
 export default function Modal({ title, onClose, children, footer, className = '' }) {
-  return (
+  return createPortal(
     <div className="modal-backdrop" onClick={onClose}>
       <div className={`card modal${className ? ` ${className}` : ''}`} onClick={(e) => e.stopPropagation()}>
         <div className="row" style={{ marginBottom: 14 }}>
@@ -16,6 +18,7 @@ export default function Modal({ title, onClose, children, footer, className = ''
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

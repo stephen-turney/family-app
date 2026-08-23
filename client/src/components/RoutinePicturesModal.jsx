@@ -62,25 +62,31 @@ export default function RoutinePicturesModal({ routine, onClose }) {
       {steps.map((step) => (
         <div className="routine-picture-row" key={step.id}>
           <strong>{step.title}</strong>
-          <IconPicker
-            compact
-            value={step.icon}
-            title={step.title}
-            onChange={(icon) => updateStep(step.id, { icon })}
-            pickerLabel={`Choose the to-do picture for ${step.title}`}
-            allowUpload
-            expandedPanel
-          />
-          <IconPicker
-            compact
-            value={step.completed_icon}
-            onChange={(completed_icon) => updateStep(step.id, { completed_icon })}
-            matchTitle={false}
-            fallback={DEFAULT_COMPLETED_ICON}
-            pickerLabel={`Choose the done picture for ${step.title}`}
-            allowUpload
-            expandedPanel
-          />
+          <div className="routine-picture-control">
+            <span className="routine-picture-control-label">To do</span>
+            <IconPicker
+              compact
+              value={step.icon}
+              title={step.title}
+              onChange={(icon) => updateStep(step.id, { icon })}
+              pickerLabel={`Choose the to-do picture for ${step.title}`}
+              allowUpload
+              expandedPanel
+            />
+          </div>
+          <div className="routine-picture-control">
+            <span className="routine-picture-control-label">Done</span>
+            <IconPicker
+              compact
+              value={step.completed_icon}
+              onChange={(completed_icon) => updateStep(step.id, { completed_icon })}
+              matchTitle={false}
+              fallback={DEFAULT_COMPLETED_ICON}
+              pickerLabel={`Choose the done picture for ${step.title}`}
+              allowUpload
+              expandedPanel
+            />
+          </div>
         </div>
       ))}
       {save.isError && <p className="icon-upload-error">Could not save the pictures. Please try again.</p>}

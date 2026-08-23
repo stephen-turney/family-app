@@ -238,6 +238,14 @@ export default function TasksPage() {
         // link is absolutely placed so it doesn't pull the photo off-centre.
         <div className="checklist-head">
           <Link className="btn ghost small checklist-back" to="/home">← Family</Link>
+          <div className="checklist-head-actions">
+            <button
+              className={`btn ghost small edit-routines-button${editingRoutines ? ' active' : ''}`}
+              onClick={() => setEditingRoutines((editing) => !editing)}
+            >
+              {editingRoutines ? 'Done editing' : 'Edit routines'}
+            </button>
+          </div>
           <span
             className="checklist-avatar"
             style={{ background: `${focusMember.color}59`, borderColor: focusMember.color }}
@@ -248,42 +256,42 @@ export default function TasksPage() {
 
           {/* Which day this list is for, and a step either side of it. Arrows are
               46px like the checkboxes — the same finger is doing the tapping. */}
-          <div className="checklist-daynav">
-            <button
-              className="daynav-btn previous"
-              onClick={() => setDate(shiftDate(date, -1))}
-              aria-label="Previous day"
-              title="Previous day"
-            >
-              <svg className="daynav-arrow" viewBox="0 0 24 24" aria-hidden="true">
-                <polyline points="15 18 9 12 15 6" />
-              </svg>
-            </button>
-            <span className="daynav-date">
-              <span className="daynav-date-text">
+          <div className="checklist-daynav-wrap">
+            <div className="checklist-daynav">
+              <button
+                className="daynav-btn previous"
+                onClick={() => setDate(shiftDate(date, -1))}
+                aria-label="Previous day"
+                title="Previous day"
+              >
+                <svg className="daynav-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
+              <span className="daynav-date">
                 {format(parseLocalDate(date), 'EEEE, MMMM d')}
               </span>
-              {date === today && <span className="daynav-tag">Today</span>}
-            </span>
-            <button
-              className="daynav-btn next"
-              onClick={() => setDate(shiftDate(date, 1))}
-              aria-label="Next day"
-              title="Next day"
-            >
-              <svg className="daynav-arrow" viewBox="0 0 24 24" aria-hidden="true">
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
-            </button>
+              <button
+                className="daynav-btn next"
+                onClick={() => setDate(shiftDate(date, 1))}
+                aria-label="Next day"
+                title="Next day"
+              >
+                <svg className="daynav-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
+            </div>
+            <div className="daynav-tag-slot">
+              {date === today ? (
+                <span className="daynav-tag">Today</span>
+              ) : (
+                <button className="btn ghost small daynav-jump" onClick={() => setDate(today)}>
+                  Jump to today
+                </button>
+              )}
+            </div>
           </div>
-          {/* Absolutely placed, like the ← Family link it mirrors: in the centred
-              row it would shift the date sideways as it appears and disappears. */}
-          {date !== today && (
-            <button className="btn ghost small daynav-today" onClick={() => setDate(today)}>
-              Jump to today
-            </button>
-          )}
-
         </div>
       ) : (
         <h1>Daily Checklist · Today</h1>

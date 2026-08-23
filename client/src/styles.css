@@ -143,7 +143,7 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 
 /* Home page: one large photo tile per family member */
 .home-head { text-align: center; margin-bottom: 24px; }
-.home-head h1 { margin-bottom: 2px; }
+.home-head h1 { margin: 0; }
 .home-head p { margin: 0; }
 /* Two big tiles per row (2×2 for a family of four). The narrow max-width is what
    caps it at 2 columns — auto-fit then still collapses to 1 on a phone. */
@@ -187,6 +187,11 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
   gap: 12px; margin-bottom: 22px;
 }
 .checklist-back { position: absolute; left: 0; top: 0; }
+.checklist-head-actions {
+  position: absolute; right: 0; top: 0;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+}
+.checklist-head-actions .edit-routines-button { margin-left: 0; }
 .checklist-avatar {
   width: 170px; height: 170px; border-radius: 50%; border: 4px solid;
   display: flex; align-items: center; justify-content: center; overflow: hidden;
@@ -195,6 +200,9 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 
 /* Which day the list is for, with a step either side of it. The arrows are 46px —
    the same size as the row checkboxes, since it's the same finger on a tablet. */
+.checklist-daynav-wrap {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+}
 .checklist-daynav { display: flex; align-items: center; gap: 14px; }
 .daynav-btn {
   width: 46px; height: 46px; flex-shrink: 0;
@@ -212,29 +220,43 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
   fill: none; stroke: currentColor; stroke-width: 3;
   stroke-linecap: round; stroke-linejoin: round;
 }
-/* Fixed centre width so stepping between days doesn't slide the arrows about.
-   Measured worst case is 297px — "Wednesday, September 30" with the Today tag, a
-   real date (2026-09-30) — so 320px holds every label with 23px to spare. */
+/* A true fixed centre width keeps both arrows anchored while the date changes.
+   The longest printed date is "Wednesday, September 30"; 320px gives it ample
+   room at the tablet/desktop size. The Today/Jump control has its own row below
+   and therefore cannot affect this measurement. */
 .daynav-date {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  min-width: 320px; font-size: 18px; font-weight: 600; color: var(--muted);
+  display: flex; align-items: center; justify-content: center; height: 46px;
+  width: 320px; min-width: 320px; flex: 0 0 320px;
+  font-size: 18px; font-weight: 600; color: var(--muted);
+  text-align: center;
 }
-.daynav-date-text { display: block; text-align: center; }
+.daynav-tag-slot {
+  display: flex; align-items: center; justify-content: center;
+  height: 28px;
+}
 .daynav-tag {
-  display: block; margin-top: 5px;
+  display: block;
   font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em;
   color: var(--accent); background: var(--accent-soft); border-radius: 7px; padding: 3px 8px;
 }
-/* Mirrors .checklist-back on the other side, and for the same reason: in the
-   centred row it would shift the date sideways each time it appeared. */
-.daynav-today { position: absolute; right: 0; top: 0; }
-
+.daynav-jump { white-space: nowrap; }
 @media (max-width: 560px) {
   .checklist-avatar { width: 128px; height: 128px; }
   .checklist-title { font-size: 23px; }
-  /* No room for a fixed centre here; a little arrow drift beats overflowing. */
-  .daynav-date { min-width: 0; font-size: 16px; }
+  /* At 390px wide this fills the space between the two 46px arrows exactly,
+     while still holding "Wednesday, September 30" on one line. */
+  .daynav-date {
+    width: 230px; min-width: 230px; flex-basis: 230px;
+    font-size: 16px; white-space: nowrap;
+  }
   .checklist-daynav { gap: 10px; }
+}
+
+@media (max-width: 340px) {
+  .daynav-date {
+    width: 208px; min-width: 208px; flex-basis: 208px;
+    font-size: 14px;
+  }
 }
 
 /* --- Daily checklist blocks (morning / afternoon / evening) ---------------
@@ -435,6 +457,20 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 .task-edit-button:hover { border-color: var(--accent); color: var(--accent); }
 .task-edit-button.delete { color: var(--danger); }
 .task-edit-button:disabled { cursor: wait; opacity: .65; }
+
+/* On a phone, the three edit buttons otherwise consume most of the row and
+   leave the task title painting underneath them. A narrow action rail gives
+   the title its space back; the rail's three touch targets also make the flex
+   row grow tall enough to contain them. Tablet and desktop rows stay unchanged. */
+@media (max-width: 560px) {
+  .task-edit-actions {
+    flex-direction: column; align-items: stretch;
+    margin-left: 5px; padding: 5px 4px 5px 0;
+  }
+  .task-edit-button { width: 100%; }
+  .task-edit-button + .task-edit-button { margin-top: 5px; margin-left: 0; }
+}
+
 .add-task-button {
   display: block; width: 100%; margin-top: 6px; padding: 9px 12px;
   border: 1px dashed var(--border); border-radius: 8px;
@@ -483,6 +519,8 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 .routine-picture-columns span:first-child { text-align: left; }
 .routine-picture-row { padding: 7px 0; border-top: 1px solid var(--border); }
 .routine-picture-row > strong { min-width: 0; font-size: 14px; }
+.routine-picture-control { min-width: 0; }
+.routine-picture-control-label { display: none; }
 
 /* Picture picker (chores + routine steps) */
 .icon-current {
@@ -521,6 +559,45 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 }
 .icon-choice:hover { background: var(--accent-soft); border-color: var(--accent); }
 .icon-choice.selected { background: var(--accent-soft); border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+
+/* The phone layout is a scrollable sheet instead of a desktop dialog squeezed
+   into a narrow viewport. Each state gets a full-width picker, and its choices
+   open in the document flow so the panel can never be clipped off either edge. */
+@media (max-width: 699px) {
+  .modal-backdrop { align-items: stretch; padding: 8px; }
+  .picture-edit-modal {
+    width: 100%; max-width: none; max-height: none; padding: 16px;
+    overflow-x: hidden; overflow-y: auto;
+  }
+  .picture-edit-modal > .row:first-child { flex-wrap: nowrap; }
+  .picture-edit-modal > .row:first-child h2 { min-width: 0; font-size: 20px; }
+  .picture-edit-modal > .row:first-child .btn { flex-shrink: 0; }
+  .picture-edit-modal .routine-pictures-help { font-size: 14px; line-height: 1.4; }
+  .picture-edit-modal .routine-picture-columns { display: none; }
+  .picture-edit-modal .routine-picture-row {
+    grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 14px 0;
+  }
+  .picture-edit-modal .routine-picture-row > strong { font-size: 16px; }
+  .picture-edit-modal .routine-picture-control-label {
+    display: block; margin-bottom: 5px;
+    color: var(--muted); font-size: 12px; font-weight: 700;
+  }
+  .picture-edit-modal .icon-picker.compact .icon-current {
+    width: 100%; height: 50px; padding: 8px 12px; justify-content: flex-start;
+  }
+  .picture-edit-modal .icon-picker.compact .icon-panel {
+    position: static; width: 100%; max-width: none; margin-top: 8px;
+    box-shadow: none;
+  }
+  .picture-edit-modal .expanded-panel .icon-scroll { max-height: 240px; }
+  .picture-edit-modal .modal-footer {
+    position: sticky; bottom: -16px; z-index: 6;
+    margin: 16px -16px -16px !important; padding: 12px 16px 16px;
+    flex-wrap: nowrap; background: var(--panel); border-top: 1px solid var(--border);
+  }
+  .picture-edit-modal .modal-footer .spacer { display: none; }
+  .picture-edit-modal .modal-footer .btn { flex: 1; min-width: 0; }
+}
 
 /* Picture editing gets the tablet's available canvas. A wide, flattened grid
    keeps every built-in choice visible at once, while the panel is positioned

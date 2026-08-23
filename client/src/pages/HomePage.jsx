@@ -1,7 +1,19 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useMembers, useProgress, localDate } from '../api/client.js';
 import Avatar from '../components/Avatar.jsx';
+
+function parseLocalDate(iso) {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function shiftDate(iso, days) {
+  const d = parseLocalDate(iso);
+  d.setDate(d.getDate() + days);
+  return localDate(d);
+}
 
 // Landing page reached by clicking the family name in the header: one big photo
 // per member, tapping through to that person's daily checklist.
@@ -10,8 +22,9 @@ export default function HomePage() {
   // the date shows (the topbar's copy was removed), so a stale one would be the
   // page claiming to be a day it isn't — and the tile counts have to agree with it.
   const today = localDate();
+  const [date, setDate] = useState(today);
   const { data: members = [], isLoading } = useMembers();
-  const { data: progress } = useProgress(today, today);
+  const { data: progress } = useProgress(date, date);
 
   const statFor = (id) => progress?.members.find((m) => m.member_id === id);
 
@@ -32,7 +45,42 @@ export default function HomePage() {
   return (
     <div>
       <div className="home-head">
-        <h1>{format(new Date(), 'EEEE, MMMM d')}</h1>
+        <div className="checklist-daynav-wrap">
+          <div className="checklist-daynav">
+            <button
+              className="daynav-btn previous"
+              onClick={() => setDate(shiftDate(date, -1))}
+              aria-label="Previous day"
+              title="Previous day"
+            >
+              <svg className="daynav-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+            <h1 className="daynav-date">
+              {format(parseLocalDate(date), 'EEEE, MMMM d')}
+            </h1>
+            <button
+              className="daynav-btn next"
+              onClick={() => setDate(shiftDate(date, 1))}
+              aria-label="Next day"
+              title="Next day"
+            >
+              <svg className="daynav-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+          </div>
+          <div className="daynav-tag-slot">
+            {date === today ? (
+              <span className="daynav-tag">Today</span>
+            ) : (
+              <button className="btn ghost small daynav-jump" onClick={() => setDate(today)}>
+                Jump to today
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="home-grid">
@@ -61,7 +109,9 @@ export default function HomePage() {
                   </span>
                 </>
               ) : (
-                <span className="muted" style={{ fontSize: 13 }}>Nothing due today</span>
+                <span className="muted" style={{ fontSize: 13 }}>
+                  Nothing due {date === today ? 'today' : format(parseLocalDate(date), 'EEEE')}
+                </span>
               )}
             </Link>
           );
