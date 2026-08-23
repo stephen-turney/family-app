@@ -103,6 +103,33 @@ On the iPad, open `http://<your-mac-ip>:3001` (not port 5173). Re-run `npm run b
 changes. If the launchd hosting agent is installed, it already serves this built version on port
 3001; rebuilding `client/dist` is enough to publish a client-only change.
 
+### Restarting the Raspberry Pi production service
+
+The production server on the Raspberry Pi runs as the systemd service `familyhub`. After pulling
+changes that modify anything under `server/`, restart the service so Node loads the new backend
+code:
+
+```bash
+sudo systemctl restart familyhub
+sudo systemctl status familyhub --no-pager
+```
+
+To inspect recent server output when troubleshooting:
+
+```bash
+sudo journalctl -u familyhub -n 100 --no-pager
+```
+
+Changes limited to `client/` only require rebuilding the production client:
+
+```bash
+cd client
+npm run build
+```
+
+If an update includes both client and server changes, rebuild the client and restart `familyhub`.
+Restarting the service does not delete or reset `server/data.sqlite`.
+
 ## Setting up a child's checklist
 
 1. **⚙️ (top right) → Members → + Add member** — name, colour, and optionally a photo. They get
