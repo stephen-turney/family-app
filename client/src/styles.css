@@ -350,7 +350,7 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 
   /* iOS 10 ignores `gap` on flex containers. Recreate the task-row spacing
      with margins so the checkbox, picture, and label do not touch. */
-  .checkline .box { margin-right: 12px; }
+  .checkline .box, .checkline .task-drag-handle { margin-right: 12px; }
   .checkline .task-icon { margin-right: 12px; }
 
   @media (min-width: 650px) {
@@ -419,7 +419,19 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 }
 .checkline:active { background: var(--panel-2); }
 .checkline:disabled { color: inherit; cursor: wait; opacity: 1; }
-.checkline-row.editing .checkline { width: auto; flex: 1; min-width: 0; }
+.checkline-row.editing .checkline { width: auto; flex: 1; min-width: 0; cursor: default; }
+.checkline-row.dragging { opacity: .55; }
+.checkline-row.drag-over { background: var(--accent-soft); }
+.task-drag-handle {
+  width: 46px; min-width: 46px; height: 46px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  border: 0; border-radius: 8px; background: transparent; color: var(--muted);
+  cursor: grab; font: inherit; font-size: 23px; line-height: 1;
+  touch-action: none; -webkit-tap-highlight-color: transparent;
+}
+.task-drag-handle:hover, .task-drag-handle:focus { color: var(--accent); background: var(--accent-soft); }
+.task-drag-handle:active { cursor: grabbing; }
+.task-drag-handle:disabled { cursor: wait; opacity: .5; }
 .checkline-content {
   width: 100%; min-height: var(--row-h);
   display: flex; align-items: center; gap: 12px;
@@ -463,6 +475,10 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
    the title its space back; the rail's three touch targets also make the flex
    row grow tall enough to contain them. Tablet and desktop rows stay unchanged. */
 @media (max-width: 560px) {
+  /* The edit action rail is 122px tall (three 34px controls, two 5px gaps,
+     and 10px vertical padding). Give ordinary checklist rows the same content
+     height so entering edit mode does not shift this routine or later blocks. */
+  .checklist { --row-h: 122px; }
   .task-edit-actions {
     flex-direction: column; align-items: stretch;
     margin-left: 5px; padding: 5px 4px 5px 0;
@@ -488,7 +504,9 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
   .checkline-content { gap: 9px; }
   .checkline .task-icon { width: 70px; height: 70px; font-size: 50px; }
   .checkline .label { font-size: 15px; }
-  .checkline .box { width: 42px; height: 42px; font-size: 26px; }
+  .checkline .box, .checkline .task-drag-handle {
+    width: 42px; min-width: 42px; height: 42px; font-size: 26px;
+  }
 }
 .section-title { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 14px 0 4px; }
 

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -194,10 +194,130 @@ export default function TasksPage() {
   const [renamingStep, setRenamingStep] = useState(null);
   const [addingTaskTo, setAddingTaskTo] = useState(null);
   const [editingRoutines, setEditingRoutines] = useState(false);
+  const dragState = useRef(null);
+  const touchDragCleanup = useRef(null);
+  const [draggingStepId, setDraggingStepId] = useState(null);
+  const [dragOverStepId, setDragOverStepId] = useState(null);
+  const [reorderError, setReorderError] = useState('');
   const deleteStep = useApiMutation(
     (stepId) => api.del(`/routines/steps/${stepId}`),
     ['routines', 'progress']
   );
+
+  const reorderSteps = useMutation({
+    mutationFn: ({ routineId, stepIds }) =>
+      api.patch(`/routines/${routineId}/steps/order`, { step_ids: stepIds }),
+    onError: (_error, variables) => {
+      queryClient.setQueryData(['routines', variables.date], (old = []) => old.map((routine) =>
+        routine.id === variables.routineId
+          ? {
+              ...routine,
+              steps: variables.originalStepIds
+                .map((id) => routine.steps.find((step) => step.id === id))
+                .filter(Boolean),
+            }
+          : routine
+      ));
+      setReorderError('That new task order could not be saved. Please try again.');
+    },
+    onSuccess: () => setReorderError(''),
+    onSettled: (_data, _error, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['routines', variables.date] });
+    },
+  });
+
+  const beginStepDrag = (routine, step) => {
+    if (!editingRoutines || reorderSteps.isPending) return;
+    dragState.current = {
+      routineId: routine.id,
+      stepId: step.id,
+      date: shownDate,
+      originalStepIds: routine.steps.map((item) => item.id),
+      lastTargetStepId: step.id,
+    };
+    setDraggingStepId(step.id);
+    setDragOverStepId(step.id);
+  };
+
+  const moveDraggedStep = (targetStepId) => {
+    const drag = dragState.current;
+    if (!drag || drag.stepId === targetStepId || drag.lastTargetStepId === targetStepId) return;
+    drag.lastTargetStepId = targetStepId;
+
+    queryClient.setQueryData(['routines', drag.date], (old = []) => old.map((routine) => {
+      if (routine.id !== drag.routineId) return routine;
+      const from = routine.steps.findIndex((step) => step.id === drag.stepId);
+      const to = routine.steps.findIndex((step) => step.id === targetStepId);
+      if (from < 0 || to < 0 || from === to) return routine;
+      const steps = [...routine.steps];
+      const [moved] = steps.splice(from, 1);
+      steps.splice(to, 0, moved);
+      return { ...routine, steps };
+    }));
+    setDragOverStepId(targetStepId);
+  };
+
+  const finishStepDrag = () => {
+    const drag = dragState.current;
+    if (!drag) return;
+    const current = queryClient
+      .getQueryData(['routines', drag.date])
+      ?.find((routine) => routine.id === drag.routineId);
+    const stepIds = current?.steps.map((step) => step.id) || drag.originalStepIds;
+    dragState.current = null;
+    setDraggingStepId(null);
+    setDragOverStepId(null);
+    if (stepIds.some((id, index) => id !== drag.originalStepIds[index])) {
+      reorderSteps.mutate({ ...drag, stepIds });
+    }
+  };
+
+  const moveStepWithKeyboard = (routine, step, direction) => {
+    const index = routine.steps.findIndex((item) => item.id === step.id);
+    const target = routine.steps[index + direction];
+    if (!target || reorderSteps.isPending) return;
+    beginStepDrag(routine, step);
+    moveDraggedStep(target.id);
+    finishStepDrag();
+  };
+
+  const handleTouchMove = (event, routineId) => {
+    const drag = dragState.current;
+    const touch = event.touches[0];
+    if (!drag || drag.routineId !== routineId || !touch) return;
+    event.preventDefault();
+    const row = document
+      .elementFromPoint(touch.clientX, touch.clientY)
+      ?.closest('.checkline-row[data-step-id]');
+    if (!row || Number(row.dataset.routineId) !== routineId) return;
+    moveDraggedStep(Number(row.dataset.stepId));
+  };
+
+  const beginTouchDrag = (routine, step) => {
+    beginStepDrag(routine, step);
+    if (!dragState.current) return;
+
+    touchDragCleanup.current?.();
+    const move = (event) => handleTouchMove(event, routine.id);
+    const end = () => {
+      touchDragCleanup.current?.();
+      finishStepDrag();
+    };
+    const cleanup = () => {
+      document.removeEventListener('touchmove', move);
+      document.removeEventListener('touchend', end);
+      document.removeEventListener('touchcancel', end);
+      touchDragCleanup.current = null;
+    };
+    touchDragCleanup.current = cleanup;
+    // React's delegated touch listener may be passive in newer browsers. A
+    // native non-passive listener also keeps dragging reliable on the old iPad.
+    document.addEventListener('touchmove', move, { passive: false });
+    document.addEventListener('touchend', end);
+    document.addEventListener('touchcancel', end);
+  };
+
+  useEffect(() => () => touchDragCleanup.current?.(), []);
 
   const removeStep = (step) => {
     if (window.confirm(`Delete “${step.title}” from this routine? This cannot be undone.`)) {
@@ -394,21 +514,72 @@ export default function TasksPage() {
                                 </span>
                               </div>
                             )}
-                            {g.rows.map((s) => (
-                              <div
-                                key={s.id}
-                                className={`checkline-row${editingRoutines ? ' editing' : ''}`}
-                              >
-                                <button
-                                  type="button"
+                            {g.rows.map((s) => {
+                              const ChecklineElement = editingRoutines ? 'div' : 'button';
+                              const checklineInteraction = editingRoutines
+                                ? {}
+                                : {
+                                    type: 'button',
+                                    role: 'checkbox',
+                                    'aria-checked': s.done,
+                                    disabled: pendingSteps.current.has(s.id),
+                                    onClick: () => completeStep(s, m.id),
+                                  };
+                              return (
+                                <div
+                                  key={s.id}
+                                  className={
+                                    `checkline-row${editingRoutines ? ' editing' : ''}` +
+                                    `${draggingStepId === s.id ? ' dragging' : ''}` +
+                                    `${dragOverStepId === s.id ? ' drag-over' : ''}`
+                                  }
+                                  data-routine-id={g.routine.id}
+                                  data-step-id={s.id}
+                                  onDragOver={(event) => {
+                                    if (dragState.current?.routineId !== g.routine.id) return;
+                                    event.preventDefault();
+                                    moveDraggedStep(s.id);
+                                  }}
+                                  onDrop={(event) => {
+                                    event.preventDefault();
+                                    finishStepDrag();
+                                  }}
+                                >
+                                <ChecklineElement
                                   className={`checkline ${s.done ? 'done' : ''}`}
-                                  role="checkbox"
-                                  aria-checked={s.done}
-                                  disabled={pendingSteps.current.has(s.id)}
-                                  onClick={() => completeStep(s, m.id)}
+                                  {...checklineInteraction}
                                 >
                                   <span className="checkline-content">
-                                    <span className="box">{s.done ? '✓' : ''}</span>
+                                    {editingRoutines ? (
+                                      <button
+                                        type="button"
+                                        className="task-drag-handle"
+                                        draggable={!reorderSteps.isPending}
+                                        disabled={reorderSteps.isPending}
+                                        aria-label={`Reorder ${s.title}. Use the arrow keys or drag.`}
+                                        title="Drag to reorder"
+                                        onDragStart={(event) => {
+                                          event.dataTransfer.effectAllowed = 'move';
+                                          event.dataTransfer.setData('text/plain', String(s.id));
+                                          beginStepDrag(g.routine, s);
+                                        }}
+                                        onDragEnd={finishStepDrag}
+                                        onTouchStart={() => beginTouchDrag(g.routine, s)}
+                                        onKeyDown={(event) => {
+                                          if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+                                          event.preventDefault();
+                                          moveStepWithKeyboard(
+                                            g.routine,
+                                            s,
+                                            event.key === 'ArrowUp' ? -1 : 1
+                                          );
+                                        }}
+                                      >
+                                        <span aria-hidden="true">☰</span>
+                                      </button>
+                                    ) : (
+                                      <span className="box">{s.done ? '✓' : ''}</span>
+                                    )}
                                     {/* Pre-readers find their task by picture. */}
                                     <span className="task-icon" aria-hidden="true">
                                       <TaskPicture
@@ -417,7 +588,7 @@ export default function TasksPage() {
                                     </span>
                                     <span className="label">{s.title}</span>
                                   </span>
-                                </button>
+                                </ChecklineElement>
                                 {editingRoutines && (
                                   <span className="task-edit-actions">
                                     <button
@@ -446,8 +617,9 @@ export default function TasksPage() {
                                     </button>
                                   </span>
                                 )}
-                              </div>
-                            ))}
+                                </div>
+                              );
+                            })}
                             {editingRoutines && (
                               <button
                                 type="button"
@@ -479,6 +651,9 @@ export default function TasksPage() {
                 <p className="completion-error" role="alert">
                   That task could not be deleted. Please try again.
                 </p>
+              )}
+              {reorderError && (
+                <p className="completion-error" role="alert">{reorderError}</p>
               )}
             </div>
           );

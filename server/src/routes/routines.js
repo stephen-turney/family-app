@@ -79,6 +79,38 @@ routinesRouter.delete('/:id', (req, res) => {
 });
 
 // --- Step management ---
+routinesRouter.patch('/:id/steps/order', (req, res) => {
+  const routine = db.prepare('SELECT id FROM routines WHERE id = ?').get(req.params.id);
+  if (!routine) return res.status(404).json({ error: 'routine not found' });
+
+  const { step_ids } = req.body || {};
+  if (!Array.isArray(step_ids) || step_ids.some((id) => !Number.isInteger(id) || id < 1)) {
+    return res.status(400).json({ error: 'step_ids must be an array of positive integers' });
+  }
+
+  const currentIds = db
+    .prepare('SELECT id FROM routine_steps WHERE routine_id = ? ORDER BY sort_order, id')
+    .all(req.params.id)
+    .map((step) => step.id);
+  const requestedIds = new Set(step_ids);
+  if (
+    requestedIds.size !== step_ids.length ||
+    step_ids.length !== currentIds.length ||
+    currentIds.some((id) => !requestedIds.has(id))
+  ) {
+    return res.status(400).json({ error: 'step_ids must contain every step in this routine once' });
+  }
+
+  const updateOrder = db.prepare(
+    'UPDATE routine_steps SET sort_order = ? WHERE id = ? AND routine_id = ?'
+  );
+  transaction(() => {
+    step_ids.forEach((stepId, index) => updateOrder.run(index, stepId, req.params.id));
+  });
+
+  res.json({ step_ids });
+});
+
 routinesRouter.post('/:id/steps', (req, res) => {
   const routine = db.prepare('SELECT * FROM routines WHERE id = ?').get(req.params.id);
   if (!routine) return res.status(404).json({ error: 'routine not found' });
