@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -47,6 +47,11 @@ const BLOCKS = [
   { key: 'evening', label: 'Evening', article: 'an', icon: '🌙', tint: '#9cb0c9' },
 ];
 
+// Long enough for the surrounding rows to visibly glide into their new slots,
+// while keeping the list responsive as the pointer changes direction.
+const REORDER_GLIDE_MS = 800;
+const DRAG_SETTLE_MS = 420;
+
 // One group per routine in the block, its own name as the heading (the sheet's
 // "BEFORE SCHOOL"), plus the done/total the heading shows.
 function displayGroups(routines) {
@@ -58,6 +63,13 @@ function displayGroups(routines) {
     total: r.steps.length,
     routine: r,
   }));
+}
+
+function rowsInDragOrder(rows, routineId, dragDisplayOrder) {
+  if (!dragDisplayOrder || dragDisplayOrder.routineId !== routineId) return rows;
+  return dragDisplayOrder.stepIds
+    .map((id) => rows.find((step) => step.id === id))
+    .filter(Boolean);
 }
 
 // Serves both /tasks (everyone, side by side) and /tasks/:memberId (one person,
@@ -196,9 +208,46 @@ export default function TasksPage() {
   const [editingRoutines, setEditingRoutines] = useState(false);
   const dragState = useRef(null);
   const touchDragCleanup = useRef(null);
+  const mouseDragCleanup = useRef(null);
+  const settlingDragCleanup = useRef(null);
+  const pendingReorderAnimation = useRef(null);
   const [draggingStepId, setDraggingStepId] = useState(null);
   const [dragOverStepId, setDragOverStepId] = useState(null);
+  const [dragDisplayOrder, setDragDisplayOrder] = useState(null);
   const [reorderError, setReorderError] = useState('');
+
+  // Run after React has committed the reordered DOM. This guarantees that the
+  // distance is measured between two different layouts; scheduling this from
+  // the pointer event could run before the rows had actually changed places.
+  useLayoutEffect(() => {
+    const pending = pendingReorderAnimation.current;
+    if (!pending) return;
+    pendingReorderAnimation.current = null;
+    const selector = `.checkline-row[data-routine-id="${pending.routineId}"]`;
+    document.querySelectorAll(selector).forEach((row) => {
+      if (Number(row.dataset.stepId) === pending.stepId) return;
+      const previousTop = pending.previousTops.get(row.dataset.stepId);
+      if (previousTop == null) return;
+      row._reorderAnimationCleanup?.();
+      const delta = previousTop - row.getBoundingClientRect().top;
+      if (!delta) return;
+      // Commit the cleared animation before reusing the same keyframes during
+      // a quick direction change, so Safari reliably restarts the glide.
+      void row.offsetWidth;
+      row.style.setProperty('--reorder-from-y', `${delta}px`);
+      row.style.animation =
+        `reorder-row-glide ${REORDER_GLIDE_MS}ms cubic-bezier(.22, 1, .36, 1)`;
+      const cleanup = () => {
+        row.removeEventListener('animationend', cleanup);
+        row.style.removeProperty('--reorder-from-y');
+        row.style.removeProperty('animation');
+        if (row._reorderAnimationCleanup === cleanup) row._reorderAnimationCleanup = null;
+      };
+      row._reorderAnimationCleanup = cleanup;
+      row.addEventListener('animationend', cleanup);
+    });
+  }, [dragDisplayOrder]);
+
   const deleteStep = useApiMutation(
     (stepId) => api.del(`/routines/steps/${stepId}`),
     ['routines', 'progress']
@@ -227,48 +276,177 @@ export default function TasksPage() {
   });
 
   const beginStepDrag = (routine, step) => {
-    if (!editingRoutines || reorderSteps.isPending) return;
-    dragState.current = {
+    if (!editingRoutines || reorderSteps.isPending) return null;
+    const drag = {
       routineId: routine.id,
       stepId: step.id,
       date: shownDate,
       originalStepIds: routine.steps.map((item) => item.id),
-      lastTargetStepId: step.id,
+      targetStepId: step.id,
+      displayStepIds: routine.steps.map((item) => item.id),
     };
+    dragState.current = drag;
     setDraggingStepId(step.id);
     setDragOverStepId(step.id);
+    setDragDisplayOrder({ routineId: routine.id, stepIds: [...drag.displayStepIds] });
+    return drag;
   };
 
-  const moveDraggedStep = (targetStepId) => {
+  const moveDraggedStep = (targetStepId, pointerDirection = 0) => {
     const drag = dragState.current;
-    if (!drag || drag.stepId === targetStepId || drag.lastTargetStepId === targetStepId) return;
-    drag.lastTargetStepId = targetStepId;
-
-    queryClient.setQueryData(['routines', drag.date], (old = []) => old.map((routine) => {
-      if (routine.id !== drag.routineId) return routine;
-      const from = routine.steps.findIndex((step) => step.id === drag.stepId);
-      const to = routine.steps.findIndex((step) => step.id === targetStepId);
-      if (from < 0 || to < 0 || from === to) return routine;
-      const steps = [...routine.steps];
-      const [moved] = steps.splice(from, 1);
-      steps.splice(to, 0, moved);
-      return { ...routine, steps };
-    }));
+    if (!drag) return;
+    // Once the list has shifted, the blank placeholder sits underneath the
+    // pointer. Treat crossing it as leaving the previous target so that the
+    // same neighboring row can become active again on the trip back. Without
+    // this reset, a task can move away from its starting slot but not return.
+    if (targetStepId === drag.stepId) {
+      drag.targetStepId = drag.stepId;
+      setDragOverStepId(drag.stepId);
+      return;
+    }
+    // An animated neighbor can remain visually beneath the pointer after the
+    // first swap. Ignore continued travel in that direction, but let reversing
+    // across the same row move the task back toward its previous/original slot.
+    if (
+      drag.targetStepId === targetStepId &&
+      (!pointerDirection || pointerDirection === drag.lastMoveDirection)
+    ) return;
+    const selector = `.checkline-row[data-routine-id="${drag.routineId}"]`;
+    const previousTops = new Map(
+      Array.from(document.querySelectorAll(selector), (row) => [
+        row.dataset.stepId,
+        row.getBoundingClientRect().top,
+      ])
+    );
+    drag.targetStepId = targetStepId;
+    const from = drag.displayStepIds.indexOf(drag.stepId);
+    const to = drag.displayStepIds.indexOf(targetStepId);
+    if (from < 0 || to < 0 || from === to) return;
+    const next = [...drag.displayStepIds];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    drag.displayStepIds = next;
+    drag.lastMoveDirection = pointerDirection || Math.sign(to - from);
+    pendingReorderAnimation.current = {
+      routineId: drag.routineId,
+      stepId: drag.stepId,
+      previousTops,
+    };
+    setDragDisplayOrder({ routineId: drag.routineId, stepIds: [...next] });
     setDragOverStepId(targetStepId);
   };
 
-  const finishStepDrag = () => {
+  const removeDragPreview = (drag) => {
+    if (drag?.preview?.parentNode) drag.preview.parentNode.removeChild(drag.preview);
+  };
+
+  const settleDragPreview = (drag, onComplete) => {
+    const preview = drag.preview;
+    const target = document.querySelector(
+      `.checkline-row[data-routine-id="${drag.routineId}"][data-step-id="${drag.stepId}"]`
+    );
+    if (!preview || !target) {
+      removeDragPreview(drag);
+      onComplete();
+      return;
+    }
+
+    const rect = target.getBoundingClientRect();
+    let timeoutId;
+    let finished = false;
+    const finish = (complete = true) => {
+      if (finished) return;
+      finished = true;
+      window.clearTimeout(timeoutId);
+      preview.removeEventListener('transitionend', handleTransitionEnd);
+      if (settlingDragCleanup.current === finish) settlingDragCleanup.current = null;
+      if (complete) {
+        // Remove the placeholder styling in the same paint that removes the
+        // floating preview. Waiting for React's next render here exposes one
+        // frame of the dashed outline after the preview has landed.
+        document.querySelectorAll(
+          `.checkline-row[data-routine-id="${drag.routineId}"]`
+        ).forEach((row) => row.classList.remove('dragging', 'drag-over'));
+        onComplete();
+      }
+      removeDragPreview(drag);
+    };
+    const handleTransitionEnd = (event) => {
+      if (event.propertyName === 'transform') finish();
+    };
+    settlingDragCleanup.current?.();
+    settlingDragCleanup.current = finish;
+    preview.addEventListener('transitionend', handleTransitionEnd);
+    preview.style.transition =
+      `transform ${DRAG_SETTLE_MS}ms cubic-bezier(.22, 1, .36, 1), ` +
+      `box-shadow ${DRAG_SETTLE_MS}ms ease`;
+    void preview.offsetWidth;
+    preview.classList.add('settling');
+    preview.style.transform = `translate3d(${rect.left}px, ${rect.top}px, 0) rotate(0)`;
+    // A fallback is needed for older Safari versions that occasionally omit
+    // transitionend when the destination is only a few pixels away.
+    timeoutId = window.setTimeout(() => finish(), DRAG_SETTLE_MS + 80);
+  };
+
+  const createDragPreview = (row, point) => {
+    const rect = row.getBoundingClientRect();
+    const preview = row.cloneNode(true);
+    preview.classList.remove('dragging', 'drag-over');
+    preview.classList.add('task-drag-preview');
+    preview.setAttribute('aria-hidden', 'true');
+    preview.removeAttribute('data-step-id');
+    preview.removeAttribute('data-routine-id');
+    Array.prototype.forEach.call(
+      preview.querySelectorAll('button'),
+      (button) => { button.tabIndex = -1; }
+    );
+    preview.style.width = `${rect.width}px`;
+    preview.style.height = `${rect.height}px`;
+
+    const offsetX = point.clientX - rect.left;
+    const offsetY = point.clientY - rect.top;
+    preview.style.transform =
+      `translate3d(${point.clientX - offsetX}px, ${point.clientY - offsetY}px, 0) rotate(1deg)`;
+    preview._dragOffset = { x: offsetX, y: offsetY };
+    document.body.appendChild(preview);
+    return preview;
+  };
+
+  const orderedStepIds = (drag) => {
+    return [...drag.displayStepIds];
+  };
+
+  const finishStepDrag = (commit = true) => {
     const drag = dragState.current;
     if (!drag) return;
-    const current = queryClient
-      .getQueryData(['routines', drag.date])
-      ?.find((routine) => routine.id === drag.routineId);
-    const stepIds = current?.steps.map((step) => step.id) || drag.originalStepIds;
+    const stepIds = orderedStepIds(drag);
     dragState.current = null;
-    setDraggingStepId(null);
-    setDragOverStepId(null);
-    if (stepIds.some((id, index) => id !== drag.originalStepIds[index])) {
-      reorderSteps.mutate({ ...drag, stepIds });
+    if (commit && stepIds.some((id, index) => id !== drag.originalStepIds[index])) {
+      queryClient.setQueryData(['routines', drag.date], (old = []) => old.map((routine) => {
+        if (routine.id !== drag.routineId) return routine;
+        return {
+          ...routine,
+          steps: stepIds
+            .map((id) => routine.steps.find((step) => step.id === id))
+            .filter(Boolean),
+        };
+      }));
+      reorderSteps.mutate({
+        routineId: drag.routineId,
+        date: drag.date,
+        originalStepIds: drag.originalStepIds,
+        stepIds,
+      });
+    }
+    setDragDisplayOrder(null);
+    const clearDragVisuals = () => {
+      setDraggingStepId(null);
+      setDragOverStepId(null);
+    };
+    if (commit && drag.preview) settleDragPreview(drag, clearDragVisuals);
+    else {
+      removeDragPreview(drag);
+      clearDragVisuals();
     }
   };
 
@@ -281,21 +459,67 @@ export default function TasksPage() {
     finishStepDrag();
   };
 
-  const handleTouchMove = (event, routineId) => {
+  const moveFloatingDrag = (clientX, clientY, routineId) => {
     const drag = dragState.current;
-    const touch = event.touches[0];
-    if (!drag || drag.routineId !== routineId || !touch) return;
-    event.preventDefault();
-    const row = document
-      .elementFromPoint(touch.clientX, touch.clientY)
-      ?.closest('.checkline-row[data-step-id]');
-    if (!row || Number(row.dataset.routineId) !== routineId) return;
-    moveDraggedStep(Number(row.dataset.stepId));
+    if (!drag || drag.routineId !== routineId) return;
+    const pointerDirection = Math.sign(clientY - (drag.lastClientY ?? clientY));
+    drag.lastClientY = clientY;
+
+    if (drag.preview) {
+      const { x, y } = drag.preview._dragOffset;
+      drag.preview.style.transform =
+        `translate3d(${clientX - x}px, ${clientY - y}px, 0) rotate(1deg)`;
+    }
+
+    // Keep long routines draggable without requiring a second gesture. The
+    // content pane is the actual scroller on both the phone and old iPad.
+    const scroller = document.querySelector('.content');
+    const edge = 72;
+    if (scroller && clientY < edge) scroller.scrollTop -= 14;
+    else if (scroller && clientY > window.innerHeight - edge) scroller.scrollTop += 14;
+
+    // FLIP animations temporarily transform neighboring rows from their old
+    // positions. Hit-test their final layout slots instead of their animated
+    // pixels, otherwise a quick reversal can appear to miss the original slot.
+    const rows = document.querySelectorAll(
+      `.checkline-row[data-routine-id="${routineId}"][data-step-id]`
+    );
+    const row = Array.from(rows).find((candidate) => {
+      const rect = candidate.getBoundingClientRect();
+      const transform = getComputedStyle(candidate).transform;
+      const matrix = transform && transform !== 'none'
+        ? transform.match(/^matrix(3d)?\((.+)\)$/)
+        : null;
+      const values = matrix?.[2].split(',').map(Number);
+      const translateY = values
+        ? values[matrix[1] ? 13 : 5] || 0
+        : 0;
+      const layoutTop = rect.top - translateY;
+      return (
+        clientX >= rect.left &&
+        clientX <= rect.right &&
+        clientY >= layoutTop &&
+        clientY < layoutTop + candidate.offsetHeight
+      );
+    });
+    if (!row) return;
+    moveDraggedStep(Number(row.dataset.stepId), pointerDirection);
   };
 
-  const beginTouchDrag = (routine, step) => {
-    beginStepDrag(routine, step);
-    if (!dragState.current) return;
+  const handleTouchMove = (event, routineId) => {
+    const touch = event.touches[0];
+    if (!touch) return;
+    event.preventDefault();
+    moveFloatingDrag(touch.clientX, touch.clientY, routineId);
+  };
+
+  const beginTouchDrag = (routine, step, event) => {
+    const drag = beginStepDrag(routine, step);
+    const touch = event.touches[0];
+    const row = event.currentTarget.closest('.checkline-row');
+    if (!drag || !touch || !row) return;
+    drag.lastClientY = touch.clientY;
+    drag.preview = createDragPreview(row, touch);
 
     touchDragCleanup.current?.();
     const move = (event) => handleTouchMove(event, routine.id);
@@ -303,10 +527,14 @@ export default function TasksPage() {
       touchDragCleanup.current?.();
       finishStepDrag();
     };
+    const cancel = () => {
+      touchDragCleanup.current?.();
+      finishStepDrag(false);
+    };
     const cleanup = () => {
       document.removeEventListener('touchmove', move);
       document.removeEventListener('touchend', end);
-      document.removeEventListener('touchcancel', end);
+      document.removeEventListener('touchcancel', cancel);
       touchDragCleanup.current = null;
     };
     touchDragCleanup.current = cleanup;
@@ -314,10 +542,49 @@ export default function TasksPage() {
     // native non-passive listener also keeps dragging reliable on the old iPad.
     document.addEventListener('touchmove', move, { passive: false });
     document.addEventListener('touchend', end);
-    document.addEventListener('touchcancel', end);
+    document.addEventListener('touchcancel', cancel);
   };
 
-  useEffect(() => () => touchDragCleanup.current?.(), []);
+  const beginMouseDrag = (routine, step, event) => {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    const drag = beginStepDrag(routine, step);
+    const row = event.currentTarget.closest('.checkline-row');
+    if (!drag || !row) return;
+    drag.lastClientY = event.clientY;
+    drag.preview = createDragPreview(row, event);
+
+    mouseDragCleanup.current?.();
+    const move = (mouseEvent) => {
+      mouseEvent.preventDefault();
+      moveFloatingDrag(mouseEvent.clientX, mouseEvent.clientY, routine.id);
+    };
+    const end = () => {
+      mouseDragCleanup.current?.();
+      finishStepDrag();
+    };
+    const cancel = () => {
+      mouseDragCleanup.current?.();
+      finishStepDrag(false);
+    };
+    const cleanup = () => {
+      document.removeEventListener('mousemove', move);
+      document.removeEventListener('mouseup', end);
+      window.removeEventListener('blur', cancel);
+      mouseDragCleanup.current = null;
+    };
+    mouseDragCleanup.current = cleanup;
+    document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup', end);
+    window.addEventListener('blur', cancel);
+  };
+
+  useEffect(() => () => {
+    touchDragCleanup.current?.();
+    mouseDragCleanup.current?.();
+    settlingDragCleanup.current?.(false);
+    removeDragPreview(dragState.current);
+  }, []);
 
   const removeStep = (step) => {
     if (window.confirm(`Delete “${step.title}” from this routine? This cannot be undone.`)) {
@@ -514,7 +781,7 @@ export default function TasksPage() {
                                 </span>
                               </div>
                             )}
-                            {g.rows.map((s) => {
+                            {rowsInDragOrder(g.rows, g.routine.id, dragDisplayOrder).map((s) => {
                               const ChecklineElement = editingRoutines ? 'div' : 'button';
                               const checklineInteraction = editingRoutines
                                 ? {}
@@ -535,15 +802,6 @@ export default function TasksPage() {
                                   }
                                   data-routine-id={g.routine.id}
                                   data-step-id={s.id}
-                                  onDragOver={(event) => {
-                                    if (dragState.current?.routineId !== g.routine.id) return;
-                                    event.preventDefault();
-                                    moveDraggedStep(s.id);
-                                  }}
-                                  onDrop={(event) => {
-                                    event.preventDefault();
-                                    finishStepDrag();
-                                  }}
                                 >
                                 <ChecklineElement
                                   className={`checkline ${s.done ? 'done' : ''}`}
@@ -554,17 +812,11 @@ export default function TasksPage() {
                                       <button
                                         type="button"
                                         className="task-drag-handle"
-                                        draggable={!reorderSteps.isPending}
                                         disabled={reorderSteps.isPending}
                                         aria-label={`Reorder ${s.title}. Use the arrow keys or drag.`}
                                         title="Drag to reorder"
-                                        onDragStart={(event) => {
-                                          event.dataTransfer.effectAllowed = 'move';
-                                          event.dataTransfer.setData('text/plain', String(s.id));
-                                          beginStepDrag(g.routine, s);
-                                        }}
-                                        onDragEnd={finishStepDrag}
-                                        onTouchStart={() => beginTouchDrag(g.routine, s)}
+                                        onMouseDown={(event) => beginMouseDrag(g.routine, s, event)}
+                                        onTouchStart={(event) => beginTouchDrag(g.routine, s, event)}
                                         onKeyDown={(event) => {
                                           if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
                                           event.preventDefault();

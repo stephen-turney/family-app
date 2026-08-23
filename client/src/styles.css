@@ -420,8 +420,28 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 .checkline:active { background: var(--panel-2); }
 .checkline:disabled { color: inherit; cursor: wait; opacity: 1; }
 .checkline-row.editing .checkline { width: auto; flex: 1; min-width: 0; cursor: default; }
-.checkline-row.dragging { opacity: .55; }
-.checkline-row.drag-over { background: var(--accent-soft); }
+.checkline-row.dragging {
+  outline: 2px dashed var(--accent); outline-offset: -2px;
+  background: var(--accent-soft);
+}
+.checkline-row.dragging > * { visibility: hidden; }
+.checkline-row.drag-over:not(.dragging) {
+  background: var(--accent-soft); box-shadow: inset 0 -3px 0 var(--accent);
+}
+@keyframes reorder-row-glide {
+  from { transform: translateY(var(--reorder-from-y)); }
+  to { transform: translateY(0); }
+}
+.task-drag-preview {
+  position: fixed; z-index: 100; left: 0; top: 0; margin: 0;
+  pointer-events: none; overflow: hidden;
+  background: var(--panel); border: 1px solid var(--accent);
+  box-shadow: 0 14px 30px rgba(16, 24, 40, .24), 0 4px 10px rgba(16, 24, 40, .16);
+  opacity: .97; will-change: transform;
+}
+.task-drag-preview.settling {
+  box-shadow: 0 3px 8px rgba(16, 24, 40, .14);
+}
 .task-drag-handle {
   width: 46px; min-width: 46px; height: 46px; padding: 0;
   display: flex; align-items: center; justify-content: center;
