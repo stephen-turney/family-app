@@ -1,14 +1,13 @@
 import { Router } from 'express';
 import { existsSync, readdirSync, unlinkSync } from 'node:fs';
 import path from 'node:path';
-import { REPORTS_DIR, generateUserReport, reportInfo } from '../weeklyReports.js';
+import { REPORTS_DIR, generateAllowanceReport, reportInfo } from '../weeklyReports.js';
 
 export const reportsRouter = Router();
 const REPORT_NAME = /^(?:Allowance-Totals_Week-of-[A-Za-z]+-\d{1,2}(?:st|nd|rd|th)|user-report_\d{4}-\d{2}-\d{2}(?:_\d{3})?)\.txt$/;
 
 reportsRouter.post('/', (req, res) => {
-  const result = generateUserReport(new Date());
-  res.status(201).json(reportInfo(result.filename));
+  res.json(generateAllowanceReport(new Date()));
 });
 
 reportsRouter.get('/', (req, res) => {

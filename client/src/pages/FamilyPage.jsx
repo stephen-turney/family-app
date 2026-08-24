@@ -22,6 +22,7 @@ export default function FamilyPage() {
 
 function ReportsCard() {
   const { data: reports = [], isLoading, error } = useReports();
+  const [openReport, setOpenReport] = useState(null);
   const generate = useApiMutation(() => api.post('/reports'), ['reports']);
   const remove = useApiMutation(
     (filename) => api.del(`/reports/${encodeURIComponent(filename)}`),
@@ -42,16 +43,13 @@ function ReportsCard() {
         <button
           className="btn small"
           disabled={generate.isPending}
-          onClick={() => generate.mutate()}
+          onClick={() => generate.mutate(undefined, { onSuccess: setOpenReport })}
         >
           {generate.isPending ? 'Generating…' : 'Generate report now'}
         </button>
       </div>
       {generate.isError && (
         <p className="report-message error">The report could not be generated.</p>
-      )}
-      {generate.isSuccess && (
-        <p className="report-message">Created {generate.data.filename}</p>
       )}
       {isLoading && <span className="muted">Loading reports…</span>}
       {error && <span className="muted">Reports could not be loaded.</span>}
@@ -82,7 +80,85 @@ function ReportsCard() {
       {remove.isError && (
         <p className="report-message error">The report could not be deleted.</p>
       )}
+      {openReport && (
+        <AllowanceReportModal report={openReport} onClose={() => setOpenReport(null)} />
+      )}
     </div>
+  );
+}
+
+const REPORT_CATEGORIES = [
+  ['spending', 'Spending', 50],
+  ['savings', 'Savings', 30],
+  ['giving', 'Giving', 10],
+  ['taxes', 'Taxes', 10],
+];
+
+function reportMoney(cents) {
+  return `$${(cents / 100).toFixed(2)}`;
+}
+
+function AllowanceReportModal({ report, onClose }) {
+  return (
+    <Modal title="Allowance report" onClose={onClose} className="allowance-report-modal">
+      <div className="allowance-report-heading">
+        <span className="allowance-report-kicker">Weekly totals</span>
+        <strong>{report.mondayLabel} – {report.fridayLabel}</strong>
+      </div>
+
+      {report.members.length === 0 ? (
+        <div className="allowance-report-empty">
+          No family members have a weekly allowance configured.
+        </div>
+      ) : report.members.map((member) => (
+        <section className="allowance-member-report" key={member.id}>
+          <div className="allowance-member-summary">
+            <div>
+              <span className="allowance-member-label">{member.name}</span>
+              <span className="allowance-earned-label">Allowance earned</span>
+            </div>
+            <strong>{reportMoney(member.grandTotalCents)}</strong>
+          </div>
+
+          <div className="allowance-progress-copy">
+            <span>{member.creditedTasks} of {report.taskTarget} tasks</span>
+            <span>{member.points} points · {member.percent}%</span>
+          </div>
+          <div className="progress allowance-report-progress" aria-label={`${member.percent}% complete`}>
+            <span style={{ width: `${Math.min(member.percent, 100)}%` }} />
+          </div>
+
+          <div className="allowance-category-grid">
+            {REPORT_CATEGORIES.map(([key, label, percent]) => {
+              const category = member.categories[key];
+              return (
+                <div className={`allowance-category ${key}`} key={key}>
+                  <span>{label} <small>{percent}%</small></span>
+                  <strong>{reportMoney(category.roundedCents)}</strong>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="allowance-report-details">
+            <span>Earned before category rounding</span>
+            <strong>{reportMoney(member.allowanceCents)}</strong>
+            <span>Additional rounding</span>
+            <strong>+{reportMoney(member.additionalRoundingCents)}</strong>
+            <span>Full weekly allowance</span>
+            <strong>{reportMoney(member.weeklyAllowanceCents)}</strong>
+          </div>
+        </section>
+      ))}
+
+      <p className="allowance-report-note">
+        Each completed task earns 10 points. Allowances round up to the nearest $0.10,
+        then each category rounds up to the nearest $0.05.
+      </p>
+      <div className="allowance-report-actions">
+        <button className="btn" onClick={onClose}>Done</button>
+      </div>
+    </Modal>
   );
 }
 

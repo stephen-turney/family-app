@@ -25,7 +25,7 @@
 [ ]   6. If they get all the checks done in the day - a pop up animation occurs.
          Holy Guacamole gif of becca (+ sound if possible)
 
-[ ]   7. Running report generates a pop up thats formatted better
+[x]   7. Running report generates a pop up thats formatted better
 
 [ ]   8. Parent notifications - sends out email/text at end of week with report
 

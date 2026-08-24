@@ -88,24 +88,14 @@ function allowanceBreakdown(totalCents) {
 }
 
 function categoryLine(label, percent, category) {
-  const base = `  ${label.padEnd(8)} (${percent}%):  ${money(category.original)}`;
-  return category.adjustment === 0
+  const base = `  ${label.padEnd(8)} (${percent}%):  ${money(category.originalCents)}`;
+  return category.adjustmentCents === 0
     ? base
-    : `${base} (+${money(category.adjustment)}) = ${money(category.rounded)}`;
+    : `${base} (+${money(category.adjustmentCents)}) = ${money(category.roundedCents)}`;
 }
 
-export function generateWeeklyReport(
-  referenceDate = new Date(),
-  { overwrite = false, outputFilename } = {}
-) {
+export function generateAllowanceReport(referenceDate = new Date()) {
   const { monday, friday } = reportWeek(referenceDate);
-  const filename = outputFilename || reportFilename(monday);
-  mkdirSync(REPORTS_DIR, { recursive: true });
-  const filePath = path.join(REPORTS_DIR, filename);
-  if (!overwrite && existsSync(filePath)) {
-    return { filename, filePath, created: false, monday, friday };
-  }
-
   const members = db.prepare(
     `SELECT id, name, weekly_allowance_cents FROM members
       WHERE weekly_allowance_cents IS NOT NULL ORDER BY id`
@@ -119,43 +109,87 @@ export function generateWeeklyReport(
       GROUP BY c.due_date`
   );
 
+  return {
+    monday,
+    friday,
+    mondayLabel: displayDate(monday),
+    fridayLabel: displayDate(friday),
+    taskTarget: WEEKLY_TASK_TARGET,
+    pointTarget: WEEKLY_POINT_TARGET,
+    members: members.map((member) => {
+      const creditedTasks = dailyCounts.all(member.id, monday, friday)
+        .reduce((sum, row) => sum + Math.min(Number(row.completed), TASKS_PER_DAY), 0);
+      const points = creditedTasks * POINTS_PER_TASK;
+      const percent = Math.round((creditedTasks / WEEKLY_TASK_TARGET) * 100);
+      const allowanceCents = Math.ceil(
+        (member.weekly_allowance_cents * creditedTasks) / WEEKLY_TASK_TARGET / 10
+      ) * 10;
+      const breakdown = allowanceBreakdown(allowanceCents);
+      const categories = Object.fromEntries(
+        Object.entries(breakdown.categories).map(([key, category]) => [key, {
+          originalCents: category.original,
+          roundedCents: category.rounded,
+          adjustmentCents: category.adjustment,
+        }])
+      );
+
+      return {
+        id: member.id,
+        name: member.name,
+        weeklyAllowanceCents: member.weekly_allowance_cents,
+        creditedTasks,
+        points,
+        percent,
+        allowanceCents,
+        additionalRoundingCents: breakdown.additionalRounding,
+        grandTotalCents: breakdown.grandTotal,
+        categories,
+      };
+    }),
+  };
+}
+
+export function generateWeeklyReport(
+  referenceDate = new Date(),
+  { overwrite = false, outputFilename } = {}
+) {
+  const report = generateAllowanceReport(referenceDate);
+  const { monday, friday } = report;
+  const filename = outputFilename || reportFilename(monday);
+  mkdirSync(REPORTS_DIR, { recursive: true });
+  const filePath = path.join(REPORTS_DIR, filename);
+  if (!overwrite && existsSync(filePath)) {
+    return { filename, filePath, created: false, monday, friday };
+  }
+
   const lines = [
     'ALLOWANCE TOTALS',
-    `Week of ${displayDate(monday)} through ${displayDate(friday)}`,
+    `Week of ${report.mondayLabel} through ${report.fridayLabel}`,
     '',
   ];
-  if (members.length === 0) {
+  if (report.members.length === 0) {
     lines.push('No family members have a weekly allowance configured.');
   }
 
-  for (const member of members) {
-    const creditedTasks = dailyCounts.all(member.id, monday, friday)
-      .reduce((sum, row) => sum + Math.min(Number(row.completed), TASKS_PER_DAY), 0);
-    const points = creditedTasks * POINTS_PER_TASK;
-    const percent = Math.round((creditedTasks / WEEKLY_TASK_TARGET) * 100);
-    // Calculate the exact pro-rata payout, then round upward to a dime.
-    const roundedAllowanceCents = Math.ceil(
-      (member.weekly_allowance_cents * creditedTasks) / WEEKLY_TASK_TARGET / 10
-    ) * 10;
-    const breakdown = allowanceBreakdown(roundedAllowanceCents);
+  for (const member of report.members) {
     const memberName = member.name.toUpperCase();
 
     lines.push(
       '============================================================',
-      `${memberName} — TOTAL ALLOWANCE EARNED: ${money(roundedAllowanceCents)}`,
-      `${memberName} — ADDITIONAL ROUNDING:    ${money(breakdown.additionalRounding)}`,
+      `${memberName} — TOTAL ALLOWANCE EARNED: ${money(member.allowanceCents)}`,
+      `${memberName} — ADDITIONAL ROUNDING:    ${money(member.additionalRoundingCents)}`,
       '',
-      `${memberName} — GRAND TOTAL:            ${money(breakdown.grandTotal)}`,
+      `${memberName} — GRAND TOTAL:            ${money(member.grandTotalCents)}`,
       '============================================================',
-      categoryLine('SPENDING', 50, breakdown.categories.spending),
-      categoryLine('SAVINGS', 30, breakdown.categories.savings),
-      categoryLine('GIVING', 10, breakdown.categories.giving),
-      categoryLine('TAXES', 10, breakdown.categories.taxes),
+      categoryLine('SPENDING', 50, member.categories.spending),
+      categoryLine('SAVINGS', 30, member.categories.savings),
+      categoryLine('GIVING', 10, member.categories.giving),
+      categoryLine('TAXES', 10, member.categories.taxes),
       '------------------------------------------------------------',
-      `  Full weekly allowance: ${money(member.weekly_allowance_cents)}`,
-      `  Tasks completed: ${creditedTasks} of ${WEEKLY_TASK_TARGET}`,
-      `  Points earned: ${points} of ${WEEKLY_POINT_TARGET}`,
-      `  Completion: ${percent}%`,
+      `  Full weekly allowance: ${money(member.weeklyAllowanceCents)}`,
+      `  Tasks completed: ${member.creditedTasks} of ${report.taskTarget}`,
+      `  Points earned: ${member.points} of ${report.pointTarget}`,
+      `  Completion: ${member.percent}%`,
       ''
     );
   }
@@ -168,19 +202,6 @@ export function generateWeeklyReport(
   writeFileSync(tempPath, `${lines.join('\n')}\n`, 'utf8');
   renameSync(tempPath, filePath);
   return { filename, filePath, created: true, monday, friday };
-}
-
-export function generateUserReport(referenceDate = new Date()) {
-  mkdirSync(REPORTS_DIR, { recursive: true });
-  const date = localIsoDate(referenceDate);
-  const base = `user-report_${date}`;
-  let filename = `${base}.txt`;
-  let sequence = 1;
-  while (existsSync(path.join(REPORTS_DIR, filename))) {
-    filename = `${base}_${String(sequence).padStart(3, '0')}.txt`;
-    sequence += 1;
-  }
-  return generateWeeklyReport(referenceDate, { outputFilename: filename });
 }
 
 function scheduleNextSunday() {
