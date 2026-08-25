@@ -82,15 +82,15 @@ export default function TasksPage() {
   // Read per render rather than once at module load, so a display left open past
   // midnight at least labels the day correctly as soon as anything re-renders.
   const today = localDate();
-  // The day being shown. Only /tasks/:memberId can move off today — the grid has
-  // no date controls, so it stays on `today`.
+  // The day being shown. Both the focused checklist and Overview can browse
+  // dates, keeping family-wide progress and routine rows in step.
   // Home passes its currently displayed day in the URL so opening a family
   // member keeps the date visually continuous. Bookmarks and direct visits
   // without a valid date continue to open on today.
   const requestedDate = searchParams.get('date');
   const initialDate = /^\d{4}-\d{2}-\d{2}$/.test(requestedDate || '') ? requestedDate : today;
   const [date, setDate] = useState(initialDate);
-  const shownDate = focusId ? date : today;
+  const shownDate = date;
 
   const { data: members = [] } = useMembers();
   const { data: routines = [] } = useRoutines(shownDate);
@@ -645,16 +645,7 @@ export default function TasksPage() {
               {editingRoutines ? 'Done editing' : 'Edit routines'}
             </button>
           </div>
-          <span
-            className="checklist-avatar"
-            style={{ background: `${focusMember.color}59`, borderColor: focusMember.color }}
-          >
-            <Avatar member={focusMember} size={150} />
-          </span>
-          <h1 className="checklist-title">{focusMember.name}'s Daily Checklist</h1>
-
-          {/* Which day this list is for, and a step either side of it. Arrows are
-              46px like the checkboxes — the same finger is doing the tapping. */}
+          {/* Which day this list is for, and a step either side of it. */}
           <div className="checklist-daynav-wrap">
             <div className="checklist-daynav">
               <button
@@ -686,15 +677,57 @@ export default function TasksPage() {
                 <span className="daynav-tag">Today</span>
               ) : (
                 <button className="btn ghost small daynav-jump" onClick={() => setDate(today)}>
-                  Jump to today
+                  <span className="daynav-tag">Jump to today</span>
                 </button>
               )}
             </div>
           </div>
+          <span
+            className="checklist-avatar"
+            style={{ background: `${focusMember.color}59`, borderColor: focusMember.color }}
+          >
+            <Avatar member={focusMember} size={150} />
+          </span>
+          <h1 className="checklist-title">{focusMember.name}'s Daily Checklist</h1>
         </div>
       ) : (
-        <div className="overview-head">
-          <h1>Daily Checklist · Today</h1>
+        <div className="overview-daynav-head">
+          <div className="checklist-daynav-wrap">
+            <div className="checklist-daynav">
+              <button
+                className="daynav-btn previous"
+                onClick={() => setDate(shiftDate(date, -1))}
+                aria-label="Previous day"
+                title="Previous day"
+              >
+                <svg className="daynav-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
+              <span className="daynav-date">
+                {format(parseLocalDate(date), 'EEEE, MMMM d')}
+              </span>
+              <button
+                className="daynav-btn next"
+                onClick={() => setDate(shiftDate(date, 1))}
+                aria-label="Next day"
+                title="Next day"
+              >
+                <svg className="daynav-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
+            </div>
+            <div className="daynav-tag-slot">
+              {date === today ? (
+                <span className="daynav-tag">Today</span>
+              ) : (
+                <button className="btn ghost small daynav-jump" onClick={() => setDate(today)}>
+                  <span className="daynav-tag">Jump to today</span>
+                </button>
+              )}
+            </div>
+          </div>
           <button
             className={`btn ghost small edit-routines-button${editingRoutines ? ' active' : ''}`}
             onClick={() => setEditingRoutines((editing) => !editing)}

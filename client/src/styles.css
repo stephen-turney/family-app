@@ -187,10 +187,9 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 .progress { height: 10px; border-radius: 999px; background: var(--panel-2); overflow: hidden; }
 .progress > span { display: block; height: 100%; background: var(--good); transition: width .3s; }
 
-/* Home page: one large photo tile per family member. Reserve the same vertical
-   space the single-member checklist uses for its photo and title, so the day
-   navigator does not jump when moving between Home and a child's routine. */
-.home-head { text-align: center; margin-bottom: 24px; padding-top: 230px; }
+/* Home page: one large photo tile per family member. Its navigator starts at
+   the same top position as the routine-page navigator. */
+.home-head { text-align: center; margin-bottom: 24px; }
 .home-head h1 { margin: 0; }
 .home-head p { margin: 0; }
 /* Two big tiles per row (2×2 for a family of four). The narrow max-width is what
@@ -218,8 +217,10 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 
 /* Overview has narrower cards than a single-member checklist, so its editing
    controls use the same compact vertical rail as the phone layout. */
-.overview-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
-.overview-head h1 { margin: 0; }
+.overview-daynav-head {
+  position: relative; display: flex; justify-content: center; margin-bottom: 16px;
+}
+.overview-daynav-head .edit-routines-button { position: absolute; right: 0; top: 0; }
 .member-columns:not(.single) .checklist { --row-h: 122px; }
 .member-columns:not(.single) .task-edit-actions {
   flex-direction: column; align-items: stretch;
@@ -246,9 +247,9 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
   position: relative; display: flex; flex-direction: column; align-items: center;
   gap: 12px; margin-bottom: 22px;
 }
-.checklist-back { position: absolute; left: 0; top: 0; }
+.checklist-back { position: absolute; left: 0; top: 91px; }
 .checklist-head-actions {
-  position: absolute; right: 0; top: 0;
+  position: absolute; right: 0; top: 91px;
   display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
 }
 .checklist-head-actions .edit-routines-button { margin-left: 0; }
@@ -308,10 +309,9 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
   font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em;
   color: var(--accent); background: var(--accent-soft); border-radius: 7px; padding: 3px 8px;
 }
-.daynav-jump { white-space: nowrap; }
+.btn.ghost.daynav-jump { white-space: nowrap; }
 @media (max-width: 560px) {
-  /* Mirrors the smaller checklist avatar and title on a phone. */
-  .home-head { padding-top: 180px; }
+  .overview-daynav-head { padding-top: 40px; }
   .checklist-avatar { width: 128px; height: 128px; }
   .checklist-title { font-size: 23px; line-height: 28px; }
   /* At 390px wide this fills the space between the two 46px arrows exactly,

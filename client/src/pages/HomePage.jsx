@@ -79,7 +79,7 @@ export default function HomePage() {
               <span className="daynav-tag">Today</span>
             ) : (
               <button className="btn ghost small daynav-jump" onClick={() => setDate(today)}>
-                Jump to today
+                <span className="daynav-tag">Jump to today</span>
               </button>
             )}
           </div>
