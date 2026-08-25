@@ -11,6 +11,7 @@ import { progressRouter } from './routes/progress.js';
 import { settingsRouter } from './routes/settings.js';
 import { reportsRouter } from './routes/reports.js';
 import { backupsRouter } from './routes/backups.js';
+import { customImagesRouter } from './routes/customImages.js';
 import { startWeeklyReportScheduler } from './weeklyReports.js';
 
 process.env.TZ ||= 'America/Chicago';
@@ -32,6 +33,7 @@ app.use('/api/progress', progressRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/reports', reportsRouter);
 app.use('/api/backups', backupsRouter);
+app.use('/api/custom-images', customImagesRouter);
 
 // Serve the built frontend, so one process on one port is the whole app — that's
 // what makes hosting it on the home network a single `node src/index.js`. In dev

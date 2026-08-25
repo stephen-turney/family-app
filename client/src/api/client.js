@@ -56,6 +56,11 @@ export function useRoutines(date) {
   });
 }
 
+// ---- Custom image library ----
+export function useCustomImages() {
+  return useQuery({ queryKey: ['custom-images'], queryFn: () => api.get('/custom-images') });
+}
+
 // ---- Settings ----
 export function useSettings() {
   return useQuery({ queryKey: ['settings'], queryFn: () => api.get('/settings') });

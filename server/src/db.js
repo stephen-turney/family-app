@@ -85,6 +85,14 @@ db.exec(`
   );
   CREATE UNIQUE INDEX IF NOT EXISTS idx_step_completion
     ON routine_step_completions(step_id, due_date);
+
+  -- Reusable custom pictures. Task rows still retain their selected data URL so
+  -- deleting a library item later never breaks a picture already in use.
+  CREATE TABLE IF NOT EXISTS custom_images (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    data_url   TEXT NOT NULL UNIQUE,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
 `);
 
 // ---------------------------------------------------------------------------
@@ -104,6 +112,17 @@ ensureColumn('members', 'weekly_allowance_cents', 'INTEGER');
 ensureColumn('chores', 'icon', 'TEXT');
 ensureColumn('routine_steps', 'icon', 'TEXT');
 ensureColumn('routine_steps', 'completed_icon', 'TEXT');
+
+// Pictures uploaded before the library existed were saved directly on a step.
+// Preserve those choices and make them selectable for future tasks too.
+db.exec(`
+  INSERT OR IGNORE INTO custom_images (data_url)
+  SELECT icon FROM chores WHERE icon LIKE 'data:image/%'
+  UNION
+  SELECT icon FROM routine_steps WHERE icon LIKE 'data:image/%'
+  UNION
+  SELECT completed_icon FROM routine_steps WHERE completed_icon LIKE 'data:image/%';
+`);
 
 // Configure the two existing children without tying report calculations to
 // member ids. The value remains editable in Settings and is left alone once set.

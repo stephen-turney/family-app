@@ -52,7 +52,7 @@ export default function RoutinePicturesModal({ routine, onClose }) {
       }
     >
       <p className="muted routine-pictures-help">
-        Choose an emoji or upload a custom image for each state.
+        Choose an emoji, select a saved custom image, or upload a new one for each state.
       </p>
       <div className="routine-picture-columns" aria-hidden="true">
         <span>Task</span>

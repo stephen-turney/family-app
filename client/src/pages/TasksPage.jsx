@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -76,6 +76,7 @@ function rowsInDragOrder(rows, routineId, dragDisplayOrder) {
 // linked from the home page tiles).
 export default function TasksPage() {
   const { memberId } = useParams();
+  const [searchParams] = useSearchParams();
   const focusId = memberId ? Number(memberId) : null;
 
   // Read per render rather than once at module load, so a display left open past
@@ -83,7 +84,12 @@ export default function TasksPage() {
   const today = localDate();
   // The day being shown. Only /tasks/:memberId can move off today — the grid has
   // no date controls, so it stays on `today`.
-  const [date, setDate] = useState(today);
+  // Home passes its currently displayed day in the URL so opening a family
+  // member keeps the date visually continuous. Bookmarks and direct visits
+  // without a valid date continue to open on today.
+  const requestedDate = searchParams.get('date');
+  const initialDate = /^\d{4}-\d{2}-\d{2}$/.test(requestedDate || '') ? requestedDate : today;
+  const [date, setDate] = useState(initialDate);
   const shownDate = focusId ? date : today;
 
   const { data: members = [] } = useMembers();
@@ -624,7 +630,7 @@ export default function TasksPage() {
         // One person: their photo large and centred, title underneath. The back
         // link is absolutely placed so it doesn't pull the photo off-centre.
         <div className="checklist-head">
-          <Link className="btn ghost small checklist-back" to="/home">← Family</Link>
+          <Link className="btn ghost small checklist-back" to={`/home?date=${date}`}>← Family</Link>
           <div className="checklist-head-actions">
             <button
               className={`btn ghost small edit-routines-button${editingRoutines ? ' active' : ''}`}
@@ -681,7 +687,15 @@ export default function TasksPage() {
           </div>
         </div>
       ) : (
-        <h1>Daily Checklist · Today</h1>
+        <div className="overview-head">
+          <h1>Daily Checklist · Today</h1>
+          <button
+            className={`btn ghost small edit-routines-button${editingRoutines ? ' active' : ''}`}
+            onClick={() => setEditingRoutines((editing) => !editing)}
+          >
+            {editingRoutines ? 'Done editing' : 'Edit routines'}
+          </button>
+        </div>
       )}
 
       {completionError && (

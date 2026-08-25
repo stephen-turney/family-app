@@ -187,8 +187,10 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 .progress { height: 10px; border-radius: 999px; background: var(--panel-2); overflow: hidden; }
 .progress > span { display: block; height: 100%; background: var(--good); transition: width .3s; }
 
-/* Home page: one large photo tile per family member */
-.home-head { text-align: center; margin-bottom: 24px; }
+/* Home page: one large photo tile per family member. Reserve the same vertical
+   space the single-member checklist uses for its photo and title, so the day
+   navigator does not jump when moving between Home and a child's routine. */
+.home-head { text-align: center; margin-bottom: 24px; padding-top: 230px; }
 .home-head h1 { margin: 0; }
 .home-head p { margin: 0; }
 /* Two big tiles per row (2×2 for a family of four). The narrow max-width is what
@@ -213,6 +215,18 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 }
 .home-name { font-size: 26px; }
 .home-tile .progress { width: 100%; }
+
+/* Overview has narrower cards than a single-member checklist, so its editing
+   controls use the same compact vertical rail as the phone layout. */
+.overview-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.overview-head h1 { margin: 0; }
+.member-columns:not(.single) .checklist { --row-h: 122px; }
+.member-columns:not(.single) .task-edit-actions {
+  flex-direction: column; align-items: stretch;
+  margin-left: 5px; padding: 5px 4px 5px 0;
+}
+.member-columns:not(.single) .task-edit-button { width: 100%; }
+.member-columns:not(.single) .task-edit-button + .task-edit-button { margin-top: 5px; margin-left: 0; }
 
 /* Tasks page. auto-*fit* with a max track width, not auto-fill with 1fr: with only
    two people in the family, auto-fill kept four 325px tracks and left the right half
@@ -242,7 +256,9 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
   width: 170px; height: 170px; border-radius: 50%; border: 4px solid;
   display: flex; align-items: center; justify-content: center; overflow: hidden;
 }
-.checklist-title { margin: 0; font-size: 30px; font-weight: 700; text-align: center; }
+.checklist-title {
+  margin: 0; font-size: 30px; line-height: 36px; font-weight: 700; text-align: center;
+}
 
 /* Which day the list is for, with a step either side of it. The arrows are 46px —
    the same size as the row checkboxes, since it's the same finger on a tablet. */
@@ -287,8 +303,10 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 }
 .daynav-jump { white-space: nowrap; }
 @media (max-width: 560px) {
+  /* Mirrors the smaller checklist avatar and title on a phone. */
+  .home-head { padding-top: 180px; }
   .checklist-avatar { width: 128px; height: 128px; }
-  .checklist-title { font-size: 23px; }
+  .checklist-title { font-size: 23px; line-height: 28px; }
   /* At 390px wide this fills the space between the two 46px arrows exactly,
      while still holding "Wednesday, September 30" on one line. */
   .daynav-date {
@@ -628,6 +646,7 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
   width: 300px; max-width: 78vw; background: var(--panel);
   box-shadow: 0 10px 24px rgba(16, 24, 40, .18);
 }
+.icon-picker.compact.opens-upward .icon-panel { top: auto; bottom: calc(100% + 6px); }
 .icon-panel {
   margin-top: 8px; padding: 10px; background: var(--bg);
   border: 1px solid var(--border); border-radius: 11px;
@@ -643,6 +662,22 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 }
 .icon-choice:hover { background: var(--accent-soft); border-color: var(--accent); }
 .icon-choice.selected { background: var(--accent-soft); border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.custom-image-choice { height: 46px; padding: 0; overflow: hidden; }
+.custom-image-choice img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.custom-image-library {
+  margin: 2px 0 14px; padding: 10px;
+  background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 32%, var(--border));
+  border-radius: 10px;
+}
+.custom-image-library-heading { display: flex; align-items: center; gap: 8px; color: var(--text); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+.custom-image-count { padding: 2px 6px; border-radius: 99px; background: var(--panel); color: var(--accent); font-size: 10px; letter-spacing: 0; }
+.custom-image-library p { margin: 3px 0 8px; color: var(--muted); font-size: 11px; }
+.custom-image-library .icon-grid { grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); }
+.stock-images-heading {
+  display: flex; align-items: center; gap: 9px; margin: 2px 0 7px;
+  color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em;
+}
+.stock-images-heading::after { content: ''; height: 1px; flex: 1; background: var(--border); }
 
 /* The phone layout is a scrollable sheet instead of a desktop dialog squeezed
    into a narrow viewport. Each state gets a full-width picker, and its choices
@@ -698,7 +733,7 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
   }
   .picture-edit-modal .routine-picture-row .icon-panel { left: auto; right: 0; }
   .picture-edit-modal .new-step-pictures .icon-panel { left: 0; right: auto; }
-  .picture-edit-modal .expanded-panel .icon-scroll { max-height: none; overflow: visible; }
+  .picture-edit-modal .expanded-panel .icon-scroll { overflow-y: auto; }
   .picture-edit-modal .expanded-panel .icon-grid {
     grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
     gap: 4px; grid-gap: 4px;

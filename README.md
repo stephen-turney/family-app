@@ -103,6 +103,31 @@ On the iPad, open `http://<your-mac-ip>:3001` (not port 5173). Re-run `npm run b
 changes. If the launchd hosting agent is installed, it already serves this built version on port
 3001; rebuilding `client/dist` is enough to publish a client-only change.
 
+### Windows scheduled-task hosting
+
+On the Windows home server, Family Hub runs as the scheduled task **`Family Hub`**. It starts
+`C:\Program Files\nodejs\node.exe src\index.js` with its working directory set to
+`C:\Family Hub\server`, and serves the built app and API on port 3001.
+
+After changing anything under `server/`, restart the task so Node loads the new code. After a
+client change, build first, then restart the task if the update also changes the server:
+
+```powershell
+cd 'C:\Family Hub\client'
+npm run build
+```
+
+In **Task Scheduler**, select **Task Scheduler Library → Family Hub**, right-click the task, choose
+**End**, then right-click it again and choose **Run**. This only restarts the web server; it does not
+delete or reset `C:\Family Hub\server\data.sqlite`.
+
+If your Windows account has permission to control the task, the equivalent PowerShell commands are:
+
+```powershell
+schtasks /end /tn "\Family Hub"
+schtasks /run /tn "\Family Hub"
+```
+
 ### Restarting the Raspberry Pi production service
 
 The production server on the Raspberry Pi runs as the systemd service `familyhub`. After pulling

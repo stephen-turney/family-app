@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import {
   ICON_GROUPS,
   iconForTitle,
@@ -7,6 +7,8 @@ import {
   isUploadedImage,
 } from '../lib/taskIcons.js';
 import { fileToTaskImageDataUrl } from '../lib/image.js';
+import { api, useCustomImages } from '../api/client.js';
+import { useQueryClient } from '@tanstack/react-query';
 
 // Picture chooser for a chore or routine step.
 //
@@ -27,6 +29,38 @@ export default function IconPicker({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [uploadError, setUploadError] = useState('');
+  const [panelLayout, setPanelLayout] = useState({ opensUpward: false, scrollHeight: null });
+  const { data: customImages = [] } = useCustomImages();
+  const queryClient = useQueryClient();
+  const pickerRef = useRef(null);
+  const panelRef = useRef(null);
+  const scrollRef = useRef(null);
+
+  // Compact pickers are used inside the full-screen picture editor. Measure
+  // their available room after opening so the panel stays inside the browser
+  // window, even as the custom-image library grows.
+  useLayoutEffect(() => {
+    if (!open || !compact || window.innerWidth < 700) {
+      setPanelLayout({ opensUpward: false, scrollHeight: null });
+      return;
+    }
+
+    const anchor = pickerRef.current?.getBoundingClientRect();
+    const panel = panelRef.current;
+    const scroll = scrollRef.current;
+    if (!anchor || !panel || !scroll) return;
+
+    const below = window.innerHeight - anchor.bottom - 16;
+    const above = anchor.top - 16;
+    const opensUpward = panel.offsetHeight > below && above > below;
+    const available = opensUpward ? above : below;
+    const panelChrome = panel.offsetHeight - scroll.offsetHeight;
+
+    setPanelLayout({
+      opensUpward,
+      scrollHeight: Math.max(80, available - panelChrome),
+    });
+  }, [open, compact, query, customImages.length]);
 
   const auto = matchTitle ? iconForTitle(title) : null;
   const shown = value || auto || fallback;
@@ -44,7 +78,10 @@ export default function IconPicker({
     event.target.value = '';
     if (!file) return;
     try {
-      choose(await fileToTaskImageDataUrl(file));
+      const dataUrl = await fileToTaskImageDataUrl(file);
+      const image = await api.post('/custom-images', { data_url: dataUrl });
+      queryClient.invalidateQueries({ queryKey: ['custom-images'] });
+      choose(image.data_url);
     } catch (err) {
       setUploadError(err.message || 'Could not read that image file');
     }
@@ -70,8 +107,35 @@ export default function IconPicker({
     </div>
   );
 
+  const customImageGrid = customImages.length > 0 && (
+    <section className="custom-image-library" aria-label="Your custom image library">
+      <div className="custom-image-library-heading">
+        <span>Custom image library</span>
+        <span className="custom-image-count">{customImages.length} saved</span>
+      </div>
+      <p>Saved photos and pictures for your family</p>
+      <div className="icon-grid custom-image-grid">
+        {customImages.map((image) => (
+          <button
+            key={image.id}
+            type="button"
+            className={`icon-choice custom-image-choice${value === image.data_url ? ' selected' : ''}`}
+            title="Choose custom image"
+            aria-label="Choose custom image"
+            onClick={() => choose(image.data_url)}
+          >
+            <img src={image.data_url} alt="" />
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+
   return (
-    <div className={`icon-picker${compact ? ' compact' : ''}${expandedPanel ? ' expanded-panel' : ''}`}>
+    <div
+      ref={pickerRef}
+      className={`icon-picker${compact ? ' compact' : ''}${expandedPanel ? ' expanded-panel' : ''}${panelLayout.opensUpward ? ' opens-upward' : ''}`}
+    >
       <button
         type="button"
         className="icon-current"
@@ -90,7 +154,7 @@ export default function IconPicker({
       </button>
 
       {open && (
-        <div className="icon-panel">
+        <div ref={panelRef} className="icon-panel">
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -109,7 +173,9 @@ export default function IconPicker({
             </button>
           )}
           {uploadError && <p className="icon-upload-error">{uploadError}</p>}
-          <div className="icon-scroll">
+          <div ref={scrollRef} className="icon-scroll" style={panelLayout.scrollHeight ? { maxHeight: panelLayout.scrollHeight } : undefined}>
+            {!query.trim() && customImageGrid}
+            {!query.trim() && <div className="stock-images-heading">Built-in pictures</div>}
             {results ? (
               results.length ? (
                 grid(results)

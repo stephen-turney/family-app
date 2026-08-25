@@ -2,7 +2,8 @@
 
 ---------AUGUST 21, 2026------------------------------------------------------------
 
-[ ]   1. Allow task list items to be moved around (dragged and dropped).
+-->completed
+[x]   1. Allow task list items to be moved around (dragged and dropped).
          Right now onlyway to change the order is to delete the routine
          and start over again.
 

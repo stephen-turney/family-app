@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useMembers, useProgress, localDate } from '../api/client.js';
 import Avatar from '../components/Avatar.jsx';
@@ -22,7 +22,10 @@ export default function HomePage() {
   // the date shows (the topbar's copy was removed), so a stale one would be the
   // page claiming to be a day it isn't — and the tile counts have to agree with it.
   const today = localDate();
-  const [date, setDate] = useState(today);
+  const [searchParams] = useSearchParams();
+  const requestedDate = searchParams.get('date');
+  const initialDate = /^\d{4}-\d{2}-\d{2}$/.test(requestedDate || '') ? requestedDate : today;
+  const [date, setDate] = useState(initialDate);
   const { data: members = [], isLoading } = useMembers();
   const { data: progress } = useProgress(date, date);
 
@@ -89,7 +92,7 @@ export default function HomePage() {
           const hasTasks = stat && stat.expected > 0;
           const points = Math.min(stat?.points || 0, 200);
           return (
-            <Link key={m.id} to={`/tasks/${m.id}`} className="home-tile">
+            <Link key={m.id} to={`/tasks/${m.id}?date=${date}`} className="home-tile">
               <span
                 className="home-avatar"
                 style={{ background: `${m.color}59`, borderColor: m.color }}
