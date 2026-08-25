@@ -221,6 +221,11 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
   position: relative; display: flex; justify-content: center; margin-bottom: 16px;
 }
 .overview-daynav-head .edit-routines-button { position: absolute; right: 0; top: 0; }
+.overview-member-link {
+  display: inline-flex; align-items: center; gap: 8px; color: var(--text); text-decoration: none;
+  font-size: 17px;
+}
+.overview-member-link:hover { color: var(--accent); }
 .member-columns:not(.single) .checklist { --row-h: 122px; }
 .member-columns:not(.single) .task-edit-actions {
   flex-direction: column; align-items: stretch;
@@ -247,9 +252,9 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
   position: relative; display: flex; flex-direction: column; align-items: center;
   gap: 12px; margin-bottom: 22px;
 }
-.checklist-back { position: absolute; left: 0; top: 91px; }
+.checklist-back { position: absolute; left: 0; top: 0; }
 .checklist-head-actions {
-  position: absolute; right: 0; top: 91px;
+  position: absolute; right: 0; top: 0;
   display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
 }
 .checklist-head-actions .edit-routines-button { margin-left: 0; }
@@ -474,7 +479,12 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
   display: flex; align-items: center;
   margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--border);
 }
-.edit-routines-button { margin-left: auto; }
+.edit-routines-button {
+  margin-left: auto;
+  /* Links inherit the app font; native buttons do not consistently do so. Match
+     the neighbouring ← Family link exactly. */
+  font-family: inherit; color: var(--text); font-size: 13px; font-weight: 600;
+}
 .edit-routines-button.active { background: var(--accent-soft); border-color: var(--accent); }
 /* The entire row is a generous tablet touch target. Its height is driven by the
    75px task picture plus 6px of padding above and below. */

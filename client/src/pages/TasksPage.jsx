@@ -774,8 +774,10 @@ export default function TasksPage() {
               {/* In single-member view the page header already names them. */}
               {!focusMember && (
                 <div className="row">
-                  <Avatar member={m} size={28} />
-                  <strong style={{ fontSize: 17 }}>{m.name}</strong>
+                  <Link className="overview-member-link" to={`/tasks/${m.id}?date=${shownDate}`}>
+                    <Avatar member={m} size={28} />
+                    <strong>{m.name}</strong>
+                  </Link>
                   <div className="spacer" />
                 </div>
               )}
