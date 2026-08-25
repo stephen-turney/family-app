@@ -15,7 +15,7 @@ membersRouter.post('/', (req, res) => {
       'INSERT INTO members (name, color, emoji, avatar, weekly_allowance_cents) VALUES (?, ?, ?, ?, ?)'
     )
     .run(
-      name.trim(), color || '#4f7cff', emoji || '🙂', avatar || null,
+      name.trim(), color || '#4f7cff', emoji ?? '🙂', avatar || null,
       weekly_allowance_cents == null ? null : Math.max(0, Math.round(weekly_allowance_cents))
     );
   res.status(201).json(db.prepare('SELECT * FROM members WHERE id = ?').get(info.lastInsertRowid));

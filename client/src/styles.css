@@ -343,7 +343,66 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
    containment it creates would trap a position:fixed modal backdrop. */
 .checklist { container-type: inline-size; }
 
-.checklist-block { display: flex; flex-direction: column; margin-top: 16px; }
+.checklist-block { position: relative; display: flex; flex-direction: column; margin-top: 16px; }
+.block-celebration {
+  position: absolute; z-index: 3; top: 22px; left: 50%; width: 190px; height: 190px;
+  transform: translateX(-50%); pointer-events: none;
+}
+.celebration-check {
+  position: absolute; inset: 25px; width: 140px; height: 140px; overflow: visible;
+  filter: drop-shadow(0 5px 8px rgba(43, 153, 104, .32));
+  animation: celebration-check-pop .52s ease-out both, celebration-check-bounce .6s .76s ease-in-out 1;
+}
+.block-celebration.is-complete .celebration-check { animation: none; }
+.block-celebration.is-complete .celebration-ring,
+.block-celebration.is-complete .celebration-tick { stroke-dashoffset: 0; animation: none; }
+.celebration-ring, .celebration-tick { fill: none; stroke: var(--good); stroke-linecap: round; stroke-linejoin: round; }
+.celebration-ring { stroke-width: 6; stroke-dasharray: 264; stroke-dashoffset: 264; animation: celebration-ring .48s ease-out forwards; }
+.celebration-tick { stroke-width: 9; stroke-dasharray: 70; stroke-dashoffset: 70; animation: celebration-tick .42s .36s ease-out forwards; }
+.celebration-spark, .celebration-confetti { position: absolute; opacity: 0; animation: celebration-burst .72s .42s cubic-bezier(.15,.8,.3,1) forwards; }
+.celebration-spark { color: #f3b934; font-size: 27px; line-height: 1; text-shadow: 0 1px 1px rgba(16, 24, 40, .18); }
+.spark-one { left: 1px; top: 13px; --burst-x: -22px; --burst-y: -25px; }
+.spark-two { right: 0; top: 10px; --burst-x: 24px; --burst-y: -23px; }
+.spark-three { left: 44px; bottom: -2px; --burst-x: 2px; --burst-y: 24px; }
+.spark-four { left: 8px; bottom: 9px; --burst-x: -25px; --burst-y: 12px; }
+.spark-five { right: 8px; bottom: 8px; --burst-x: 25px; --burst-y: 12px; }
+.celebration-confetti { width: 8px; height: 16px; border-radius: 3px; background: var(--accent); }
+.confetti-one { left: 16px; bottom: 19px; --burst-x: -28px; --burst-y: 20px; background: #ef7c98; }
+.confetti-two { right: 12px; bottom: 22px; --burst-x: 29px; --burst-y: 17px; background: #7cba8a; }
+.confetti-three { left: 48px; top: 2px; --burst-x: 3px; --burst-y: -30px; background: #8c78c7; }
+.confetti-four { left: 30px; top: 9px; --burst-x: -15px; --burst-y: -27px; background: #f3b934; }
+.confetti-five { right: 28px; top: 14px; --burst-x: 17px; --burst-y: -24px; background: #58a7d7; }
+.confetti-six { left: 49px; bottom: 12px; --burst-x: 5px; --burst-y: 29px; background: #ee8c57; }
+.celebration-particle-cloud { position: absolute; inset: 0; }
+.celebration-particle {
+  position: absolute; left: 50%; top: 50%; width: 10px; height: 17px; border-radius: 3px;
+  background: var(--particle-color); opacity: 0;
+  animation: celebration-party-burst 1.7s var(--particle-delay) cubic-bezier(.15,.75,.28,1) forwards;
+}
+.celebration-particle:nth-child(3n) { width: 15px; height: 8px; border-radius: 99px; }
+.celebration-particle:nth-child(4n) { width: 8px; height: 8px; border-radius: 50%; }
+@keyframes celebration-ring { to { stroke-dashoffset: 0; } }
+@keyframes celebration-tick { to { stroke-dashoffset: 0; } }
+@keyframes celebration-check-pop {
+  0% { transform: scale(.3) rotate(-12deg); opacity: 0; }
+  75% { transform: scale(1.1) rotate(3deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+@keyframes celebration-check-bounce {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-5px) rotate(3deg); }
+}
+@keyframes celebration-burst {
+  0% { opacity: 0; transform: translate(0, 0) rotate(0deg) scale(.3); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--burst-x), var(--burst-y)) rotate(150deg) scale(1); }
+}
+@keyframes celebration-party-burst {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(0deg) scale(.2); }
+  12% { opacity: 1; }
+  62% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--burst-x)), calc(-50% + var(--burst-y))) rotate(520deg) scale(.85); }
+}
 /* With the panel a fixed square rather than a full-height spine, nothing else
    marks where one block ends — without this the afternoon rows read as a
    continuation of the morning list. */
@@ -375,6 +434,12 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
    Keep it above ~300 so the narrow member columns on /tasks still stack. */
 @container (min-width: 600px) {
   .checklist-block { flex-direction: row; align-items: flex-start; gap: 14px; }
+  /* In the wide paper-sheet layout, the graphic reads as three zones: the
+     celebration lives above the sun/moon in the upper zone. */
+  .block-celebration {
+    left: calc(var(--block-panel-w) / 2); top: calc(var(--routine-head-h) + 8px);
+    transform: translateX(-50%);
+  }
   .block-panel {
     flex-direction: column; justify-content: center; gap: 18px;
     width: var(--block-panel-w);

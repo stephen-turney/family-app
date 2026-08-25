@@ -47,6 +47,16 @@ const BLOCKS = [
   { key: 'evening', label: 'Evening', article: 'an', icon: '🌙', tint: '#9cb0c9' },
 ];
 
+const CELEBRATION_PARTICLES = [
+  [-105, -82, '#f3b934', 0], [-72, -112, '#ef7c98', .08], [-34, -125, '#58a7d7', .16],
+  [8, -122, '#8c78c7', .04], [47, -108, '#7cba8a', .12], [86, -76, '#ee8c57', .2],
+  [116, -35, '#f3b934', .07], [108, 18, '#ef7c98', .18], [77, 59, '#58a7d7', .1],
+  [39, 86, '#8c78c7', .24], [-6, 93, '#7cba8a', .14], [-50, 83, '#ee8c57', .03],
+  [-91, 51, '#f3b934', .2], [-117, 8, '#ef7c98', .11], [-122, -34, '#58a7d7', .25],
+  [-67, -49, '#8c78c7', .29], [65, -48, '#7cba8a', .31], [90, 42, '#ee8c57', .27],
+  [-32, 56, '#f3b934', .34], [29, 49, '#ef7c98', .37],
+];
+
 // Long enough for the surrounding rows to visibly glide into their new slots,
 // while keeping the list responsive as the pointer changes direction.
 const REORDER_GLIDE_MS = 800;
@@ -103,6 +113,8 @@ export default function TasksPage() {
   const pendingSteps = useRef(new Set());
   const [, renderPendingSteps] = useState(0);
   const [completionError, setCompletionError] = useState('');
+  const [celebratingBlocks, setCelebratingBlocks] = useState(() => new Set());
+  const celebrationTimers = useRef(new Map());
 
   const setStepPending = (stepId, pending) => {
     if (pending) pendingSteps.current.add(stepId);
@@ -198,12 +210,34 @@ export default function TasksPage() {
     },
   });
 
-  const completeStep = (step, memberId) => {
+  const completeStep = (step, memberId, blockKey) => {
     // A native disabled button handles ordinary double taps after the render;
     // this ref also closes the tiny same-frame gap before disabled reaches DOM.
     if (pendingSteps.current.has(step.id)) return;
+    const done = !step.done;
+    if (done) {
+      const blockSteps = routines
+        .filter((routine) => routine.member_id === memberId && routine.time_of_day === blockKey)
+        .flatMap((routine) => routine.steps);
+      if (blockSteps.length && blockSteps.every((candidate) => candidate.id === step.id || candidate.done)) {
+        const celebrationKey = `${shownDate}:${memberId}:${blockKey}`;
+        clearTimeout(celebrationTimers.current.get(celebrationKey));
+        setCelebratingBlocks((current) => new Set(current).add(celebrationKey));
+        celebrationTimers.current.set(
+          celebrationKey,
+          setTimeout(() => {
+            setCelebratingBlocks((current) => {
+              const next = new Set(current);
+              next.delete(celebrationKey);
+              return next;
+            });
+            celebrationTimers.current.delete(celebrationKey);
+          }, 2300)
+        );
+      }
+    }
     setStepPending(step.id, true);
-    setCompletion.mutate({ stepId: step.id, memberId, date: shownDate, done: !step.done });
+    setCompletion.mutate({ stepId: step.id, memberId, date: shownDate, done });
   };
 
   // {memberId, timeOfDay?} — timeOfDay preselects the block that was tapped.
@@ -590,6 +624,7 @@ export default function TasksPage() {
     mouseDragCleanup.current?.();
     settlingDragCleanup.current?.(false);
     removeDragPreview(dragState.current);
+    celebrationTimers.current.forEach((timer) => clearTimeout(timer));
   }, []);
 
   const removeStep = (step) => {
@@ -813,6 +848,9 @@ export default function TasksPage() {
                   0
                 );
                 const blockPercent = blockRows ? Math.round((blockDone / blockRows) * 100) : 0;
+                const blockComplete = blockRows > 0 && blockDone === blockRows;
+                const celebrationKey = `${shownDate}:${m.id}:${block.key}`;
+                const isCelebrating = celebratingBlocks.has(celebrationKey);
                 return (
                   <section
                     key={block.key}
@@ -827,6 +865,39 @@ export default function TasksPage() {
                       '--block-panel-h': `${Math.max(blockRows * 87, 260)}px`,
                     }}
                   >
+                    {(isCelebrating || blockComplete) && (
+                      <div className={`block-celebration${isCelebrating ? '' : ' is-complete'}`} aria-label={`${block.label} complete!`}>
+                        {isCelebrating && <>
+                          <span className="celebration-spark spark-one">✦</span>
+                          <span className="celebration-spark spark-two">✦</span>
+                          <span className="celebration-spark spark-three">✦</span>
+                          <span className="celebration-spark spark-four">✦</span>
+                          <span className="celebration-spark spark-five">✦</span>
+                          <span className="celebration-confetti confetti-one" />
+                          <span className="celebration-confetti confetti-two" />
+                          <span className="celebration-confetti confetti-three" />
+                          <span className="celebration-confetti confetti-four" />
+                          <span className="celebration-confetti confetti-five" />
+                          <span className="celebration-confetti confetti-six" />
+                          <div className="celebration-particle-cloud" aria-hidden="true">
+                            {CELEBRATION_PARTICLES.map(([x, y, color, delay], index) => (
+                              <span
+                                key={index}
+                                className="celebration-particle"
+                                style={{
+                                  '--burst-x': `${x}px`, '--burst-y': `${y}px`,
+                                  '--particle-color': color, '--particle-delay': `${delay}s`,
+                                }}
+                              />
+                            ))}
+                          </div>
+                        </>}
+                        <svg className="celebration-check" viewBox="0 0 100 100" aria-hidden="true">
+                          <circle className="celebration-ring" cx="50" cy="50" r="42" />
+                          <path className="celebration-tick" d="M27 51 L43 67 L74 34" />
+                        </svg>
+                      </div>
+                    )}
                     <div className="block-panel" style={{ background: block.tint }}>
                       <span className="block-icon" aria-hidden="true">{block.icon}</span>
                       <span className="block-label">{block.label}</span>
@@ -875,7 +946,7 @@ export default function TasksPage() {
                                     role: 'checkbox',
                                     'aria-checked': s.done,
                                     disabled: pendingSteps.current.has(s.id),
-                                    onClick: () => completeStep(s, m.id),
+                                    onClick: () => completeStep(s, m.id, block.key),
                                   };
                               return (
                                 <div
