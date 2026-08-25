@@ -259,6 +259,13 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 .checklist-title {
   margin: 0; font-size: 30px; line-height: 36px; font-weight: 700; text-align: center;
 }
+.checklist-progress-summary { max-width: 800px; margin: 0 auto 18px; padding: 15px 18px; }
+.checklist-progress-heading {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px;
+  color: var(--muted); font-size: 14px;
+}
+.checklist-progress-heading span { font-weight: 800; color: var(--text); }
+.checklist-progress-heading strong { font-size: 12px; }
 
 /* Which day the list is for, with a step either side of it. The arrows are 46px —
    the same size as the row checkboxes, since it's the same finger on a tablet. */
@@ -351,6 +358,9 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
   border: 1px solid var(--border); border-top: none;
   border-radius: 0 0 12px 12px; padding: 2px 12px 6px;
 }
+.block-progress { margin: 0 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.block-progress .routine-head { margin-bottom: 5px; border-bottom: none; }
+.block-progress .progress { height: 12px; }
 /* Wide card: the paper-sheet layout, panel to the left of the rows. As tall as
    that block's own rows (--block-rows comes in inline from TasksPage), so blocks
    of different lengths each stay aligned; the width is set on its own, so

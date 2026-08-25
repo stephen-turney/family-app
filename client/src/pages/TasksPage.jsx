@@ -623,6 +623,12 @@ export default function TasksPage() {
     );
   }
   const shown = focusMember ? [focusMember] : members;
+  const focusRows = focusMember
+    ? routines.filter((routine) => routine.member_id === focusMember.id).flatMap((routine) => routine.steps)
+    : [];
+  const focusDone = focusRows.filter((step) => step.done).length;
+  const focusPoints = Math.min(statFor(focusMember?.id)?.points ?? focusDone * 10, 200);
+  const focusPercent = focusRows.length ? Math.round((focusDone / focusRows.length) * 100) : 0;
 
   return (
     <div>
@@ -702,6 +708,18 @@ export default function TasksPage() {
         <p className="completion-error" role="alert">{completionError}</p>
       )}
 
+      {focusMember && (
+        <section className="card checklist-progress-summary" aria-label="Daily progress">
+          <div className="checklist-progress-heading">
+            <span>{shownDate === today ? "Today's Progress" : `${format(parseLocalDate(shownDate), 'EEEE')} Progress`}</span>
+            <strong>{focusPoints}/200 points</strong>
+          </div>
+          <div className="progress" aria-label={`${focusPercent}% complete`}>
+            <span style={{ width: `${focusPercent}%`, background: focusMember.color }} />
+          </div>
+        </section>
+      )}
+
       <div className={`member-columns${focusMember ? ' single' : ''}`}>
         {shown.map((m) => {
           const stat = statFor(m.id);
@@ -729,7 +747,7 @@ export default function TasksPage() {
                 </div>
               )}
 
-              {rows.length > 0 && (
+              {!focusMember && rows.length > 0 && (
                 <div style={{ margin: '12px 0' }}>
                   <div className="row" style={{ justifyContent: 'space-between', marginBottom: 6 }}>
                     {/* "Today's" would be a lie on any other day. */}
@@ -755,6 +773,11 @@ export default function TasksPage() {
                 // fixed --block-rows. A block with two routines pays an extra
                 // heading, which the panel doesn't try to cover.
                 const blockRows = groups.reduce((n, g) => n + g.rows.length, 0);
+                const blockDone = groups.reduce(
+                  (n, group) => n + group.rows.filter((step) => step.done).length,
+                  0
+                );
+                const blockPercent = blockRows ? Math.round((blockDone / blockRows) * 100) : 0;
                 return (
                   <section
                     key={block.key}
@@ -775,6 +798,19 @@ export default function TasksPage() {
                     </div>
 
                     <div className="block-body">
+                      <div className="block-progress">
+                        <div className="routine-head">
+                          <span className="routine-name">{groups[0]?.title || block.label}</span>
+                          <span className="routine-head-actions">
+                            <span className="routine-count">
+                              {blockRows ? `${blockDone}/${blockRows}` : 'No tasks yet'}
+                            </span>
+                          </span>
+                        </div>
+                        <div className="progress" aria-label={`${block.label}: ${blockPercent}% complete`}>
+                          <span style={{ width: `${blockPercent}%`, background: block.tint }} />
+                        </div>
+                      </div>
                       {groups.length === 0 ? (
                         // An empty block doubles as its own "add" button rather
                         // than sitting there as a dead line of text.
@@ -785,9 +821,9 @@ export default function TasksPage() {
                           + Add {block.article} {block.label.toLowerCase()} routine
                         </button>
                       ) : (
-                        groups.map((g) => (
+                        groups.map((g, index) => (
                           <div key={g.key} className="routine-group">
-                            {g.title && (
+                            {g.title && index > 0 && (
                               <div className="routine-head">
                                 <span className="routine-name">{g.title}</span>
                                 <span className="routine-head-actions">

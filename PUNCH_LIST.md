@@ -15,7 +15,7 @@
          [ ] put a small list of items they can do to make up for any misses earlier
              in the week
 
-[ ]   3. Save custom photos in the database and add them to the list of available images
+[x]   3. Save custom photos in the database and add them to the list of available images
 
 [ ]   4. Add some little animations with +10 points! bubbles that pop up
          and other cutesy things like that to get the dopamine going
