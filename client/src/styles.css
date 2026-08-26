@@ -317,6 +317,11 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 .btn.ghost.daynav-jump { white-space: nowrap; }
 @media (max-width: 560px) {
   .overview-daynav-head { padding-top: 40px; }
+  /* The date navigator fills the entire header width on a phone, so the Family
+     and editing controls need their own row instead of sitting over its arrows. */
+  .checklist-head .checklist-back,
+  .checklist-head .checklist-head-actions { top: 85px; }
+  .checklist-head .checklist-daynav-wrap { margin-bottom: 36px; }
   .checklist-avatar { width: 128px; height: 128px; }
   .checklist-title { font-size: 23px; line-height: 28px; }
   /* At 390px wide this fills the space between the two 46px arrows exactly,
@@ -345,8 +350,12 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 
 .checklist-block { position: relative; display: flex; flex-direction: column; margin-top: 16px; }
 .block-celebration {
-  position: absolute; z-index: 3; top: 22px; left: 50%; width: 190px; height: 190px;
-  transform: translateX(-50%); pointer-events: none;
+  position: absolute; z-index: 3; top: 1px; right: 7px; width: 42px; height: 42px;
+  overflow: hidden; border-radius: 9px; pointer-events: none;
+}
+.celebration-stage {
+  position: absolute; top: 0; right: 0; width: 190px; height: 190px;
+  transform: scale(.22); transform-origin: top right;
 }
 .celebration-check {
   position: absolute; inset: 25px; width: 140px; height: 140px; overflow: visible;
@@ -438,7 +447,11 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
      celebration lives above the sun/moon in the upper zone. */
   .block-celebration {
     left: calc(var(--block-panel-w) / 2); top: calc(var(--routine-head-h) + 8px);
+    right: auto; width: 190px; height: 190px; overflow: visible;
     transform: translateX(-50%);
+  }
+  .celebration-stage {
+    inset: 0; width: auto; height: auto; transform: none;
   }
   .block-panel {
     flex-direction: column; justify-content: center; gap: 18px;
@@ -505,7 +518,11 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
        time-of-day panel. Safari 10 cannot use the division inside the modern
        `calc()` used by the container-query layout, so use its resolved value. */
     .member-columns.single .checklist-block:not(.empty) .block-celebration {
-      left: 130px; top: 36px; transform: translateX(-50%);
+      left: 130px; right: auto; top: 36px; width: 190px; height: 190px;
+      overflow: visible; transform: translateX(-50%);
+    }
+    .member-columns.single .checklist-block:not(.empty) .celebration-stage {
+      inset: 0; width: auto; height: auto; transform: none;
     }
     .member-columns.single .checklist-block:not(.empty) .block-panel {
       flex-direction: column; justify-content: center; gap: 18px;

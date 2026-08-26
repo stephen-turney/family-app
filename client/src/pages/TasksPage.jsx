@@ -867,35 +867,37 @@ export default function TasksPage() {
                   >
                     {(isCelebrating || blockComplete) && (
                       <div className={`block-celebration${isCelebrating ? '' : ' is-complete'}`} aria-label={`${block.label} complete!`}>
-                        {isCelebrating && <>
-                          <span className="celebration-spark spark-one">✦</span>
-                          <span className="celebration-spark spark-two">✦</span>
-                          <span className="celebration-spark spark-three">✦</span>
-                          <span className="celebration-spark spark-four">✦</span>
-                          <span className="celebration-spark spark-five">✦</span>
-                          <span className="celebration-confetti confetti-one" />
-                          <span className="celebration-confetti confetti-two" />
-                          <span className="celebration-confetti confetti-three" />
-                          <span className="celebration-confetti confetti-four" />
-                          <span className="celebration-confetti confetti-five" />
-                          <span className="celebration-confetti confetti-six" />
-                          <div className="celebration-particle-cloud" aria-hidden="true">
-                            {CELEBRATION_PARTICLES.map(([x, y, color, delay], index) => (
-                              <span
-                                key={index}
-                                className="celebration-particle"
-                                style={{
-                                  '--burst-x': `${x}px`, '--burst-y': `${y}px`,
-                                  '--particle-color': color, '--particle-delay': `${delay}s`,
-                                }}
-                              />
-                            ))}
-                          </div>
-                        </>}
-                        <svg className="celebration-check" viewBox="0 0 100 100" aria-hidden="true">
-                          <circle className="celebration-ring" cx="50" cy="50" r="42" />
-                          <path className="celebration-tick" d="M27 51 L43 67 L74 34" />
-                        </svg>
+                        <div className="celebration-stage">
+                          {isCelebrating && <>
+                            <span className="celebration-spark spark-one">✦</span>
+                            <span className="celebration-spark spark-two">✦</span>
+                            <span className="celebration-spark spark-three">✦</span>
+                            <span className="celebration-spark spark-four">✦</span>
+                            <span className="celebration-spark spark-five">✦</span>
+                            <span className="celebration-confetti confetti-one" />
+                            <span className="celebration-confetti confetti-two" />
+                            <span className="celebration-confetti confetti-three" />
+                            <span className="celebration-confetti confetti-four" />
+                            <span className="celebration-confetti confetti-five" />
+                            <span className="celebration-confetti confetti-six" />
+                            <div className="celebration-particle-cloud" aria-hidden="true">
+                              {CELEBRATION_PARTICLES.map(([x, y, color, delay], index) => (
+                                <span
+                                  key={index}
+                                  className="celebration-particle"
+                                  style={{
+                                    '--burst-x': `${x}px`, '--burst-y': `${y}px`,
+                                    '--particle-color': color, '--particle-delay': `${delay}s`,
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          </>}
+                          <svg className="celebration-check" viewBox="0 0 100 100" aria-hidden="true">
+                            <circle className="celebration-ring" cx="50" cy="50" r="42" />
+                            <path className="celebration-tick" d="M27 51 L43 67 L74 34" />
+                          </svg>
+                        </div>
                       </div>
                     )}
                     <div className="block-panel" style={{ background: block.tint }}>
