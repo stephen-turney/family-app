@@ -501,6 +501,12 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
     .member-columns.single .checklist-block:not(.empty) {
       flex-direction: row; align-items: flex-start; gap: 14px;
     }
+    /* Keep the completion artwork in the upper third of the fixed 260px-wide
+       time-of-day panel. Safari 10 cannot use the division inside the modern
+       `calc()` used by the container-query layout, so use its resolved value. */
+    .member-columns.single .checklist-block:not(.empty) .block-celebration {
+      left: 130px; top: 36px; transform: translateX(-50%);
+    }
     .member-columns.single .checklist-block:not(.empty) .block-panel {
       flex-direction: column; justify-content: center; gap: 18px;
       width: var(--block-panel-w); height: var(--block-panel-h);
