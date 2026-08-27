@@ -128,6 +128,32 @@ schtasks /end /tn "\Family Hub"
 schtasks /run /tn "\Family Hub"
 ```
 
+### Encrypted cloud database backups
+
+Do not commit `server/data.sqlite` or database snapshots to Git: they contain
+private family information. Use the included Restic-to-Backblaze B2 job instead.
+Restic encrypts each backup before upload, while `hosting/backup-db.mjs` creates
+a SQLite-consistent snapshot that includes live WAL changes.
+
+1. Create a **private** Backblaze B2 bucket and a B2 application key restricted
+   to that bucket with read/write access.
+2. Install [Restic](https://restic.net/) and ensure `restic` is on your PATH.
+3. Copy `hosting/restic.env.example` to `hosting/restic.env`, then fill in the
+   B2 key ID, application key, and bucket name. This file is ignored by Git.
+4. Put a long, unique Restic passphrase in the local text file named by
+   `RESTIC_PASSWORD_FILE`. Store a second copy of that passphrase somewhere
+   safe; without it, the cloud backups cannot be recovered.
+5. In an elevated PowerShell, run:
+
+   ```powershell
+   cd 'C:\Family Hub\hosting'
+   .\install-restic-backup.ps1 -RunNow
+   ```
+
+The task runs at 3:30 AM daily, retains 30 daily and 12 monthly snapshots, and
+runs a repository integrity check each Sunday. Its log is
+`C:\Family Hub\logs\restic-backup.log`.
+
 ### Restarting the Raspberry Pi production service
 
 The production server on the Raspberry Pi runs as the systemd service `familyhub`. After pulling

@@ -1,2 +1,7 @@
 /logs/*.log
 .DS_Store
+# Family data belongs in the encrypted backup repository, never in source control.
+/backups/*.sqlite
+/server/data.sqlite*
+/hosting/restic.env
+/hosting/restic-password.txt

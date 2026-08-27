@@ -2,7 +2,6 @@
 
 ---------AUGUST 21, 2026------------------------------------------------------------
 
--->completed
 [x]   1. Allow task list items to be moved around (dragged and dropped).
          Right now onlyway to change the order is to delete the routine
          and start over again.
@@ -20,7 +19,7 @@
 [ ]   4. Add some little animations with +10 points! bubbles that pop up
          and other cutesy things like that to get the dopamine going
 
-[ ]   5. Add a mini progress bar for each routine section (0-20)
+[x]   5. Add a mini progress bar for each routine section (0-20)
          Prompt that encourages them pops up if they do everything in that block
 
 [ ]   6. If they get all the checks done in the day - a pop up animation occurs.
