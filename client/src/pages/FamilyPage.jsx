@@ -6,7 +6,6 @@ import { fileToAvatarDataUrl } from '../lib/image.js';
 
 // "Six Pastels" palette — deep enough to stay distinct behind an avatar.
 const COLORS = ['#afd5c0', '#a9c3d5', '#a99cc6', '#efbcc8', '#ec9db8', '#ba82ad'];
-const EMOJIS = ['🙂', '👩', '👨', '🧒', '👧', '👦', '👶', '🐶', '🐱'];
 
 export default function FamilyPage() {
   return (
@@ -321,7 +320,6 @@ function MemberModal({ member, onClose }) {
   const isNew = !member.id;
   const [name, setName] = useState(member.name || '');
   const [color, setColor] = useState(member.color || COLORS[2]);
-  const [emoji, setEmoji] = useState(member.avatar ? null : (member.emoji || EMOJIS[0]));
   const [avatar, setAvatar] = useState(member.avatar || null);
   const [allowance, setAllowance] = useState(
     member.weekly_allowance_cents == null ? '' : (member.weekly_allowance_cents / 100).toFixed(2)
@@ -332,7 +330,6 @@ function MemberModal({ member, onClose }) {
     if (!file) return;
     try {
       setAvatar(await fileToAvatarDataUrl(file));
-      setEmoji(null);
     } catch (err) {
       alert(err.message);
     }
@@ -374,9 +371,6 @@ function MemberModal({ member, onClose }) {
             onClick={() => save.mutate({
               name,
               color,
-              // A photo is the chosen identity picture, so don't keep a hidden
-              // emoji selection behind it.
-              emoji: emoji || '',
               avatar,
               weekly_allowance_cents: allowance === '' ? null : Math.round(Number(allowance) * 100),
             }, { onSuccess: onClose })}
@@ -417,14 +411,15 @@ function MemberModal({ member, onClose }) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: 28,
+              fontSize: 34,
+              fontWeight: 500,
               flexShrink: 0,
             }}
           >
             {avatar ? (
               <img src={avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (
-              emoji
+              Array.from(name.trim() || '?')[0].toLocaleUpperCase()
             )}
           </div>
           <label className="btn ghost small" style={{ cursor: 'pointer' }}>
@@ -438,7 +433,7 @@ function MemberModal({ member, onClose }) {
           )}
         </div>
         <p className="muted" style={{ margin: '6px 0 0', fontSize: 12 }}>
-          Uploading a photo clears the emoji selection.
+          Without a photo, the first letter of their name is shown.
         </p>
       </div>
       <div className="field">
@@ -458,26 +453,6 @@ function MemberModal({ member, onClose }) {
                 outlineOffset: 2,
               }}
             />
-          ))}
-        </div>
-      </div>
-      <div className="field">
-        <label>Emoji</label>
-        <div className="row">
-          {EMOJIS.map((e) => (
-            <span
-              key={e}
-              onClick={() => setEmoji(e)}
-              style={{
-                fontSize: 22,
-                cursor: 'pointer',
-                padding: 4,
-                borderRadius: 8,
-                background: emoji === e ? 'var(--panel-2)' : 'transparent',
-              }}
-            >
-              {e}
-            </span>
           ))}
         </div>
       </div>
