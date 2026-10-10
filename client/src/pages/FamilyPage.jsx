@@ -5,8 +5,8 @@ import Avatar from '../components/Avatar.jsx';
 import { fileToAvatarDataUrl } from '../lib/image.js';
 import { MEMBER_COLORS, memberColor } from '../lib/theme.js';
 
-// Six distinct member accents from the seasonal palette.
-const COLORS = MEMBER_COLORS;
+// Offer black alongside the seasonal accents without changing automatic colours.
+const COLORS = [...MEMBER_COLORS, '#000000'];
 
 export default function FamilyPage() {
   return (
@@ -444,12 +444,14 @@ function MemberModal({ member, onClose }) {
           {COLORS.map((c) => (
             <span
               key={c}
+              title={c === '#000000' ? 'Black' : c}
               onClick={() => setColor(c)}
               style={{
                 width: 26,
                 height: 26,
                 borderRadius: '50%',
                 background: c,
+                boxShadow: c === '#000000' ? '0 0 0 1px var(--muted)' : 'none',
                 cursor: 'pointer',
                 outline: displayedColor === c ? '2px solid var(--text)' : 'none',
                 outlineOffset: 2,
