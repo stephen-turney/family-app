@@ -15,7 +15,9 @@ import RoutinePicturesModal from '../components/RoutinePicturesModal.jsx';
 import StepAddModal from '../components/StepAddModal.jsx';
 import StepRenameModal from '../components/StepRenameModal.jsx';
 import Avatar from '../components/Avatar.jsx';
+import completionKnife from '../assets/completion-knife.svg';
 import { isUploadedImage, resolveCompletedIcon, resolveIcon } from '../lib/taskIcons.js';
+import { memberColor } from '../lib/theme.js';
 
 function TaskPicture({ picture }) {
   return isUploadedImage(picture) ? <img src={picture} alt="" /> : picture;
@@ -38,23 +40,23 @@ function shiftDate(iso, days) {
 
 // The day is split into the same three blocks as a printed kids' chore sheet, in
 // day order. `key` matches routines.time_of_day, so the grouping needs no new
-// column. Tints echo the paper original: periwinkle morning, sage afternoon,
-// slate evening. Blocks always all render, even when empty — a checklist a kid
+// column. Palette colors: pumpkin morning, lavender afternoon, sea-green evening.
+// Keep the familiar sun/moon pictures. Blocks always render, even when empty — a checklist a kid
 // reads every day should keep the same shape.
 const BLOCKS = [
-  { key: 'morning', label: 'Morning', article: 'a', icon: '🌤️', tint: '#aab8d6' },
-  { key: 'afternoon', label: 'Afternoon', article: 'an', icon: '☀️', tint: '#aec4a3' },
-  { key: 'evening', label: 'Evening', article: 'an', icon: '🌙', tint: '#9cb0c9' },
+  { key: 'morning', label: 'Morning', article: 'a', icon: '🌤️', tint: '#FF7518' },
+  { key: 'afternoon', label: 'Afternoon', article: 'an', icon: '☀️', tint: '#9370DB' },
+  { key: 'evening', label: 'Evening', article: 'an', icon: '🌙', tint: '#2E8B57' },
 ];
 
 const CELEBRATION_PARTICLES = [
-  [-105, -82, '#f3b934', 0], [-72, -112, '#ef7c98', .08], [-34, -125, '#58a7d7', .16],
-  [8, -122, '#8c78c7', .04], [47, -108, '#7cba8a', .12], [86, -76, '#ee8c57', .2],
-  [116, -35, '#f3b934', .07], [108, 18, '#ef7c98', .18], [77, 59, '#58a7d7', .1],
-  [39, 86, '#8c78c7', .24], [-6, 93, '#7cba8a', .14], [-50, 83, '#ee8c57', .03],
-  [-91, 51, '#f3b934', .2], [-117, 8, '#ef7c98', .11], [-122, -34, '#58a7d7', .25],
-  [-67, -49, '#8c78c7', .29], [65, -48, '#7cba8a', .31], [90, 42, '#ee8c57', .27],
-  [-32, 56, '#f3b934', .34], [29, 49, '#ef7c98', .37],
+  [-105, -82, '#FFA500', 0], [-72, -112, '#C71585', .08], [-34, -125, '#9400D3', .16],
+  [8, -122, '#9370DB', .04], [47, -108, '#32CD32', .12], [86, -76, '#FF7518', .2],
+  [116, -35, '#FFA500', .07], [108, 18, '#C71585', .18], [77, 59, '#9400D3', .1],
+  [39, 86, '#9370DB', .24], [-6, 93, '#32CD32', .14], [-50, 83, '#FF7518', .03],
+  [-91, 51, '#FFA500', .2], [-117, 8, '#C71585', .11], [-122, -34, '#9400D3', .25],
+  [-67, -49, '#9370DB', .29], [65, -48, '#32CD32', .31], [90, 42, '#FF7518', .27],
+  [-32, 56, '#FFA500', .34], [29, 49, '#C71585', .37],
 ];
 
 // Long enough for the surrounding rows to visibly glide into their new slots,
@@ -130,7 +132,7 @@ export default function TasksPage() {
       const progressKey = ['progress', completionDate, completionDate];
       // Stop an older background refresh from repainting the pre-tap state over
       // this optimistic change. Cancellation is intentionally not awaited: the
-      // checkmark should render in the same turn as the click.
+      // completion picture should render in the same turn as the click.
       queryClient.cancelQueries({ queryKey: routinesKey });
       queryClient.cancelQueries({ queryKey: progressKey });
 
@@ -719,7 +721,7 @@ export default function TasksPage() {
           </div>
           <span
             className="checklist-avatar"
-            style={{ background: `${focusMember.color}59`, borderColor: focusMember.color }}
+            style={{ background: `${memberColor(focusMember)}59`, borderColor: memberColor(focusMember) }}
           >
             <Avatar member={focusMember} size={150} />
           </span>
@@ -783,7 +785,7 @@ export default function TasksPage() {
             <strong>{focusPoints}/200 points</strong>
           </div>
           <div className="progress" aria-label={`${focusPercent}% complete`}>
-            <span style={{ width: `${focusPercent}%`, background: focusMember.color }} />
+            <span style={{ width: `${focusPercent}%`, backgroundColor: memberColor(focusMember) }} />
           </div>
         </section>
       )}
@@ -831,7 +833,7 @@ export default function TasksPage() {
                     </span>
                   </div>
                   <div className="progress">
-                    <span style={{ width: `${shownPct}%`, background: m.color }} />
+                    <span style={{ width: `${shownPct}%`, backgroundColor: memberColor(m) }} />
                   </div>
                 </div>
               )}
@@ -893,14 +895,14 @@ export default function TasksPage() {
                               ))}
                             </div>
                           </>}
-                          <svg className="celebration-check" viewBox="0 0 100 100" aria-hidden="true">
-                            <circle className="celebration-ring" cx="50" cy="50" r="42" />
-                            <path className="celebration-tick" d="M27 51 L43 67 L74 34" />
+                          <svg className="celebration-icon" viewBox="0 0 100 100" aria-hidden="true">
+                            <circle cx="50" cy="50" r="42" />
+                            <path d="M27 51 L43 67 L74 34" />
                           </svg>
                         </div>
                       </div>
                     )}
-                    <div className="block-panel" style={{ background: block.tint }}>
+                    <div className="block-panel" style={{ backgroundColor: block.tint }}>
                       <span className="block-icon" aria-hidden="true">{block.icon}</span>
                       <span className="block-label">{block.label}</span>
                     </div>
@@ -916,7 +918,7 @@ export default function TasksPage() {
                           </span>
                         </div>
                         <div className="progress" aria-label={`${block.label}: ${blockPercent}% complete`}>
-                          <span style={{ width: `${blockPercent}%`, background: block.tint }} />
+                          <span style={{ width: `${blockPercent}%`, backgroundColor: block.tint }} />
                         </div>
                       </div>
                       {groups.length === 0 ? (
@@ -988,7 +990,12 @@ export default function TasksPage() {
                                         <span aria-hidden="true">☰</span>
                                       </button>
                                     ) : (
-                                      <span className="box">{s.done ? '✓' : ''}</span>
+                                      <span className="box" aria-hidden="true">
+                                        {s.done && <>
+                                          <img className="completion-knife" src={completionKnife} alt="" />
+                                          <span className="completion-entry" />
+                                        </>}
+                                      </span>
                                     )}
                                     {/* Pre-readers find their task by picture. */}
                                     <span className="task-icon" aria-hidden="true">

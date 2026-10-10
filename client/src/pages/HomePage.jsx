@@ -3,6 +3,8 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useMembers, useProgress, localDate } from '../api/client.js';
 import Avatar from '../components/Avatar.jsx';
+import HalloweenScene from '../components/HalloweenScene.jsx';
+import { memberColor } from '../lib/theme.js';
 
 function parseLocalDate(iso) {
   const [y, m, d] = iso.split('-').map(Number);
@@ -47,6 +49,9 @@ export default function HomePage() {
 
   return (
     <div>
+      <div className="spooky-welcome" aria-hidden="true">
+        <HalloweenScene className="spooky-welcome-art" />
+      </div>
       <div className="home-head">
         <div className="checklist-daynav-wrap">
           <div className="checklist-daynav">
@@ -87,15 +92,17 @@ export default function HomePage() {
       </div>
 
       <div className="home-grid">
-        {members.map((m) => {
+        {members.map((m, index) => {
+          const color = memberColor(m);
           const stat = statFor(m.id);
           const hasTasks = stat && stat.expected > 0;
           const points = Math.min(stat?.points || 0, 200);
           return (
             <Link key={m.id} to={`/tasks/${m.id}?date=${date}`} className="home-tile">
+              <span className="home-tile-charm" aria-hidden="true">{['🎃', '👻', '🍬', '🦇'][index % 4]}</span>
               <span
                 className="home-avatar"
-                style={{ background: `${m.color}59`, borderColor: m.color }}
+                style={{ background: `${color}59`, borderColor: color }}
               >
                 <Avatar member={m} size={200} />
               </span>
@@ -105,7 +112,7 @@ export default function HomePage() {
               {hasTasks ? (
                 <>
                   <div className="progress">
-                    <span style={{ width: `${Math.round(points / 2)}%`, background: m.color }} />
+                    <span style={{ width: `${Math.round(points / 2)}%`, backgroundColor: color }} />
                   </div>
                   <span className="muted" style={{ fontSize: 13 }}>
                     {points}/200 points

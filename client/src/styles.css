@@ -351,23 +351,23 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 .checklist-block { position: relative; display: flex; flex-direction: column; margin-top: 16px; }
 .block-celebration {
   position: absolute; z-index: 3; top: 1px; right: 7px; width: 42px; height: 42px;
-  overflow: hidden; border-radius: 9px; pointer-events: none;
+  overflow: visible; border-radius: 9px; pointer-events: none;
 }
 .celebration-stage {
   position: absolute; top: 0; right: 0; width: 190px; height: 190px;
   transform: scale(.22); transform-origin: top right;
 }
-.celebration-check {
-  position: absolute; inset: 25px; width: 140px; height: 140px; overflow: visible;
+.celebration-icon {
+  position: absolute; top: 25px; left: 25px; width: 140px; height: 140px;
   filter: drop-shadow(0 5px 8px rgba(43, 153, 104, .32));
-  animation: celebration-check-pop .52s ease-out both, celebration-check-bounce .6s .76s ease-in-out 1;
+  animation: celebration-icon-pop .52s ease-out both, celebration-icon-bounce .6s .76s ease-in-out 1;
 }
-.block-celebration.is-complete .celebration-check { animation: none; }
-.block-celebration.is-complete .celebration-ring,
-.block-celebration.is-complete .celebration-tick { stroke-dashoffset: 0; animation: none; }
-.celebration-ring, .celebration-tick { fill: none; stroke: var(--good); stroke-linecap: round; stroke-linejoin: round; }
-.celebration-ring { stroke-width: 6; stroke-dasharray: 264; stroke-dashoffset: 264; animation: celebration-ring .48s ease-out forwards; }
-.celebration-tick { stroke-width: 9; stroke-dasharray: 70; stroke-dashoffset: 70; animation: celebration-tick .42s .36s ease-out forwards; }
+.block-celebration.is-complete .celebration-icon { animation: none; }
+.celebration-icon circle, .celebration-icon path {
+  fill: none; stroke: var(--good); stroke-linecap: round; stroke-linejoin: round;
+}
+.celebration-icon circle { stroke-width: 6; }
+.celebration-icon path { stroke-width: 9; }
 .celebration-spark, .celebration-confetti { position: absolute; opacity: 0; animation: celebration-burst .72s .42s cubic-bezier(.15,.8,.3,1) forwards; }
 .celebration-spark { color: #f3b934; font-size: 27px; line-height: 1; text-shadow: 0 1px 1px rgba(16, 24, 40, .18); }
 .spark-one { left: 1px; top: 13px; --burst-x: -22px; --burst-y: -25px; }
@@ -390,14 +390,12 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 }
 .celebration-particle:nth-child(3n) { width: 15px; height: 8px; border-radius: 99px; }
 .celebration-particle:nth-child(4n) { width: 8px; height: 8px; border-radius: 50%; }
-@keyframes celebration-ring { to { stroke-dashoffset: 0; } }
-@keyframes celebration-tick { to { stroke-dashoffset: 0; } }
-@keyframes celebration-check-pop {
+@keyframes celebration-icon-pop {
   0% { transform: scale(.3) rotate(-12deg); opacity: 0; }
   75% { transform: scale(1.1) rotate(3deg); opacity: 1; }
   100% { transform: scale(1) rotate(0); opacity: 1; }
 }
-@keyframes celebration-check-bounce {
+@keyframes celebration-icon-bounce {
   0%, 100% { transform: translateY(0) rotate(0); }
   50% { transform: translateY(-5px) rotate(3deg); }
 }
@@ -582,7 +580,7 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 }
 .checkline-row:last-child { border-bottom: none; }
 .checkline {
-  width: 100%; display: block; padding: 0 6px; min-height: var(--row-h);
+  width: 100%; display: block; padding: 0 6px; min-height: var(--row-h); overflow: visible;
   border: 0; cursor: pointer;
   border-radius: 10px; background: transparent; color: inherit;
   font: inherit; text-align: left; -webkit-appearance: none; appearance: none;
@@ -629,11 +627,38 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
   display: flex; align-items: center; gap: 12px;
 }
 .checkline .box {
+  position: relative; overflow: visible;
   width: 46px; height: 46px; border-radius: 13px; border: 3px solid var(--border);
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   font-size: 29px; line-height: 1; background: var(--panel);
 }
-.checkline.done .box { background: var(--good); border-color: var(--good); color: #fff; }
+.checkline.done .box {
+  background-color: #DBAD77; border-color: #96633F;
+  background-image: repeating-linear-gradient(0deg, transparent, transparent 8px, rgba(121, 74, 40, .16) 9px, transparent 11px);
+  box-shadow: inset 0 2px 0 rgba(255, 239, 206, .55), 0 3px 0 #835536;
+}
+.checkline .box img { display: block; width: 100%; height: 100%; }
+.checkline .box .completion-knife {
+  /* The SVG's contact point is (64, 64): 64% of 66px = 42.24px.
+     Anchor that point to the centre of either checkbox size. */
+  position: absolute; z-index: 3; top: calc(50% - 42.24px); left: calc(50% - 42.24px);
+  width: 66px; height: 66px; filter: drop-shadow(1px 2px 1px rgba(45, 30, 23, .24));
+  pointer-events: none; animation: completion-knife-in .22s ease-out both;
+}
+.completion-entry {
+  position: absolute; z-index: 4; top: 50%; left: 50%; width: 18px; height: 5px;
+  transform: translate(-50%, -50%) rotate(-45deg); border-radius: 50%;
+  background: #57331F; box-shadow: inset 0 1px 1px #321F16;
+  pointer-events: none;
+}
+.completion-entry::after {
+  content: ''; position: absolute; left: 1px; right: 1px; bottom: -1px; height: 2px;
+  border-radius: 50%; background: #E9C28D;
+}
+@keyframes completion-knife-in {
+  from { transform: translate(-10px, -10px); opacity: 0; }
+  to { transform: translate(0, 0); opacity: 1; }
+}
 .checkline.done .label { text-decoration: line-through; color: var(--muted); }
 /* The picture a pre-reader recognises the task by. Uploaded images are cropped
    square when selected and fill this 75px frame; emoji stay centered within it. */

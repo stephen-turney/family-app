@@ -34,6 +34,7 @@ export default function App() {
         {/* The family name doubles as the home link, the usual place people
             click to get back to a hub page. */}
         <Link to="/home" className="brand" title="Family home">
+          <span className="brand-pumpkin" aria-hidden="true">🎃</span>
           {brand}
         </Link>
         <nav className="nav">
@@ -42,6 +43,7 @@ export default function App() {
             ✅ Overview
           </NavLink>
         </nav>
+        <span className="season-label"><span aria-hidden="true">✦</span> Spooky season</span>
         {/* Icon only, hard right, in the space the date used to hold. */}
         <NavLink
           to="/settings"

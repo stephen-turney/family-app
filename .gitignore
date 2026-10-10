@@ -1,4 +1,7 @@
 /logs/*.log
+# Generated visual previews stay local.
+/logs/*-preview.png
+/logs/*-preview.jpg
 .DS_Store
 # Family data belongs in the encrypted backup repository, never in source control.
 /backups/*.sqlite

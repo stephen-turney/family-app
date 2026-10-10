@@ -3,9 +3,10 @@ import { api, useMembers, useSettings, useReports, useApiMutation } from '../api
 import Modal from '../components/Modal.jsx';
 import Avatar from '../components/Avatar.jsx';
 import { fileToAvatarDataUrl } from '../lib/image.js';
+import { MEMBER_COLORS, memberColor } from '../lib/theme.js';
 
-// "Six Pastels" palette — deep enough to stay distinct behind an avatar.
-const COLORS = ['#afd5c0', '#a9c3d5', '#a99cc6', '#efbcc8', '#ec9db8', '#ba82ad'];
+// Six distinct member accents from the seasonal palette.
+const COLORS = MEMBER_COLORS;
 
 export default function FamilyPage() {
   return (
@@ -301,7 +302,7 @@ function MembersCard() {
               style={{
                 padding: 3,
                 borderRadius: '50%',
-                border: `3px solid ${m.color}`,
+                border: `3px solid ${memberColor(m)}`,
                 display: 'inline-flex',
               }}
             >
@@ -320,6 +321,7 @@ function MemberModal({ member, onClose }) {
   const isNew = !member.id;
   const [name, setName] = useState(member.name || '');
   const [color, setColor] = useState(member.color || COLORS[2]);
+  const displayedColor = memberColor({ ...member, color });
   const [avatar, setAvatar] = useState(member.avatar || null);
   const [allowance, setAllowance] = useState(
     member.weekly_allowance_cents == null ? '' : (member.weekly_allowance_cents / 100).toFixed(2)
@@ -449,7 +451,7 @@ function MemberModal({ member, onClose }) {
                 borderRadius: '50%',
                 background: c,
                 cursor: 'pointer',
-                outline: color === c ? '2px solid var(--text)' : 'none',
+                outline: displayedColor === c ? '2px solid var(--text)' : 'none',
                 outlineOffset: 2,
               }}
             />

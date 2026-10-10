@@ -1,0 +1,193 @@
+/* Halloween palette: charcoal surfaces, pumpkin orange, purple, and green.
+   Keep the chosen page background and the checklist's geometry intact.
+   Solid colours, ordinary gradients, and SVG work in the iOS 10 legacy build. */
+:root {
+  --bg: #21172f;
+  --panel: #1c1c1c;
+  --panel-2: #2f2f2f;
+  --text: #ff8c69;
+  --muted: #ff7f50;
+  --border: #663399;
+  --accent: #ff7518;
+  --accent-soft: #4b0082;
+  --good: #32cd32;
+  --danger: #ff6347;
+  --shadow: 0 4px 0 rgba(0, 0, 0, .22), 0 12px 28px rgba(0, 0, 0, .2);
+  --radius: 20px;
+  color-scheme: dark;
+}
+
+body {
+  color: var(--text);
+  background: #21172f;
+  background-image:
+    radial-gradient(ellipse at 10% 0%, rgba(103, 65, 139, .38), transparent 55%),
+    radial-gradient(ellipse at 95% 90%, rgba(114, 60, 61, .24), transparent 50%);
+}
+
+.topbar {
+  flex-shrink: 0;
+  background: var(--panel);
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, .2);
+}
+.brand { font-weight: 800; letter-spacing: -.5px; }
+.brand-dot { background: linear-gradient(135deg, #ff7518, #9932cc); }
+.brand-pumpkin { font-size: 30px; line-height: 1; margin-right: 2px; }
+a.brand:hover { opacity: 1; color: var(--accent); }
+.nav a { color: var(--text); }
+.nav a:hover, .nav-gear:hover { background: var(--accent-soft); color: var(--text); }
+.nav a.active { background: var(--accent); color: var(--panel); }
+.nav-gear.active { background: #663399; }
+.season-label {
+  color: var(--accent); font-size: 11px; font-weight: 800;
+  letter-spacing: .12em; text-transform: uppercase; white-space: nowrap;
+}
+.season-label > span { margin-right: 6px; }
+.content > .muted { color: var(--muted); }
+.content > div > .completion-error { color: var(--danger); }
+
+.card, .home-tile, .task-drag-preview { color: var(--text); }
+.card { border-top: 3px solid var(--accent); }
+/* Dark labels keep the orange actions legible without bright white text. */
+.btn { color: var(--panel); box-shadow: 0 2px 0 rgba(0, 0, 0, .2); }
+.btn.ghost { box-shadow: none; }
+.btn.danger { border-color: var(--danger); }
+.btn.danger:hover { background: var(--panel-2); }
+input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+input, select, textarea, .icon-current { background: var(--panel-2); border-color: #9370db; }
+input::placeholder, textarea::placeholder { color: var(--muted); opacity: .8; }
+select option { background: var(--panel-2); color: var(--text); }
+.icon-panel, .report-link, .allowance-report-empty { background: var(--panel-2); }
+.custom-image-library { border-color: #9370db; }
+.icon-picker.compact .icon-panel { box-shadow: 0 10px 24px rgba(0, 0, 0, .3); }
+.badge .swatch { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .25); }
+.task-drag-preview { box-shadow: 0 14px 30px rgba(0, 0, 0, .3), 0 4px 10px rgba(0, 0, 0, .2); }
+
+/* Use :focus as the fallback for older Safari; modern browsers suppress the
+   ring for pointer clicks while retaining it for keyboard navigation. */
+a:focus, button:focus, input:focus, select:focus, textarea:focus {
+  outline: 3px solid #9370db; outline-offset: 3px;
+}
+@supports selector(:focus-visible) {
+  a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
+}
+
+.spooky-welcome {
+  position: relative;
+  max-width: 860px; height: 170px; margin: 0 auto 22px;
+  overflow: hidden; border: 1px solid #7b3daa; border-radius: 24px;
+  background: #4b0082;
+  background-image: radial-gradient(ellipse at 50% 100%, #663399, transparent 75%);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, .2);
+}
+.spooky-welcome-art { display: block; width: 100%; height: 100%; }
+
+.home-head { margin-bottom: 20px; }
+.daynav-date { color: var(--text); font-weight: 700; }
+.daynav-btn { background: var(--panel); color: var(--accent); border-color: #9370db; box-shadow: 0 3px 0 rgba(0, 0, 0, .2); }
+.daynav-btn:hover { color: #ffa500; border-color: var(--accent); }
+.daynav-btn:active { background: var(--accent-soft); }
+.daynav-tag { background: var(--accent-soft); color: var(--text); border: 1px solid #9370db; }
+.btn.ghost.daynav-jump { padding: 0; border: none; background: transparent; }
+.checklist-title { color: var(--text); }
+
+.home-tile { position: relative; padding-top: 25px; border: 2px solid var(--border); }
+.home-tile:hover { border-color: var(--accent); box-shadow: 0 6px 0 rgba(0, 0, 0, .22), 0 16px 30px rgba(0, 0, 0, .28); }
+.home-tile-charm {
+  position: absolute; top: 13px; right: 14px; width: 39px; height: 39px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--panel-2); border: 1px solid #e07b10; border-radius: 50%; font-size: 23px;
+  transform: rotate(10deg); pointer-events: none;
+}
+.home-avatar, .checklist-avatar { box-shadow: 0 0 0 6px rgba(147, 112, 219, .18); }
+.home-name { letter-spacing: -.5px; }
+.progress { background: var(--panel-2); }
+.progress > span {
+  background-image: repeating-linear-gradient(115deg, transparent, transparent 10px, rgba(255, 140, 105, .2) 10px, rgba(255, 140, 105, .2) 20px);
+}
+.block-panel {
+  background-image: radial-gradient(circle at 85% 18%, rgba(28, 28, 28, .15) 0, rgba(28, 28, 28, .15) 3px, transparent 4px);
+  background-size: 28px 28px;
+}
+.block-label { color: var(--text); background: var(--panel); }
+.checkline .box { border-color: #9370db; background: var(--panel-2); }
+.checkline .task-icon { background: var(--panel-2); }
+.checkline.done { background: var(--panel-2); }
+.checkline:active { background: var(--accent-soft); }
+.checkline.done .label { color: var(--muted); }
+.task-edit-button, .add-task-button, .block-empty { border-color: #9370db; }
+.modal-backdrop { background: rgba(0, 0, 0, .78); }
+.allowance-report-heading { color: var(--text); background: linear-gradient(120deg, #4b0082, #663399); }
+.allowance-category { background: var(--panel-2); border-top: 3px solid var(--accent); }
+.allowance-category.savings { background: var(--panel-2); border-top-color: #32cd32; }
+.allowance-category.giving { background: var(--panel-2); border-top-color: #ff6347; }
+.allowance-category.taxes { background: var(--panel-2); border-top-color: #9370db; }
+.celebration-icon { filter: drop-shadow(0 5px 8px rgba(50, 205, 50, .32)); }
+.celebration-spark { color: #ffa500; text-shadow: 0 1px 1px rgba(0, 0, 0, .2); }
+.confetti-one { background: #ff6347; }
+.confetti-two { background: #32cd32; }
+.confetti-three { background: #9370db; }
+.confetti-four { background: #ffa500; }
+.confetti-five { background: #9932cc; }
+.confetti-six { background: #ff7518; }
+
+/* The ghosts float briefly and settle, keeping the wall tablet calm. */
+.spooky-ghost { animation: spooky-float 3s ease-in-out 2; }
+@keyframes spooky-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@media (max-width: 699px) {
+  .topbar { gap: 12px; padding: 12px 16px; }
+  .brand { font-size: 18px; }
+  .brand-pumpkin { font-size: 25px; }
+  .nav a { padding: 10px 12px; }
+  .season-label { display: none; }
+  .content { padding: 20px 16px; }
+  .spooky-welcome { height: 150px; }
+}
+@media (max-width: 560px) {
+  .topbar { flex-wrap: wrap; gap: 0; }
+  .brand { flex: 1; min-width: 0; overflow-wrap: break-word; margin-right: 10px; }
+  .nav { order: 3; flex-basis: 100%; margin-top: 9px; }
+  .nav a { display: block; width: 100%; text-align: center; }
+  .nav-gear { width: 44px; }
+  .spooky-welcome { height: 140px; }
+  .home-grid { grid-template-columns: minmax(0, 1fr); }
+  .member-columns { grid-template-columns: minmax(0, 1fr); }
+  .home-tile { padding: 24px 18px; }
+  .daynav-date { width: 212px; min-width: 212px; flex-basis: 212px; font-size: 15px; }
+  .checklist-daynav { gap: 8px; }
+}
+@media (max-width: 359px) {
+  .content { padding: 16px 10px; }
+  .daynav-date { width: 188px; min-width: 188px; flex-basis: 188px; font-size: 13px; }
+  .checklist-daynav { gap: 6px; }
+}
+@supports not (container-type: inline-size) {
+  .brand-pumpkin { margin-right: 10px; }
+  .topbar .nav { margin-left: 20px; }
+  .season-label { margin-right: 20px; }
+  .home-tile > * + * { margin-top: 12px; }
+  .home-tile-charm + .home-avatar { margin-top: 0; }
+  .checklist-daynav .previous { margin-right: 14px; }
+  .checklist-daynav .next { margin-left: 14px; }
+  @media (max-width: 560px) {
+    .topbar .nav { margin-left: 0; }
+    .checklist-daynav .previous { margin-right: 8px; }
+    .checklist-daynav .next { margin-left: 8px; }
+  }
+  @media (max-width: 359px) {
+    .checklist-daynav .previous { margin-right: 6px; }
+    .checklist-daynav .next { margin-left: 6px; }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spooky-ghost, .celebration-icon, .checkline .box .completion-knife,
+  .celebration-spark, .celebration-confetti, .celebration-particle { animation: none; }
+  .home-tile, .progress > span, .nav-gear { transition: none; }
+  .home-tile:hover { transform: none; }
+}
