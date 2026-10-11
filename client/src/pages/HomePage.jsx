@@ -92,14 +92,13 @@ export default function HomePage() {
       </div>
 
       <div className="home-grid">
-        {members.map((m, index) => {
+        {members.map((m) => {
           const color = memberColor(m);
           const stat = statFor(m.id);
           const hasTasks = stat && stat.expected > 0;
           const points = Math.min(stat?.points || 0, 200);
           return (
             <Link key={m.id} to={`/tasks/${m.id}?date=${date}`} className="home-tile">
-              <span className="home-tile-charm" aria-hidden="true">{['🎃', '🍬', '🦇'][index % 3]}</span>
               <span
                 className="home-avatar"
                 style={{ background: `${color}59`, borderColor: color }}

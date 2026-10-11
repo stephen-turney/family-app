@@ -95,12 +95,6 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
 
 .home-tile { position: relative; padding-top: 25px; border: 2px solid var(--border); }
 .home-tile:hover { border-color: var(--accent); box-shadow: 0 6px 0 rgba(0, 0, 0, .22), 0 16px 30px rgba(0, 0, 0, .28); }
-.home-tile-charm {
-  position: absolute; top: 13px; right: 14px; width: 39px; height: 39px;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--panel-2); border: 1px solid #e07b10; border-radius: 50%; font-size: 23px;
-  transform: rotate(10deg); pointer-events: none;
-}
 .home-avatar, .checklist-avatar { box-shadow: 0 0 0 6px rgba(147, 112, 219, .18); }
 .home-name { letter-spacing: -.5px; }
 .progress { background: var(--panel-2); }
@@ -172,7 +166,6 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
   .topbar .nav { margin-left: 20px; }
   .season-label { margin-right: 20px; }
   .home-tile > * + * { margin-top: 12px; }
-  .home-tile-charm + .home-avatar { margin-top: 0; }
   .checklist-daynav .previous { margin-right: 14px; }
   .checklist-daynav .next { margin-left: 14px; }
   @media (max-width: 560px) {

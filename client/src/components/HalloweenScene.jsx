@@ -17,6 +17,59 @@ function MinecraftJackOLantern({ x, y }) {
   );
 }
 
+function GhastTentacle({ x, y, length, tilt }) {
+  return (
+    <g transform={`translate(${x} ${y}) rotate(${tilt})`}>
+      <path d={`M0 0H6V${length}H0Z`} fill="#A3A3A3" />
+      <path d={`m6 0 4-2v${length}l-4 2Z`} fill="#777777" />
+      <path d="m0 0 4-2h6L6 0Z" fill="#C5C5C5" />
+      <path d={`M0 7h3v7H0ZM3 ${length - 12}h3v8H3Z`} fill="#B8B8B8" />
+      <path d={`M6 12h2v7H6ZM8 ${length - 10}h2v6H8Z`} fill="#858585" />
+    </g>
+  );
+}
+
+function MinecraftGhast({ x, y = 0, scale = 1 }) {
+  return (
+    <g transform={`translate(${x} ${y}) scale(${scale})`}>
+      {/* Keep positioning separate from the gentle floating animation. */}
+      <g className="spooky-ghost">
+        {/* Nine cuboid tentacles hang behind the cube's lower faces. */}
+        {[
+          [42, 59, 39, -8], [28, 66, 43, -12], [56, 66, 38, -22],
+          [14, 73, 34, -14], [42, 73, 41, -18], [70, 73, 37, -26],
+          [28, 80, 35, -10], [56, 80, 38, -22], [42, 87, 35, -16],
+        ].map(([tx, ty, length, tilt], index) => (
+          <GhastTentacle key={index} x={tx} y={ty} length={length} tilt={tilt} />
+        ))}
+
+        {/* Isometric, pixel-textured white cube and the reference's red face. */}
+        <g transform="matrix(1 -.5 1 .5 0 21)">
+          <path d="M0 0H42V42H0Z" fill="#ECECEC" />
+          <path d="M0 0h12v3H0ZM18 3h12v3H18ZM36 0h6v3h-6ZM0 18h6v3H0ZM9 36h12v3H9ZM33 30h9v3h-9Z" fill="#F7F7F7" />
+          <path d="M9 6h3v18H9ZM21 0h3v9h-3ZM27 15h3v18h-3ZM36 9h3v15h-3ZM18 30h3v12h-3Z" fill="#D8D6D6" />
+          <path d="M12 15h6v3h-6ZM21 24h6v3h-6ZM30 33h6v3h-6Z" fill="#D4C9C9" />
+        </g>
+        <g transform="matrix(1 -.5 0 1 42 42)">
+          <path d="M0 0H42V52H0Z" fill="#777777" />
+          <path d="M0 3h3v12H0ZM12 0h9v3h-9ZM27 6h6v3h-6ZM36 21h6v12h-6ZM9 36h6v6H9ZM24 45h9v3h-9Z" fill="#828282" />
+          <path d="M18 6h6v3h-6ZM33 3h6v3h-6ZM6 18h3v9H6ZM15 24h6v3h-6ZM27 30h6v3h-6ZM3 42h9v3H3ZM18 48h6v4h-6Z" fill="#6D6D6D" />
+          <path d="M9 27h3v9H9ZM3 33h6v3H3ZM12 39h9v3h-9ZM30 39h6v3h-6Z" fill="#8B8B8B" />
+        </g>
+        <g transform="matrix(1 .5 0 1 0 21)">
+          <path d="M0 0H42V52H0Z" fill="#B5B5B5" />
+          <path d="M0 0h3v12H0ZM6 3h9v3H6ZM24 0h6v3h-6ZM36 6h6v12h-6ZM3 27h6v3H3ZM30 24h6v6h-6ZM12 45h6v7h-6Z" fill="#C2C2C2" />
+          <path d="M9 9h6v3H9ZM27 6h6v3h-6ZM0 21h3v6H0ZM6 36h6v3H6ZM33 36h6v3h-6ZM24 48h6v4h-6Z" fill="#A3A3A3" />
+          <path d="M12 21h3v9h-3ZM30 21h3v9h-3Z" fill="#A49C9C" />
+          <path d="M6 15h9v3h3v6H6ZM27 15h9v3h3v6H27ZM18 30h6v3h3v15H15V33h3Z" fill="#242424" />
+          <path d="M12 18h3v6h-3ZM30 18h6v6h-6ZM18 36h6v9h-6Z" fill="#C10D0D" />
+          <path d="M0 45h6v3H0ZM33 45h9v3h-9Z" fill="#AAAAAA" />
+        </g>
+      </g>
+    </g>
+  );
+}
+
 function MinecraftEnderDragon({ x, y, scale = 1 }) {
   return (
     <g transform={`translate(${x} ${y}) scale(${scale})`} stroke="#08080B" strokeWidth="2" strokeLinejoin="miter">
@@ -131,6 +184,40 @@ function MinecraftZombie({ x, y }) {
   );
 }
 
+function MinecraftSkeleton({ x, y }) {
+  return (
+    <g transform={`translate(${x} ${y})`} stroke="#42494B" strokeWidth="1.5" strokeLinejoin="miter">
+      <ellipse cx="46" cy="99" rx="34" ry="6" fill="#1C1C1C" opacity=".25" stroke="none" />
+
+      {/* Thin cuboid legs, hanging arms, and an open chest like the game model. */}
+      <path d="M33 67H41V99H33ZM49 67H57V99H49Z" fill="#A3A7A6" />
+      <path d="m41 67 4-3v32l-4 3Zm16 0 4-3v32l-4 3Z" fill="#798B93" />
+
+      <path d="M42 43H49V64H42Z" fill="#949C9C" />
+      <path d="m49 43 4-3v21l-4 3Z" fill="#6E7E85" />
+      <path d="M22 34 26 31H33L29 34ZM61 34l4-3h7l-4 3Z" fill="#BCC0BE" />
+      <path d="M22 34H29V68H22ZM61 34H68V68H61Z" fill="#A3A7A6" />
+      <path d="m29 34 4-3v34l-4 3Zm39 0 4-3v34l-4 3Z" fill="#798B93" />
+
+      <path d="M30 34 34 31H64L60 34Zm30 0 4-3v16l-4 3Z" fill="#798B93" />
+      <path d="M30 34H60V50H52V54H48V50H42V54H36V50H30Z" fill="#A3A7A6" />
+      <path d="M29 62 33 59H64L60 62Z" fill="#BCC0BE" />
+      <path d="M29 62H60V69H29Z" fill="#A3A7A6" />
+      <path d="m60 62 4-3v7l-4 3Z" fill="#798B93" />
+
+      {/* A cube skull with rectangular eye sockets and mouth. */}
+      <path d="M28 4 35 0H67L60 4Z" fill="#BCC0BE" />
+      <path d="m60 4 7-4v29l-7 4Z" fill="#798B93" />
+      <path d="M28 4H60V29H28Z" fill="#A3A7A6" />
+      <g stroke="none">
+        <path d="M32 16h8v4h-8ZM48 16h8v4h-8ZM32 24h24v5H32Z" fill="#171D1F" />
+      </g>
+      <path d="M28 29H60V33H28Z" fill="#A3A7A6" />
+      <path d="m60 29 7-4v4l-7 4Z" fill="#798B93" />
+    </g>
+  );
+}
+
 function Bat({ x, y, scale = 1, rotate = 0 }) {
   return (
     <path
@@ -220,9 +307,11 @@ export default function HalloweenScene({ className = '' }) {
       <Mushroom x={35} y={153} scale={.65} />
 
       <MinecraftJackOLantern x={312} y={17} />
+      <MinecraftGhast x={451} y={37} scale={.96} />
       <Mushroom x={295} y={157} scale={.7} />
 
       <MinecraftZombie x={589} y={60} />
+      <MinecraftSkeleton x={733} y={59} />
       <Mushroom x={821} y={158} scale={.5} />
     </svg>
   );
