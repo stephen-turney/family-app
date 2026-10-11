@@ -1,64 +1,128 @@
-function Pumpkin({ x, y = 0, scale = 1 }) {
+import minecraftJackOLantern from '../assets/minecraft-jack-o-lantern.png';
+
+function MinecraftJackOLantern({ x, y }) {
   return (
-    <g transform={`translate(${x} ${y}) scale(${scale})`}>
-      <ellipse cx="112" cy="162" rx="76" ry="9" fill="#1C1C1C" opacity=".25" />
-      <path d="M106 73c-4-12 1-22 11-27l10 7c-9 4-12 11-9 20" fill="#6B8E23" stroke="#556B2F" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M112 75c-29-18-62-4-67 25-6 30 10 57 38 61 11 2 21 0 29-3 11 5 23 5 36 1 27-8 39-32 32-60-7-28-41-41-68-24Z" fill="#FF7518" stroke="#2F2F2F" strokeWidth="3" strokeLinejoin="round" />
-      <path d="M93 75c-15 9-22 25-20 45 1 17 8 31 19 39" stroke="#D2691E" strokeWidth="3" strokeLinecap="round" />
-      <path d="M132 74c15 10 22 26 20 44-1 18-8 32-18 42" stroke="#D2691E" strokeWidth="3" strokeLinecap="round" />
-      <path d="M111 80c-10 18-11 46-2 72" stroke="#FFA500" strokeWidth="8" strokeLinecap="round" />
-      <path d="m82 110 12-13 7 15Z" fill="#2F2F2F" stroke="#2F2F2F" strokeWidth="2" strokeLinejoin="round" />
-      <path d="m124 112 8-15 11 13Z" fill="#2F2F2F" stroke="#2F2F2F" strokeWidth="2" strokeLinejoin="round" />
-      <path d="m106 119 6-8 7 9Z" fill="#2F2F2F" stroke="#2F2F2F" strokeWidth="2" strokeLinejoin="round" />
-      <path d="M82 128c15 12 45 14 62-1-6 23-44 29-62 1Z" fill="#2F2F2F" stroke="#2F2F2F" strokeWidth="2" strokeLinejoin="round" />
-      <path d="m102 136 1 7 9 1 1-7" fill="#FFA500" />
-      <path d="M53 109c-2 11 0 20 4 26" stroke="#FF8C69" strokeWidth="3" strokeLinecap="round" opacity=".8" />
+    <g transform={`translate(${x} ${y})`}>
+      <ellipse cx="40" cy="150" rx="39" ry="6" fill="#1C1C1C" opacity=".25" />
+      <image
+        href={minecraftJackOLantern}
+        xlinkHref={minecraftJackOLantern}
+        width="80"
+        height="150"
+        transform="translate(80 0) scale(-1 1)"
+        preserveAspectRatio="xMidYMid meet"
+        style={{ imageRendering: 'pixelated' }}
+      />
     </g>
   );
 }
 
-function Ghost({ x, y = 0, scale = 1 }) {
+function GhastTentacle({ x, y, length, tilt }) {
+  return (
+    <g transform={`translate(${x} ${y}) rotate(${tilt})`}>
+      <path d={`M0 0H6V${length}H0Z`} fill="#A3A3A3" />
+      <path d={`m6 0 4-2v${length}l-4 2Z`} fill="#777777" />
+      <path d="m0 0 4-2h6L6 0Z" fill="#C5C5C5" />
+      <path d={`M0 7h3v7H0ZM3 ${length - 12}h3v8H3Z`} fill="#B8B8B8" />
+      <path d={`M6 12h2v7H6ZM8 ${length - 10}h2v6H8Z`} fill="#858585" />
+    </g>
+  );
+}
+
+function MinecraftGhast({ x, y = 0, scale = 1 }) {
   return (
     <g transform={`translate(${x} ${y}) scale(${scale})`}>
       {/* Keep positioning separate from the gentle floating animation. */}
       <g className="spooky-ghost">
-        <path d="M194 112c0-31 12-50 36-51 25-1 40 20 39 49l5 30c-7 5-13 1-18-5-4 9-13 12-20 4-6 10-15 9-22 1-8 7-16 7-23 0Z" fill="#9370DB" stroke="#663399" strokeWidth="3" strokeLinejoin="round" />
-        <path d="M202 100c1-15 7-25 17-29" stroke="#FF8C69" strokeWidth="4" strokeLinecap="round" />
-        <ellipse cx="216" cy="99" rx="4" ry="6" fill="#2F2F2F" />
-        <ellipse cx="243" cy="99" rx="4" ry="6" fill="#2F2F2F" />
-        <path d="M222 113c4 6 11 6 15 0" stroke="#2F2F2F" strokeWidth="3" strokeLinecap="round" />
-        <ellipse cx="207" cy="111" rx="6" ry="3.5" fill="#FF8C69" />
-        <ellipse cx="252" cy="111" rx="6" ry="3.5" fill="#FF8C69" />
-        <path d="M193 111c-6 0-11-4-14-9M270 109c6-1 11-6 13-12" stroke="#9370DB" strokeWidth="8" strokeLinecap="round" />
+        {/* Nine cuboid tentacles hang behind the cube's lower faces. */}
+        {[
+          [42, 59, 39, -8], [28, 66, 43, -12], [56, 66, 38, -22],
+          [14, 73, 34, -14], [42, 73, 41, -18], [70, 73, 37, -26],
+          [28, 80, 35, -10], [56, 80, 38, -22], [42, 87, 35, -16],
+        ].map(([tx, ty, length, tilt], index) => (
+          <GhastTentacle key={index} x={tx} y={ty} length={length} tilt={tilt} />
+        ))}
+
+        {/* Isometric, pixel-textured white cube and the reference's red face. */}
+        <g transform="matrix(1 -.5 1 .5 0 21)">
+          <path d="M0 0H42V42H0Z" fill="#ECECEC" />
+          <path d="M0 0h12v3H0ZM18 3h12v3H18ZM36 0h6v3h-6ZM0 18h6v3H0ZM9 36h12v3H9ZM33 30h9v3h-9Z" fill="#F7F7F7" />
+          <path d="M9 6h3v18H9ZM21 0h3v9h-3ZM27 15h3v18h-3ZM36 9h3v15h-3ZM18 30h3v12h-3Z" fill="#D8D6D6" />
+          <path d="M12 15h6v3h-6ZM21 24h6v3h-6ZM30 33h6v3h-6Z" fill="#D4C9C9" />
+        </g>
+        <g transform="matrix(1 -.5 0 1 42 42)">
+          <path d="M0 0H42V52H0Z" fill="#777777" />
+          <path d="M0 3h3v12H0ZM12 0h9v3h-9ZM27 6h6v3h-6ZM36 21h6v12h-6ZM9 36h6v6H9ZM24 45h9v3h-9Z" fill="#828282" />
+          <path d="M18 6h6v3h-6ZM33 3h6v3h-6ZM6 18h3v9H6ZM15 24h6v3h-6ZM27 30h6v3h-6ZM3 42h9v3H3ZM18 48h6v4h-6Z" fill="#6D6D6D" />
+          <path d="M9 27h3v9H9ZM3 33h6v3H3ZM12 39h9v3h-9ZM30 39h6v3h-6Z" fill="#8B8B8B" />
+        </g>
+        <g transform="matrix(1 .5 0 1 0 21)">
+          <path d="M0 0H42V52H0Z" fill="#B5B5B5" />
+          <path d="M0 0h3v12H0ZM6 3h9v3H6ZM24 0h6v3h-6ZM36 6h6v12h-6ZM3 27h6v3H3ZM30 24h6v6h-6ZM12 45h6v7h-6Z" fill="#C2C2C2" />
+          <path d="M9 9h6v3H9ZM27 6h6v3h-6ZM0 21h3v6H0ZM6 36h6v3H6ZM33 36h6v3h-6ZM24 48h6v4h-6Z" fill="#A3A3A3" />
+          <path d="M12 21h3v9h-3ZM30 21h3v9h-3Z" fill="#A49C9C" />
+          <path d="M6 15h9v3h3v6H6ZM27 15h9v3h3v6H27ZM18 30h6v3h3v15H15V33h3Z" fill="#242424" />
+          <path d="M12 18h3v6h-3ZM30 18h6v6h-6ZM18 36h6v9h-6Z" fill="#C10D0D" />
+          <path d="M0 45h6v3H0ZM33 45h9v3h-9Z" fill="#AAAAAA" />
+        </g>
       </g>
     </g>
   );
 }
 
-function Frankenstein({ x, y }) {
+function MinecraftEnderDragon({ x, y, scale = 1 }) {
   return (
-    <g transform={`translate(${x} ${y})`} stroke="#2F2F2F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <ellipse cx="44" cy="109" rx="43" ry="6" fill="#1C1C1C" opacity=".25" stroke="none" />
-      <path d="m29 81-2 20 15 1 3-18 3 18 15-1-2-20Z" fill="#4B0082" />
-      <path d="M26 99c-7 1-9 5-8 9h25v-8M49 100v8h25c1-4-3-8-11-9" fill="#1C1C1C" />
-      <path d="M24 59c-8 2-12 8-14 17l12 5 11-14M64 59c9 1 15 8 18 17l-12 5-12-13" fill="#663399" />
-      <path d="M10 75c-7 0-9 7-4 11 4 3 10 2 14-2l2-5M82 75c7 0 9 7 4 11-4 3-10 2-14-2l-2-5" fill="#32CD32" />
-      <path d="M25 57c11-7 27-7 39 0l5 31c-16 5-35 5-50 0Z" fill="#663399" />
-      <path d="m28 55 15 14 17-14-6 23-11-7-10 8Z" fill="#9370DB" />
-      <path d="M37 48v12l7 8 8-8V48" fill="#32CD32" />
-      <circle cx="44" cy="79" r="2.2" fill="#FFA500" stroke="none" />
-      <circle cx="44" cy="87" r="2.2" fill="#FFA500" stroke="none" />
-      <path d="M15 44h10M63 44h11" stroke="#8A2BE2" strokeWidth="5" />
-      <path d="M12 40h5v8h-5ZM73 40h5v8h-5Z" fill="#708090" stroke="#2F2F2F" strokeWidth="2" />
-      <path d="M23 12c13-4 29-4 42 0l1 34c0 11-10 16-22 16S22 56 22 47Z" fill="#32CD32" />
-      <path d="M22 24V11c15-4 30-4 44 0v13l-9-3-3 5-8-6-8 5-6-4Z" fill="#1C1C1C" />
-      <path d="m50 29 11 1m-9-4-1 6m6-5-1 6" stroke="#228B22" strokeWidth="1.7" />
-      <path d="m29 35 8-1m12 0 8 1" strokeWidth="2" />
-      <ellipse cx="34" cy="41" rx="3" ry="4.5" fill="#2F2F2F" stroke="none" />
-      <ellipse cx="53" cy="41" rx="3" ry="4.5" fill="#2F2F2F" stroke="none" />
-      <path d="M34 51c5 6 14 6 19 0" fill="none" />
-      <ellipse cx="28" cy="48" rx="4" ry="2.5" fill="#FF8C69" stroke="none" />
-      <ellipse cx="59" cy="48" rx="4" ry="2.5" fill="#FF8C69" stroke="none" />
+    <g transform={`translate(${x} ${y}) scale(${scale})`} stroke="#08080B" strokeWidth="2" strokeLinejoin="miter">
+      <ellipse cx="112" cy="180" rx="79" ry="7" fill="#1C1C1C" opacity=".25" stroke="none" />
+      {/* Face into the garden, with the reference's angular wings and cube anatomy. */}
+      <g transform="translate(223 0) scale(-1 1)">
+        <path d="m105 75-38-41L8 5l21 50 27-3 8 23 22-7 14 24Z" fill="#111115" />
+        <path d="m105 75-39-43L8 5l60 21 41 38Z" fill="#77777D" />
+        <path d="M14 12 57 43 86 68M57 43l-1 9M68 35l-4 40M85 53l1 15" fill="none" stroke="#55555C" strokeWidth="4" />
+        <path d="m139 76 29-43 42-28-12 53-25-6-5 23-22-5-9 23Z" fill="#08080B" />
+        <path d="m133 72 31-43 46-24-37 35-32 42Z" fill="#9A9A9F" />
+        <path d="M203 13 181 43 147 70M181 43l17 15M167 39l6 13M152 60l16 15" fill="none" stroke="#6F6F76" strokeWidth="4" />
+
+        {/* The tail tapers through distinct block segments. */}
+        <path d="m133 85 27 9 22 6 18-2 13-9 10-13-3 20-15 14-22 6-27-6-25-11Z" fill="#19191E" />
+        <path d="m137 85 24 8 22 6 17-2 13-9 10-12" fill="none" stroke="#55555D" strokeWidth="3" />
+        <path d="m157 94-2 14m24-8 2 15m18-17 5 11m9-19 6 5" fill="none" />
+        <path d="m156 91 2-7 5 2-1 7m16 5 1-7 5 1-1 8m14-3 3-7 4-1-2 8" fill="#929299" strokeWidth="1" />
+
+        {/* Four hanging cuboid legs beneath the long, faceted body. */}
+        <path d="m104 94-2 24 7 12h13l-6-16 3-20m10 1 8 19 5 10h13l-7-15-4-19" fill="#111115" />
+        <path d="m86 99-7 21 1 21h17l-3-20 10-19m19-3 1 23 9 17h18l-12-21-1-24" fill="#202025" />
+        <path d="m86 106-6 16 2 13h6l-1-13 7-16m38 0 2 17 8 11h6l-9-15-1-13" fill="#39393F" stroke="none" />
+        <path d="M80 136h17v5H80Zm53-2h18v5h-18Z" fill="#08080B" stroke="none" />
+        <path d="M84 74 101 62h36l11 17-8 25H99L81 91Z" fill="#202025" />
+        <path d="m84 74 17-12h36l-14 12Z" fill="#45454D" />
+        <path d="M123 74h18l7 5-8 25h-17Z" fill="#111115" />
+        <path d="M94 78h12v10H94Zm14 13h11v9h-11Zm23-11h8v11h-8Z" fill="#303036" stroke="none" />
+        <path d="m92 67 1-11 7-3v10m15-1 1-11 7-2-1 13m13 1 2-10 6 3-2 11" fill="#929299" strokeWidth="1.5" />
+
+        {/* Both pixel eyes sit level on one face, above the long cuboid muzzle. */}
+        <path d="m57 75 27-10 17 12-19 20-27-5Z" fill="#19191E" />
+        <path d="m61 75 24-9 9 7-28 11Z" fill="#45454D" />
+        <path d="M23 74 35 65H79L67 74Z" fill="#393940" />
+        <path d="m67 74 12-9v29l-12 9Z" fill="#08080B" />
+        <path d="M23 74H67V103H23Z" fill="#151519" />
+        <path d="m35 65-5-16 8-2 7 18Zm24 0 2-17 8-3-2 20Z" fill="#77777F" />
+        <path d="m35 65-5-16 3-1 7 17Zm24 0 2-17 3-1-1 18Z" fill="#99999F" stroke="none" />
+
+        <path d="m12 113 39 3 16-13-12 26H18Z" fill="#08080B" />
+        <path d="m18 125 35-2 14-20v12l-12 19H18Z" fill="#29292F" />
+        <path d="M7 96 23 88H67V110L51 119H7Z" fill="#111115" />
+        <path d="m7 96 16-8h44l-16 8Z" fill="#303037" />
+        <path d="m51 96 16-8v22l-16 9Z" fill="#08080B" />
+        <path d="M12 101h6v4h-6Zm23 0h6v4h-6Z" fill="#020204" stroke="none" />
+        <path d="M18 125h35v3H18Z" fill="#53535B" stroke="none" />
+
+        <g stroke="none">
+          <path d="M28 79h13v8H28ZM49 79h13v8H49Z" fill="#69277E" />
+          <path d="M29 80h11v6H29ZM50 80h11v6H50Z" fill="#C15AE0" />
+          <path d="M31 80h3v4h-3ZM52 80h3v4h-3Z" fill="#F0A2FF" />
+        </g>
+      </g>
     </g>
   );
 }
@@ -67,6 +131,7 @@ function MinecraftCreeper({ x, y }) {
   return (
     <g transform={`translate(${x} ${y})`} stroke="#263B24" strokeWidth="2" strokeLinejoin="miter">
       <ellipse cx="54" cy="109" rx="49" ry="6" fill="#1C1C1C" opacity=".25" stroke="none" />
+      <g transform="translate(117 0) scale(-1 1)">
       {/* Four cuboid feet, a narrow body, and the creeper's stepped face. */}
       <path d="M28 80 40 70H60V91L48 101H28ZM58 80 70 70H90V91L78 101H58Z" fill="#438C36" />
       <path d="M39 48H61V88H39Z" fill="#70BC48" />
@@ -87,6 +152,7 @@ function MinecraftCreeper({ x, y }) {
         <path d="M40 15h5v5h-5ZM60 15h10v5H60ZM30 45h10v5H30ZM75 10h5v10h-5ZM72 30h5v5h-5Z" fill="#4D983A" />
         <path d="M35 20H45V30H35ZM55 20H65V30H55ZM45 30h10v5h5v15h-5v-5H45v5h-5V35h5Z" fill="#17251A" />
       </g>
+      </g>
     </g>
   );
 }
@@ -98,60 +164,56 @@ function MinecraftZombie({ x, y }) {
       {/* The classic green cube head, teal shirt, and purple trousers. */}
       <path d="M33 64H47V96H33ZM51 64H65V96H51Z" fill="#6550A1" />
       <path d="m65 64 9-7v32l-9 7Z" fill="#463777" />
-      <path d="M33 80h6v12h-6ZM57 69h8v7h-8Z" fill="#7B66B5" stroke="none" />
       <path d="M30 92H47V99H30ZM51 92H70V99H51Z" fill="#4A5553" />
       <path d="m70 92 6-5v7l-6 5Z" fill="#303C3A" />
       <path d="M33 35H65V66H33Z" fill="#16A6A6" />
       <path d="m65 35 9-7v31l-9 7Z" fill="#0C727B" />
-      <path d="M37 40h6v19h-6ZM51 59h14v7H51Z" fill="#28B9B4" stroke="none" />
       <path d="M43 35h12v6H43Z" fill="#4E893C" stroke="none" />
       <path d="M21 35H33V49H21ZM65 35H77V49H65Z" fill="#16A6A6" />
       <path d="M5 43 15 36H31L21 43ZM77 43l10-7h10l-10 7Z" fill="#77B653" />
       <path d="M5 43H25V56H5ZM73 43H93V56H73Z" fill="#659C48" />
       <path d="m93 43 8-7v13l-8 7Z" fill="#467B36" />
-      <path d="M9 47h8v4H9ZM77 50h8v6h-8Z" fill="#77B653" stroke="none" />
       <path d="M31 3 40-4H72L63 3Z" fill="#77B653" />
       <path d="m63 3 9-7v32l-9 7Z" fill="#467B36" />
       <path d="M31 3H63V35H31Z" fill="#659C48" />
       <g stroke="none">
-        <path d="M31 3h12v4H31ZM55 3h8v8h-8ZM31 23h4v8h-4ZM51 31h12v4H51Z" fill="#77B653" />
-        <path d="M43 7h8v4h-8ZM35 11h4v4h-4ZM59 19h4v8h-4Z" fill="#4E893C" />
         <path d="M35 15h8v4h-8ZM51 15h8v4h-8Z" fill="#243426" />
         <path d="M43 23h12v4H43Z" fill="#354D2C" />
-        <path d="M43 19h4v4h-4Z" fill="#83B65A" />
       </g>
     </g>
   );
 }
 
-function Skeleton({ x, y }) {
+function MinecraftSkeleton({ x, y }) {
   return (
-    <g transform={`translate(${x} ${y})`} stroke="#2F2F2F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <g transform={`translate(${x} ${y})`} stroke="#42494B" strokeWidth="1.5" strokeLinejoin="miter">
       <ellipse cx="46" cy="99" rx="34" ry="6" fill="#1C1C1C" opacity=".25" stroke="none" />
-      {/* A friendly waving skeleton with a visible spine and rib cage. */}
-      <path d="M46 32v36M31 41 20 55 10 42M61 41 73 54 82 38M39 73 34 85 30 96M53 73 58 85 62 96" fill="none" strokeWidth="8" />
-      <path d="M46 32v36M31 41 20 55 10 42M61 41 73 54 82 38M39 73 34 85 30 96M53 73 58 85 62 96" fill="none" stroke="#F4EEDC" strokeWidth="5" />
-      <path d="M31 41c8-5 22-5 30 0" fill="none" stroke="#F4EEDC" strokeWidth="5" />
-      <g fill="none" stroke="#F4EEDC" strokeWidth="4">
-        <path d="M33 46c2 4 8 5 13 4 5 1 11 0 13-4" />
-        <path d="M33 53c3 4 8 5 13 4 5 1 10 0 13-4" />
-        <path d="M36 60c3 3 7 4 10 3 3 1 7 0 10-3" />
+
+      {/* Thin cuboid legs, hanging arms, and an open chest like the game model. */}
+      <path d="M33 67H41V99H33ZM49 67H57V99H49Z" fill="#A3A7A6" />
+      <path d="m41 67 4-3v32l-4 3Zm16 0 4-3v32l-4 3Z" fill="#798B93" />
+
+      <path d="M42 43H49V64H42Z" fill="#949C9C" />
+      <path d="m49 43 4-3v21l-4 3Z" fill="#6E7E85" />
+      <path d="M22 34 26 31H33L29 34ZM61 34l4-3h7l-4 3Z" fill="#BCC0BE" />
+      <path d="M22 34H29V68H22ZM61 34H68V68H61Z" fill="#A3A7A6" />
+      <path d="m29 34 4-3v34l-4 3Zm39 0 4-3v34l-4 3Z" fill="#798B93" />
+
+      <path d="M30 34 34 31H64L60 34Zm30 0 4-3v16l-4 3Z" fill="#798B93" />
+      <path d="M30 34H60V50H52V54H48V50H42V54H36V50H30Z" fill="#A3A7A6" />
+      <path d="M29 62 33 59H64L60 62Z" fill="#BCC0BE" />
+      <path d="M29 62H60V69H29Z" fill="#A3A7A6" />
+      <path d="m60 62 4-3v7l-4 3Z" fill="#798B93" />
+
+      {/* A cube skull with rectangular eye sockets and mouth. */}
+      <path d="M28 4 35 0H67L60 4Z" fill="#BCC0BE" />
+      <path d="m60 4 7-4v29l-7 4Z" fill="#798B93" />
+      <path d="M28 4H60V29H28Z" fill="#A3A7A6" />
+      <g stroke="none">
+        <path d="M32 16h8v4h-8ZM48 16h8v4h-8ZM32 24h24v5H32Z" fill="#171D1F" />
       </g>
-      <path d="M33 66c8 3 18 3 26 0l-3 10-10-4-10 4Z" fill="#F4EEDC" />
-      <g fill="#F4EEDC">
-        <circle cx="20" cy="55" r="3.5" />
-        <circle cx="73" cy="54" r="3.5" />
-        <circle cx="34" cy="85" r="3.5" />
-        <circle cx="58" cy="85" r="3.5" />
-        <path d="M30 94c-6 0-9 2-10 5h13l1-4M62 94c6 0 9 2 10 5H59l-1-4" />
-        <path d="m9 43-5-5 2-3 4 3-2-8 3-1 3 10 2-4 3 2-5 8ZM80 39l-2-7 3-1 2 4 1-9 3 1-1 9 3-4 3 2-7 8Z" />
-      </g>
-      <path d="M27 16C27 5 35 0 46 0S65 5 65 16c0 8-4 12-9 14v5H36v-5c-5-2-9-6-9-14Z" fill="#F4EEDC" />
-      <path d="M32 12c1-5 5-8 10-8" fill="none" stroke="#FFFFFF" strokeWidth="3" />
-      <ellipse cx="37" cy="18" rx="5" ry="6" fill="#2F2F2F" stroke="none" />
-      <ellipse cx="55" cy="18" rx="5" ry="6" fill="#2F2F2F" stroke="none" />
-      <path d="m46 24-3 4h6Z" fill="#2F2F2F" stroke="none" />
-      <path d="M37 31h18m-12 0v4m6-4v4" fill="none" strokeWidth="1.5" />
+      <path d="M28 29H60V33H28Z" fill="#A3A7A6" />
+      <path d="m60 29 7-4v4l-7 4Z" fill="#798B93" />
     </g>
   );
 }
@@ -240,16 +302,16 @@ export default function HalloweenScene({ className = '' }) {
         <path d="M809 162c1-11 7-17 16-16-1 11-7 17-16 16Z" />
       </g>
 
-      <Frankenstein x={67} y={48} />
+      <MinecraftEnderDragon x={8} y={27} scale={.66} />
       <MinecraftCreeper x={176} y={48} />
       <Mushroom x={35} y={153} scale={.65} />
 
-      <Pumpkin x={268} y={6} scale={.94} />
-      <Ghost x={270} y={1} scale={.98} />
+      <MinecraftJackOLantern x={312} y={17} />
+      <MinecraftGhast x={451} y={37} scale={.96} />
       <Mushroom x={295} y={157} scale={.7} />
 
       <MinecraftZombie x={589} y={60} />
-      <Skeleton x={733} y={59} />
+      <MinecraftSkeleton x={733} y={59} />
       <Mushroom x={821} y={158} scale={.5} />
     </svg>
   );
