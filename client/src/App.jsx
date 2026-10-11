@@ -5,6 +5,9 @@ import TasksPage from './pages/TasksPage.jsx';
 import FamilyPage from './pages/FamilyPage.jsx';
 import { useSettings } from './api/client.js';
 import { pluralizeFamily } from './lib/familyName.js';
+import overviewBlood from './assets/overview-blood.svg';
+import bloodshotEye from './assets/bloodshot-eye.svg';
+import screamingSkull from './assets/screaming-skull.svg';
 
 export default function App() {
   const { data: settings } = useSettings();
@@ -39,11 +42,18 @@ export default function App() {
         </Link>
         <nav className="nav">
           {/* `end` matters: without it /tasks/3 would light up Overview too. */}
-          <NavLink to="/tasks" end className={({ isActive }) => (isActive ? 'active' : '')}>
-            ✅ Overview
+          <NavLink to="/tasks" end aria-label="overview" className={({ isActive }) => `nav-overview${isActive ? ' active' : ''}`}>
+            <img className="nav-overview-art" src={overviewBlood} alt="" aria-hidden="true" />
           </NavLink>
         </nav>
-        <span className="season-label"><span aria-hidden="true">✦</span> Spooky season</span>
+        <span className="season-label" role="img" aria-label="Spooky season">
+          <span aria-hidden="true">
+            <span className="season-sparkle">✦</span>{' Sp'}
+            <img className="season-eye" src={bloodshotEye} alt="" />
+            <img className="season-eye season-eye-second" src={bloodshotEye} alt="" />
+            {'ky season'}
+          </span>
+        </span>
         {/* Icon only, hard right, in the space the date used to hold. */}
         <NavLink
           to="/settings"
@@ -51,7 +61,7 @@ export default function App() {
           title="Settings"
           aria-label="Settings"
         >
-          ⚙️
+          <img className="nav-skull-art" src={screamingSkull} alt="" aria-hidden="true" />
         </NavLink>
       </header>
 

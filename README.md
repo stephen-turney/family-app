@@ -20,9 +20,11 @@ Built as an MVP with a React (Vite) frontend and a Node/Express + SQLite backend
 - **Progress** — each member's completion count and % for the day, on their card and on Home.
 - **Weekly allowance reports** — every Sunday at 2:00 a.m. Central, the server totals Monday–Friday
   completions (10 points each, capped at 20 per day), calculates each child's completion percentage
-  and pro-rata allowance, rounds the payout up to the nearest dime, and adds a downloadable text
+  and pro-rata allowance, rounds the payout up to the nearest dime, and adds a saved weekly
   report under Settings → Reports. Reports generated on demand open immediately in a formatted
-  popup instead of creating a file. Scheduled reports can be downloaded or deleted from the list.
+  popup instead of creating a file. Saved reports open in the same formatted popup and can be
+  deleted from the list. Scheduled reports save a JSON snapshot of that week's dates and totals;
+  older text reports are converted automatically while preserving their original values.
   Each child's final payout is prominently
   divided into spending (50%), savings (30%), giving (10%), and taxes (10%). Each category is
   rounded upward to the nearest $0.05, with the extra rounding and resulting grand total shown.

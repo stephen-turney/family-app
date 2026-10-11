@@ -24,6 +24,9 @@ function ReportsCard() {
   const { data: reports = [], isLoading, error } = useReports();
   const [openReport, setOpenReport] = useState(null);
   const generate = useApiMutation(() => api.post('/reports'), ['reports']);
+  const load = useApiMutation(
+    (filename) => api.get(`/reports/${encodeURIComponent(filename)}`)
+  );
   const remove = useApiMutation(
     (filename) => api.del(`/reports/${encodeURIComponent(filename)}`),
     ['reports']
@@ -35,6 +38,16 @@ function ReportsCard() {
     }
   };
 
+  const generateReport = () => {
+    load.reset();
+    generate.mutate(undefined, { onSuccess: setOpenReport });
+  };
+
+  const viewReport = (filename) => {
+    generate.reset();
+    load.mutate(filename, { onSuccess: setOpenReport });
+  };
+
   return (
     <div className="card">
       <div className="row">
@@ -42,8 +55,8 @@ function ReportsCard() {
         <div className="spacer" />
         <button
           className="btn small"
-          disabled={generate.isPending}
-          onClick={() => generate.mutate(undefined, { onSuccess: setOpenReport })}
+          disabled={generate.isPending || load.isPending}
+          onClick={generateReport}
         >
           {generate.isPending ? 'Generating…' : 'Generate report now'}
         </button>
@@ -51,20 +64,29 @@ function ReportsCard() {
       {generate.isError && (
         <p className="report-message error">The report could not be generated.</p>
       )}
+      {load.isError && (
+        <p className="report-message error">The saved report could not be opened. Please try again.</p>
+      )}
       {isLoading && <span className="muted">Loading reports…</span>}
       {error && <span className="muted">Reports could not be loaded.</span>}
       {reports.length > 0 && (
         <div className="report-list">
           {reports.map((report) => (
             <div className="report-row" key={report.filename}>
-              <a
+              <button
+                type="button"
                 className="report-link"
-                href={`/api/reports/${encodeURIComponent(report.filename)}`}
-                download
+                disabled={generate.isPending || load.isPending || (remove.isPending && remove.variables === report.filename)}
+                aria-busy={load.isPending && load.variables === report.filename}
+                onClick={() => viewReport(report.filename)}
               >
                 <span aria-hidden="true">📄</span>
-                {report.filename}
-              </a>
+                {load.isPending && load.variables === report.filename
+                  ? 'Opening report…'
+                  : report.mondayLabel
+                    ? `Allowance totals · Week of ${report.mondayLabel}`
+                    : report.filename.replace(/\.(?:json|txt)$/, '').replace(/[_-]/g, ' ')}
+              </button>
               <button
                 className="btn danger small report-delete"
                 disabled={remove.isPending && remove.variables === report.filename}

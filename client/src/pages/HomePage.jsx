@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { useMembers, useProgress, localDate } from '../api/client.js';
 import Avatar from '../components/Avatar.jsx';
 import HalloweenScene from '../components/HalloweenScene.jsx';
+import BoneChevron from '../components/BoneChevron.jsx';
 import { memberColor } from '../lib/theme.js';
 
 function parseLocalDate(iso) {
@@ -61,9 +62,7 @@ export default function HomePage() {
               aria-label="Previous day"
               title="Previous day"
             >
-              <svg className="daynav-arrow" viewBox="0 0 24 24" aria-hidden="true">
-                <polyline points="15 18 9 12 15 6" />
-              </svg>
+              <BoneChevron direction="previous" />
             </button>
             <h1 className="daynav-date">
               {format(parseLocalDate(date), 'EEEE, MMMM d')}
@@ -74,9 +73,7 @@ export default function HomePage() {
               aria-label="Next day"
               title="Next day"
             >
-              <svg className="daynav-arrow" viewBox="0 0 24 24" aria-hidden="true">
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
+              <BoneChevron direction="next" />
             </button>
           </div>
           <div className="daynav-tag-slot">

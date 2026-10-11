@@ -62,19 +62,17 @@ a.brand:hover { opacity: .7; }
 .nav a.tab-member > :first-child { flex-shrink: 0; }
 
 /* Settings is an icon on the hard right, in the space the date used to hold.
-   44px square keeps a finger-sized target around the 26px glyph. */
+   44px square keeps a finger-sized target around the skull artwork. */
 .nav-gear {
   flex-shrink: 0; width: 44px; height: 44px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
   font-size: 26px; line-height: 1; text-decoration: none;
-  /* The glyph renders as colour emoji, so it can't be recoloured to match the
-     muted tab text — a slight dim is the nearest equivalent. Don't go much below
-     this: at .55 it read as a disabled control, and it's the only way into
-     Settings now that the label is gone. */
+  /* Keep the artwork visible while giving hover and active states emphasis. */
   opacity: .8; transition: opacity .15s ease, background .15s ease;
 }
 .nav-gear:hover { background: var(--panel-2); opacity: 1; }
 .nav-gear.active { background: var(--accent-soft); opacity: 1; }
+.nav-skull-art { display: block; width: 40px; height: 44px; }
 
 .content {
   flex: 1; overflow: auto; padding: 24px;
@@ -121,8 +119,10 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
   padding: 11px 13px; border: 1px solid var(--border); border-radius: 10px;
   background: var(--bg); color: var(--accent); font-weight: 600;
   text-decoration: none; overflow-wrap: anywhere;
+  font-family: inherit; font-size: inherit; text-align: left; cursor: pointer;
 }
 .report-link:hover { border-color: var(--accent); background: var(--accent-soft); }
+.report-link:disabled { cursor: wait; opacity: .65; }
 .report-delete { flex-shrink: 0; }
 .report-message { margin: 0 0 12px; color: var(--good); font-size: 13px; font-weight: 600; }
 .report-message.error { color: var(--danger); }

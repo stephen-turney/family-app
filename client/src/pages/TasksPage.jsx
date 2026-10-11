@@ -16,6 +16,7 @@ import StepAddModal from '../components/StepAddModal.jsx';
 import StepRenameModal from '../components/StepRenameModal.jsx';
 import Avatar from '../components/Avatar.jsx';
 import CompletionMark from '../components/CompletionMark.jsx';
+import BoneChevron from '../components/BoneChevron.jsx';
 import { isUploadedImage, resolveCompletedIcon, resolveIcon } from '../lib/taskIcons.js';
 import { memberColor } from '../lib/theme.js';
 
@@ -691,9 +692,7 @@ export default function TasksPage() {
                 aria-label="Previous day"
                 title="Previous day"
               >
-                <svg className="daynav-arrow" viewBox="0 0 24 24" aria-hidden="true">
-                  <polyline points="15 18 9 12 15 6" />
-                </svg>
+                <BoneChevron direction="previous" />
               </button>
               <span className="daynav-date">
                 {format(parseLocalDate(date), 'EEEE, MMMM d')}
@@ -704,9 +703,7 @@ export default function TasksPage() {
                 aria-label="Next day"
                 title="Next day"
               >
-                <svg className="daynav-arrow" viewBox="0 0 24 24" aria-hidden="true">
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
+                <BoneChevron direction="next" />
               </button>
             </div>
             <div className="daynav-tag-slot">
@@ -737,9 +734,7 @@ export default function TasksPage() {
                 aria-label="Previous day"
                 title="Previous day"
               >
-                <svg className="daynav-arrow" viewBox="0 0 24 24" aria-hidden="true">
-                  <polyline points="15 18 9 12 15 6" />
-                </svg>
+                <BoneChevron direction="previous" />
               </button>
               <span className="daynav-date">
                 {format(parseLocalDate(date), 'EEEE, MMMM d')}
@@ -750,9 +745,7 @@ export default function TasksPage() {
                 aria-label="Next day"
                 title="Next day"
               >
-                <svg className="daynav-arrow" viewBox="0 0 24 24" aria-hidden="true">
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
+                <BoneChevron direction="next" />
               </button>
             </div>
             <div className="daynav-tag-slot">
