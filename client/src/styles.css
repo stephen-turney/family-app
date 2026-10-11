@@ -638,6 +638,12 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
   box-shadow: inset 0 2px 0 rgba(255, 239, 206, .55), 0 3px 0 #835536;
 }
 .checkline .box img { display: block; width: 100%; height: 100%; }
+.completion-splatter {
+  /* Clip only the blood to the rounded checkbox, leaving the knife above it. */
+  position: absolute; z-index: 1; top: 0; left: 0; width: 100%; height: 100%;
+  overflow: hidden; border-radius: inherit; pointer-events: none;
+}
+.completion-splatter svg { display: block; width: 100%; height: 100%; }
 .checkline .box .completion-knife {
   /* The SVG's contact point is (64, 64): 64% of 66px = 42.24px.
      Anchor that point to the centre of either checkbox size. */

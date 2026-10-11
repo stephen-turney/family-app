@@ -36,11 +36,12 @@ Calendar merging and iCal sync were removed in August 2026 to keep this focused 
 The code and the removed data are parked in [`_archive/`](_archive/README.md) if they're ever wanted
 back. Chores exist in the database and the API but are hidden from the UI.
 
-The Halloween skin adds a purple night sky, charcoal cards, pumpkin accents, and friendly SVG
-ghosts and bats across Home, checklists, Settings, and dialogs. The skin lives in
+The Halloween skin adds a purple night sky, charcoal cards, pumpkin accents, and friendly Minecraft
+characters and bats across Home, checklists, Settings, and dialogs. The skin lives in
 `client/src/halloween.css`, applies seasonal member colours without changing saved values,
 keeps member photos, and respects reduced-motion preferences.
-Completed checkboxes show a cartoon knife embedded at the centre of a wooden block. The default
+Completed checkboxes show a cartoon knife with red blood embedded at the centre of a wooden block,
+with one of six randomly selected blood-splatter patterns contained inside each checkbox. The default
 done task picture and block celebration remain checkmarks; custom done pictures are preserved.
 
 ## Requirements

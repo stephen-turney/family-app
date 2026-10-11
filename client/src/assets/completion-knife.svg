@@ -13,10 +13,10 @@
     <path d="m43 39 38 38C62 71 46 59 37 48Z" fill="#9370DB" stroke="none"/>
     <path d="m48 43 24 24" stroke="#FF8C69" stroke-width="2.5"/>
     <g clip-path="url(#blade)" stroke="none">
-      <path d="M35 51c5-7 8 6 13 2s4 9 10 6 5 11 11 7 8 9 14 6l14 11-8 10-39-11-22-23Z" fill="#FF6347"/>
-      <path d="M35 58c15 17 35 27 58 25l-1 8-36-9Z" fill="#8B3A62"/>
-      <path d="m59 64 5 7m9 4 7 4" stroke="#FF8C69" stroke-width="2.5"/>
-      <path d="M52 53c0-4 5-3 5 0s-5 4-5 0Zm15 8c-2-4 3-6 4-2s-2 6-4 2Z" fill="#FF6347"/>
+      <path d="M35 51c5-7 8 6 13 2s4 9 10 6 5 11 11 7 8 9 14 6l14 11-8 10-39-11-22-23Z" fill="#D10B16"/>
+      <path d="M35 58c15 17 35 27 58 25l-1 8-36-9Z" fill="#850710"/>
+      <path d="m59 64 5 7m9 4 7 4" stroke="#F5222D" stroke-width="2.5"/>
+      <path d="M52 53c0-4 5-3 5 0s-5 4-5 0Zm15 8c-2-4 3-6 4-2s-2 6-4 2Z" fill="#D10B16"/>
     </g>
     <path d="M43 32 93 83C72 85 45 74 30 52L29 46Z"/>
     <path d="M10 9c3-3 7-2 10 1l22 22c4 4 2 7-1 10l-4 4c-3 3-7 4-10 0L6 24c-3-3-3-7 0-10Z" fill="#2F2F2F"/>

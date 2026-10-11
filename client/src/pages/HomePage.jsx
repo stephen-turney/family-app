@@ -99,7 +99,7 @@ export default function HomePage() {
           const points = Math.min(stat?.points || 0, 200);
           return (
             <Link key={m.id} to={`/tasks/${m.id}?date=${date}`} className="home-tile">
-              <span className="home-tile-charm" aria-hidden="true">{['🎃', '👻', '🍬', '🦇'][index % 4]}</span>
+              <span className="home-tile-charm" aria-hidden="true">{['🎃', '🍬', '🦇'][index % 3]}</span>
               <span
                 className="home-avatar"
                 style={{ background: `${color}59`, borderColor: color }}

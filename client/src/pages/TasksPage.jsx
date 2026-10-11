@@ -15,7 +15,7 @@ import RoutinePicturesModal from '../components/RoutinePicturesModal.jsx';
 import StepAddModal from '../components/StepAddModal.jsx';
 import StepRenameModal from '../components/StepRenameModal.jsx';
 import Avatar from '../components/Avatar.jsx';
-import completionKnife from '../assets/completion-knife.svg';
+import CompletionMark from '../components/CompletionMark.jsx';
 import { isUploadedImage, resolveCompletedIcon, resolveIcon } from '../lib/taskIcons.js';
 import { memberColor } from '../lib/theme.js';
 
@@ -991,10 +991,7 @@ export default function TasksPage() {
                                       </button>
                                     ) : (
                                       <span className="box" aria-hidden="true">
-                                        {s.done && <>
-                                          <img className="completion-knife" src={completionKnife} alt="" />
-                                          <span className="completion-entry" />
-                                        </>}
+                                        {s.done && <CompletionMark />}
                                       </span>
                                     )}
                                     {/* Pre-readers find their task by picture. */}
