@@ -2,7 +2,7 @@ import { createContext, useContext, useLayoutEffect } from 'react';
 import { useSettings } from '../api/client.js';
 import { resolveTheme } from '../lib/theme.js';
 
-const ThemeContext = createContext({ theme: 'spooky', isSpooky: true });
+const ThemeContext = createContext({ theme: 'spooky', isSpooky: true, isThanksgiving: false });
 
 export function ThemeProvider({ children }) {
   const { data: settings } = useSettings();
@@ -13,7 +13,7 @@ export function ThemeProvider({ children }) {
   }, [theme]);
 
   return (
-    <ThemeContext.Provider value={{ theme, isSpooky: theme === 'spooky' }}>
+    <ThemeContext.Provider value={{ theme, isSpooky: theme === 'spooky', isThanksgiving: theme === 'thanksgiving' }}>
       {children}
     </ThemeContext.Provider>
   );

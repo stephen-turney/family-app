@@ -41,8 +41,8 @@ Calendar merging and iCal sync were removed in August 2026 to keep this focused 
 The code and the removed data are parked in [`_archive/`](_archive/README.md) if they're ever wanted
 back. Chores exist in the database and the API but are hidden from the UI.
 
-**Settings → Theme** offers **Default** (the original light appearance) and **Spooky**. Selecting
-either option applies it immediately and saves the choice in the shared family settings, so it
+**Settings → Theme** offers **Default** (the original light appearance), **Spooky**, and
+**Thanksgiving**. Selecting a theme applies it immediately and saves the choice in the shared family settings, so it
 survives reloads and is used by other devices when they next load the app. Existing installations
 keep Spooky until a different theme is selected. Switching themes preserves saved member colours
 and task pictures.
@@ -54,6 +54,11 @@ keeps member photos, and respects reduced-motion preferences.
 Completed checkboxes show a cartoon knife with red blood embedded at the centre of a wooden block,
 with one of six randomly selected blood-splatter patterns contained inside each checkbox. The default
 done task picture and block celebration remain checkmarks; custom done pictures are preserved.
+
+The Thanksgiving skin uses a pixel art autumn welcome scene and transparent harvest decorations,
+with cream cards, warm brown text, pumpkin and cranberry accents, and seasonal member colours.
+Morning, afternoon, and evening panels use gold, olive, and terracotta tints. Artwork is bundled
+locally in `client/src/assets/thanksgiving/`; styles live in `client/src/thanksgiving.css`.
 
 ## Requirements
 

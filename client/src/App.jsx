@@ -8,10 +8,11 @@ import { pluralizeFamily } from './lib/familyName.js';
 import bloodshotEye from './assets/bloodshot-eye.svg';
 import screamingSkull from './assets/screaming-skull.svg';
 import { useTheme } from './components/ThemeProvider.jsx';
+import ThanksgivingSprite from './components/ThanksgivingSprite.jsx';
 
 export default function App() {
   const { data: settings } = useSettings();
-  const { isSpooky } = useTheme();
+  const { isSpooky, isThanksgiving } = useTheme();
   const brand = pluralizeFamily(settings?.family_name) || 'Family Hub';
   const navigate = useNavigate();
 
@@ -39,6 +40,7 @@ export default function App() {
             click to get back to a hub page. */}
         <Link to="/home" className="brand" title="Family home">
           {isSpooky && <span className="brand-pumpkin" aria-hidden="true">🎃</span>}
+          {isThanksgiving && <ThanksgivingSprite name="pumpkin" className="brand-harvest" />}
           {brand}
         </Link>
         {isSpooky && <span className="season-label" role="img" aria-label="Spooky season">
@@ -49,6 +51,7 @@ export default function App() {
             {'ky season'}
           </span>
         </span>}
+        {isThanksgiving && <span className="harvest-season-label">Give Thanks</span>}
         {/* Icon only, hard right, in the space the date used to hold. */}
         <NavLink
           to="/settings"

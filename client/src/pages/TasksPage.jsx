@@ -20,6 +20,7 @@ import BoneChevron from '../components/BoneChevron.jsx';
 import { isUploadedImage, resolveCompletedIcon, resolveIcon } from '../lib/taskIcons.js';
 import { memberColor } from '../lib/theme.js';
 import { useTheme } from '../components/ThemeProvider.jsx';
+import ThanksgivingSprite from '../components/ThanksgivingSprite.jsx';
 
 function TaskPicture({ picture }) {
   return isUploadedImage(picture) ? <img src={picture} alt="" /> : picture;
@@ -46,9 +47,9 @@ function shiftDate(iso, days) {
 // Keep the familiar sun/moon pictures. Blocks always render, even when empty — a checklist a kid
 // reads every day should keep the same shape.
 const BLOCKS = [
-  { key: 'morning', label: 'Morning', article: 'a', icon: '🌤️', tint: '#aab8d6', spookyTint: '#FF7518' },
-  { key: 'afternoon', label: 'Afternoon', article: 'an', icon: '☀️', tint: '#aec4a3', spookyTint: '#9370DB' },
-  { key: 'evening', label: 'Evening', article: 'an', icon: '🌙', tint: '#9cb0c9', spookyTint: '#2E8B57' },
+  { key: 'morning', label: 'Morning', article: 'a', icon: '🌤️', tint: '#aab8d6', spookyTint: '#FF7518', harvestTint: '#E3B650', harvestArt: 'corn' },
+  { key: 'afternoon', label: 'Afternoon', article: 'an', icon: '☀️', tint: '#aec4a3', spookyTint: '#9370DB', harvestTint: '#B9BE7A', harvestArt: 'leaves' },
+  { key: 'evening', label: 'Evening', article: 'an', icon: '🌙', tint: '#9cb0c9', spookyTint: '#2E8B57', harvestTint: '#CB8A60', harvestArt: 'acorn' },
 ];
 
 const CELEBRATION_PARTICLES = [
@@ -64,6 +65,11 @@ const CELEBRATION_PARTICLES = [
 const DEFAULT_PARTICLE_COLORS = {
   '#FFA500': '#f3b934', '#C71585': '#ef7c98', '#9400D3': '#58a7d7',
   '#9370DB': '#8c78c7', '#32CD32': '#7cba8a', '#FF7518': '#ee8c57',
+};
+
+const HARVEST_PARTICLE_COLORS = {
+  '#FFA500': '#B78A32', '#C71585': '#AB3F42', '#9400D3': '#9A653E',
+  '#9370DB': '#8C586B', '#32CD32': '#7D8537', '#FF7518': '#CF7028',
 };
 
 // Long enough for the surrounding rows to visibly glide into their new slots,
@@ -94,7 +100,7 @@ function rowsInDragOrder(rows, routineId, dragDisplayOrder) {
 // Serves both /tasks (everyone, side by side) and /tasks/:memberId (one person,
 // linked from the home page tiles).
 export default function TasksPage() {
-  const { theme, isSpooky } = useTheme();
+  const { theme, isSpooky, isThanksgiving } = useTheme();
   const { memberId } = useParams();
   const [searchParams] = useSearchParams();
   const focusId = memberId ? Number(memberId) : null;
@@ -795,7 +801,7 @@ export default function TasksPage() {
           const stat = statFor(m.id);
           const memberRoutines = routines.filter((r) => r.member_id === m.id);
           const blocks = BLOCKS.map((block) => ({
-            block: { ...block, tint: isSpooky ? block.spookyTint : block.tint },
+            block: { ...block, tint: isSpooky ? block.spookyTint : isThanksgiving ? block.harvestTint : block.tint },
             groups: displayGroups(memberRoutines.filter((r) => r.time_of_day === block.key)),
           }));
 
@@ -889,7 +895,7 @@ export default function TasksPage() {
                                   className="celebration-particle"
                                   style={{
                                     '--burst-x': `${x}px`, '--burst-y': `${y}px`,
-                                    '--particle-color': isSpooky ? color : DEFAULT_PARTICLE_COLORS[color], '--particle-delay': `${delay}s`,
+                                    '--particle-color': isSpooky ? color : isThanksgiving ? HARVEST_PARTICLE_COLORS[color] : DEFAULT_PARTICLE_COLORS[color], '--particle-delay': `${delay}s`,
                                   }}
                                 />
                               ))}
@@ -905,6 +911,7 @@ export default function TasksPage() {
                     <div className="block-panel" style={{ backgroundColor: block.tint }}>
                       <span className="block-icon" aria-hidden="true">{block.icon}</span>
                       <span className="block-label">{block.label}</span>
+                      {isThanksgiving && <ThanksgivingSprite name={block.harvestArt} className="block-harvest-art" />}
                     </div>
 
                     <div className="block-body">

@@ -6,6 +6,7 @@ import App from './App.jsx';
 import { ThemeProvider } from './components/ThemeProvider.jsx';
 import './styles.css';
 import './halloween.css';
+import './thanksgiving.css';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false } },

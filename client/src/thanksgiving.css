@@ -1,0 +1,134 @@
+/* Harvest colours sampled from the generated pixel art. Ordinary backgrounds,
+   custom properties and sprite sheets also work in the iOS 10 tablet build. */
+:root[data-theme="thanksgiving"] {
+  color-scheme: light;
+  --bg: #f5e7cc;
+  --panel: #fff9ed;
+  --panel-2: #efdfbf;
+  --text: #4b2b20;
+  --muted: #79563d;
+  --border: #cfb58b;
+  --accent: #a34220;
+  --accent-soft: #f4dbb7;
+  --good: #6b752d;
+  --danger: #a32d3a;
+  --shadow: 0 3px 0 #ddc5a0, 0 8px 20px rgba(88, 48, 23, .08);
+  --radius: 10px;
+}
+
+:root[data-theme="thanksgiving"] body { background: var(--bg); }
+:root[data-theme="thanksgiving"] .topbar {
+  background: #4b2b20; color: #fff1d4;
+  border-bottom: 3px solid #ba7735; box-shadow: 0 3px 0 rgba(75, 43, 32, .1);
+}
+:root[data-theme="thanksgiving"] .brand { font-weight: 800; }
+:root[data-theme="thanksgiving"] a.brand:hover { opacity: 1; color: #f6c868; }
+:root[data-theme="thanksgiving"] .nav-gear:hover,
+:root[data-theme="thanksgiving"] .nav-gear.active { background: #79513b; }
+.harvest-season-label {
+  color: #f6c868; font: 700 12px ui-monospace, 'Courier New', monospace;
+  letter-spacing: .13em; text-transform: uppercase; white-space: nowrap;
+}
+
+/* Each decoration uses one cell of the original transparent art sheet. */
+.thanksgiving-sprite {
+  display: inline-block; width: 56px; height: 54px; flex-shrink: 0;
+  background-size: 300% 300%; background-repeat: no-repeat;
+  image-rendering: pixelated; pointer-events: none;
+}
+.thanksgiving-sprite.brand-harvest { width: 38px; height: 36px; }
+.harvest-welcome {
+  position: relative; max-width: 860px; height: 240px; margin: 0 auto 24px;
+  overflow: hidden; border: 2px solid #b97b3d; border-radius: 10px;
+  background: #fce8c0; box-shadow: var(--shadow);
+}
+.harvest-welcome-art {
+  display: block; width: 100%; height: 100%; object-fit: cover;
+  object-position: center 62%; image-rendering: pixelated;
+}
+
+:root[data-theme="thanksgiving"] .home-tile { position: relative; border: 2px solid var(--border); }
+:root[data-theme="thanksgiving"] .home-tile:hover {
+  border-color: #aa6a32; box-shadow: 0 4px 0 #d5b78d, 0 12px 24px rgba(88, 48, 23, .12);
+}
+.thanksgiving-sprite.home-harvest-art { position: absolute; top: 12px; right: 12px; width: 52px; height: 50px; }
+:root[data-theme="thanksgiving"] .home-avatar,
+:root[data-theme="thanksgiving"] .checklist-avatar { box-shadow: 0 0 0 5px #f1e0bd; }
+:root[data-theme="thanksgiving"] .home-name { color: #5b3422; }
+:root[data-theme="thanksgiving"] .card { border-top: 3px solid #ba7735; }
+:root[data-theme="thanksgiving"] .daynav-btn {
+  color: var(--accent); background: var(--panel); border-color: #ba925f;
+  border-radius: 8px; box-shadow: 0 2px 0 #ddc5a0;
+}
+:root[data-theme="thanksgiving"] .daynav-btn:hover { background: var(--accent-soft); border-color: var(--accent); }
+:root[data-theme="thanksgiving"] .daynav-tag { background: #ead7ae; color: #624126; }
+:root[data-theme="thanksgiving"] .btn.ghost.daynav-jump { padding: 0; border: none; background: transparent; }
+:root[data-theme="thanksgiving"] .progress { background: #e9d8b8; border-radius: 5px; }
+:root[data-theme="thanksgiving"] .block-panel { position: relative; border: 1px solid rgba(100, 65, 30, .2); }
+:root[data-theme="thanksgiving"] .block-label {
+  color: #4b2b20; background: #fff4da; border: 1px solid rgba(100, 65, 30, .15);
+  font-family: 'Courier New', monospace; border-radius: 5px;
+}
+.thanksgiving-sprite.block-harvest-art { width: 40px; height: 38px; margin-left: auto; }
+:root[data-theme="thanksgiving"] .checkline .box { border-color: #b99c6f; border-radius: 8px; }
+:root[data-theme="thanksgiving"] .checkline.done .box { background: var(--good); border-color: var(--good); }
+:root[data-theme="thanksgiving"] .checkline.done { background: #f1ead5; }
+:root[data-theme="thanksgiving"] .checkline:active { background: var(--accent-soft); }
+:root[data-theme="thanksgiving"] .btn { border-radius: 7px; }
+:root[data-theme="thanksgiving"] .btn.danger { border-color: #cc9690; }
+:root[data-theme="thanksgiving"] .btn.danger:hover { background: #f6e0d7; }
+:root[data-theme="thanksgiving"] input,
+:root[data-theme="thanksgiving"] select,
+:root[data-theme="thanksgiving"] textarea { background: #fffcf4; border-color: #b99c6f; }
+:root[data-theme="thanksgiving"] input::placeholder,
+:root[data-theme="thanksgiving"] textarea::placeholder { color: var(--muted); opacity: .85; }
+:root[data-theme="thanksgiving"] .modal-backdrop { background: rgba(53, 30, 19, .65); }
+:root[data-theme="thanksgiving"] .allowance-report-heading { background: #ead3a5; color: var(--text); }
+:root[data-theme="thanksgiving"] .allowance-category { background: #f6dfb6; }
+:root[data-theme="thanksgiving"] .allowance-category.savings { background: #e4e5bc; }
+:root[data-theme="thanksgiving"] .allowance-category.giving { background: #f0d5c5; }
+:root[data-theme="thanksgiving"] .allowance-category.taxes { background: #e9d7cc; }
+:root[data-theme="thanksgiving"] .celebration-icon { filter: drop-shadow(0 4px 5px rgba(107, 117, 45, .24)); }
+:root[data-theme="thanksgiving"] .celebration-spark { color: #a66d14; }
+:root[data-theme="thanksgiving"] .confetti-one { background: #ab3f42; }
+:root[data-theme="thanksgiving"] .confetti-two { background: #7d8537; }
+:root[data-theme="thanksgiving"] .confetti-three { background: #9a653e; }
+:root[data-theme="thanksgiving"] .confetti-four { background: #b78a32; }
+:root[data-theme="thanksgiving"] .confetti-five { background: #8c586b; }
+:root[data-theme="thanksgiving"] .confetti-six { background: #cf7028; }
+
+/* Visible keyboard focus, including older Safari without :focus-visible. */
+:root[data-theme="thanksgiving"] a:focus,
+:root[data-theme="thanksgiving"] button:focus,
+:root[data-theme="thanksgiving"] input:focus,
+:root[data-theme="thanksgiving"] select:focus,
+:root[data-theme="thanksgiving"] textarea:focus { outline: 3px solid #a34220; outline-offset: 3px; }
+:root[data-theme="thanksgiving"] .topbar a:focus { outline-color: #f6c868; }
+@supports selector(:focus-visible) {
+  :root[data-theme="thanksgiving"] a:focus:not(:focus-visible),
+  :root[data-theme="thanksgiving"] button:focus:not(:focus-visible) { outline: none; }
+}
+
+@container (min-width: 600px) {
+  /* A corner decoration leaves short panels at their existing task-aligned height. */
+  .thanksgiving-sprite.block-harvest-art { position: absolute; top: 12px; right: 12px; width: 44px; height: 42px; margin: 0; }
+  .checklist-block.empty .thanksgiving-sprite.block-harvest-art { position: static; width: 40px; height: 38px; margin-left: auto; }
+}
+/* Match the existing paper-sheet layout on the wall tablet's older Safari. */
+@supports not (container-type: inline-size) {
+  .thanksgiving-sprite.brand-harvest { margin-right: 10px; }
+  .harvest-season-label { margin-right: 20px; }
+  @media (min-width: 650px) {
+    .single .thanksgiving-sprite.block-harvest-art { position: absolute; top: 12px; right: 12px; width: 44px; height: 42px; margin: 0; }
+    .single .checklist-block.empty .thanksgiving-sprite.block-harvest-art { position: static; width: 40px; height: 38px; margin-left: auto; }
+  }
+}
+@media (max-width: 699px) {
+  .harvest-season-label { display: none; }
+  .harvest-welcome { height: 200px; }
+}
+@media (max-width: 560px) {
+  .thanksgiving-sprite.brand-harvest { width: 32px; height: 30px; margin-right: 8px; }
+  .harvest-welcome { height: 190px; margin-bottom: 22px; }
+  .harvest-welcome-art { object-position: 57% 62%; }
+}

@@ -7,6 +7,10 @@ import HalloweenScene from '../components/HalloweenScene.jsx';
 import BoneChevron from '../components/BoneChevron.jsx';
 import { memberColor } from '../lib/theme.js';
 import { useTheme } from '../components/ThemeProvider.jsx';
+import ThanksgivingSprite from '../components/ThanksgivingSprite.jsx';
+import autumnBackground from '../assets/thanksgiving/autumn-background.png';
+
+const HARVEST_DECORATIONS = ['turkey', 'pie', 'pumpkin', 'leaves', 'acorn', 'cornucopia'];
 
 function parseLocalDate(iso) {
   const [y, m, d] = iso.split('-').map(Number);
@@ -22,7 +26,7 @@ function shiftDate(iso, days) {
 // Landing page reached by clicking the family name in the header: one big photo
 // per member, tapping through to that person's daily checklist.
 export default function HomePage() {
-  const { theme, isSpooky } = useTheme();
+  const { theme, isSpooky, isThanksgiving } = useTheme();
   // Read per render, not once at module load. This heading is now the only place
   // the date shows (the topbar's copy was removed), so a stale one would be the
   // page claiming to be a day it isn't — and the tile counts have to agree with it.
@@ -55,6 +59,11 @@ export default function HomePage() {
       {isSpooky && <div className="spooky-welcome" aria-hidden="true">
         <HalloweenScene className="spooky-welcome-art" />
       </div>}
+      {isThanksgiving && (
+        <div className="harvest-welcome" aria-hidden="true">
+          <img className="harvest-welcome-art" src={autumnBackground} alt="" />
+        </div>
+      )}
       <div className="home-head">
         <div className="checklist-daynav-wrap">
           <div className="checklist-daynav">
@@ -91,13 +100,14 @@ export default function HomePage() {
       </div>
 
       <div className="home-grid">
-        {members.map((m) => {
+        {members.map((m, index) => {
           const color = memberColor(m, theme);
           const stat = statFor(m.id);
           const hasTasks = stat && stat.expected > 0;
           const points = Math.min(stat?.points || 0, 200);
           return (
             <Link key={m.id} to={`/tasks/${m.id}?date=${date}`} className="home-tile">
+              {isThanksgiving && <ThanksgivingSprite name={HARVEST_DECORATIONS[index % HARVEST_DECORATIONS.length]} className="home-harvest-art" />}
               <span
                 className="home-avatar"
                 style={{ background: `${color}59`, borderColor: color }}

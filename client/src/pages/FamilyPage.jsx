@@ -46,6 +46,7 @@ function ThemeCard() {
           >
             <option value="default">Default</option>
             <option value="spooky">Spooky</option>
+            <option value="thanksgiving">Thanksgiving</option>
           </select>
         </div>
       </div>

@@ -1,14 +1,23 @@
 // Keep existing installations on their current look until a theme is chosen.
 export function resolveTheme(value) {
-  return value === 'default' ? 'default' : 'spooky';
+  return value === 'default' || value === 'thanksgiving' ? value : 'spooky';
 }
 
 export const DEFAULT_MEMBER_COLORS = ['#AFD5C0', '#A9C3D5', '#A99CC6', '#EFBCC8', '#EC9DB8', '#BA82AD'];
 export const MEMBER_COLORS = ['#32CD32', '#9370DB', '#FF7518', '#FF6347', '#9932CC', '#C71585'];
+export const THANKSGIVING_MEMBER_COLORS = ['#7D8537', '#B78A32', '#CF7028', '#AB3F42', '#9A653E', '#8C586B'];
 
 export function memberColors(theme) {
+  if (theme === 'thanksgiving') return THANKSGIVING_MEMBER_COLORS;
   return theme === 'default' ? DEFAULT_MEMBER_COLORS : MEMBER_COLORS;
 }
+
+const THANKSGIVING_PALETTE = new Set([...THANKSGIVING_MEMBER_COLORS, '#000000']);
+const HARVEST_COLORS = new Map(
+  [DEFAULT_MEMBER_COLORS, MEMBER_COLORS].flatMap((colors) =>
+    colors.map((color, index) => [color, THANKSGIVING_MEMBER_COLORS[index]])
+  )
+);
 
 const PALETTE_COLORS = new Set([
   '#FF7518', '#FF4500', '#8B008B', '#4B0082', '#000000', '#228B22',
@@ -28,6 +37,9 @@ export function memberColor(member, theme = 'spooky') {
   if (theme === 'default') {
     // Show the actual saved color; switching themes never rewrites family data.
     if (/^#[0-9A-F]{6}$/.test(color)) return color;
+  } else if (theme === 'thanksgiving') {
+    if (THANKSGIVING_PALETTE.has(color)) return color;
+    if (HARVEST_COLORS.has(color)) return HARVEST_COLORS.get(color);
   } else {
     if (PALETTE_COLORS.has(color)) return color;
     if (LEGACY_COLORS.has(color)) return LEGACY_COLORS.get(color);
