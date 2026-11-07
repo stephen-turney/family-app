@@ -24,7 +24,9 @@ Built as an MVP with a React (Vite) frontend and a Node/Express + SQLite backend
   and pro-rata allowance, rounds the payout up to the nearest dime, and adds a saved weekly
   report under Settings → Reports. Reports generated on demand open immediately in a formatted
   popup instead of creating a file. Saved reports open in the same formatted popup and can be
-  deleted from the list. Scheduled reports save a JSON snapshot of that week's dates and totals;
+  deleted from the list. **Recalculate** updates an existing report from the current checkboxes
+  for its original Monday–Friday week, saves the corrected totals, and opens them immediately.
+  Scheduled reports save a JSON snapshot of that week's dates and totals;
   older text reports are converted automatically while preserving their original values.
   Each child's final payout is prominently
   divided into spending (50%), savings (30%), giving (10%), and taxes (10%). Each category is

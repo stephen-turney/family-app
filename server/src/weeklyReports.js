@@ -96,7 +96,10 @@ function allowanceBreakdown(totalCents) {
 }
 
 export function generateAllowanceReport(referenceDate = new Date()) {
-  const { monday, friday } = reportWeek(referenceDate);
+  return calculateAllowanceReport(reportWeek(referenceDate));
+}
+
+function calculateAllowanceReport({ monday, friday }) {
   const members = db.prepare(
     `SELECT id, name, weekly_allowance_cents FROM members
       WHERE weekly_allowance_cents IS NOT NULL ORDER BY id`
@@ -369,6 +372,23 @@ export function readSavedReport(filename) {
     if (existsSync(reportPath(legacyFilename))) return convertLegacyReport(legacyFilename);
     throw error;
   }
+}
+
+export function recalculateSavedReport(filename) {
+  const saved = readSavedReport(filename);
+  // Use the archived week itself, avoiding UTC-midnight shifts into the prior week.
+  if (new Date(`${saved.monday}T00:00:00Z`).getUTCDay() !== 1
+    || saved.friday !== addDays(saved.monday, 4)) {
+    throw new Error('Invalid saved report week');
+  }
+  const jsonFilename = filename.replace(/\.txt$/, '.json');
+  if (!isReportFile(jsonFilename)) throw new Error('report not found');
+  const filePath = reportPath(jsonFilename);
+  const originalStat = statSync(filePath);
+  const report = { schemaVersion: 1, ...calculateAllowanceReport(saved) };
+  // Keep the report in its original position in the archive list.
+  writeSnapshot(filePath, report, originalStat);
+  return { filename: jsonFilename, report };
 }
 
 export function listSavedReports() {

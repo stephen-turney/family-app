@@ -38,7 +38,7 @@ export default function App() {
         {/* The family name doubles as the home link, the usual place people
             click to get back to a hub page. */}
         <Link to="/home" className="brand" title="Family home">
-          <span className={isSpooky ? 'brand-pumpkin' : 'brand-dot'} aria-hidden="true">{isSpooky ? '🎃' : ''}</span>
+          {isSpooky && <span className="brand-pumpkin" aria-hidden="true">🎃</span>}
           {brand}
         </Link>
         {isSpooky && <span className="season-label" role="img" aria-label="Spooky season">

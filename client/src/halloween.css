@@ -33,7 +33,6 @@
   box-shadow: 0 4px 18px rgba(0, 0, 0, .2);
 }
 :root[data-theme="spooky"] .brand { font-weight: 800; letter-spacing: -.5px; }
-:root[data-theme="spooky"] .brand-dot { background: linear-gradient(135deg, #ff7518, #9932cc); }
 :root[data-theme="spooky"] .brand-pumpkin { font-size: 30px; line-height: 1; margin-right: 2px; }
 :root[data-theme="spooky"] a.brand:hover { opacity: 1; color: var(--accent); }
 :root[data-theme="spooky"] .nav a { color: var(--text); }

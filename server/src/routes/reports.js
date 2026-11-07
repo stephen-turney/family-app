@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { REPORT_NAME, deleteSavedReport, generateAllowanceReport, listSavedReports, readSavedReport } from '../weeklyReports.js';
+import { REPORT_NAME, deleteSavedReport, generateAllowanceReport, listSavedReports, readSavedReport, recalculateSavedReport } from '../weeklyReports.js';
 
 export const reportsRouter = Router();
 
@@ -9,6 +9,17 @@ reportsRouter.post('/', (req, res) => {
 
 reportsRouter.get('/', (req, res) => {
   res.json(listSavedReports());
+});
+
+reportsRouter.post('/:filename/recalculate', (req, res) => {
+  const { filename } = req.params;
+  if (!REPORT_NAME.test(filename)) return res.status(404).json({ error: 'report not found' });
+  try {
+    res.json(recalculateSavedReport(filename));
+  } catch (error) {
+    res.status(error.message === 'report not found' ? 404 : 422)
+      .json({ error: error.message === 'report not found' ? error.message : 'This saved report could not be recalculated.' });
+  }
 });
 
 reportsRouter.get('/:filename', (req, res) => {

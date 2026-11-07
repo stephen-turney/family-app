@@ -31,19 +31,23 @@ function ThemeCard() {
 
   return (
     <div className="card">
-      <h2 id="theme-heading">Theme</h2>
-      <select
-        className="theme-select"
-        aria-labelledby="theme-heading"
-        value={theme}
-        onChange={(event) => save.mutate(event.target.value)}
-        disabled={isLoading || !!error || save.isPending}
-      >
-        <option value="default">Default</option>
-        <option value="spooky">Spooky</option>
-      </select>
-      <div className="theme-status" role="status">
-        {save.isPending ? 'Saving…' : ''}
+      <div className="theme-controls">
+        <h2 id="theme-heading">Theme</h2>
+        <div className="theme-status" role="status">
+          {save.isPending ? 'Saving…' : ''}
+        </div>
+        <div className="theme-select-wrap">
+          <select
+            className="theme-select"
+            aria-labelledby="theme-heading"
+            value={theme}
+            onChange={(event) => save.mutate(event.target.value)}
+            disabled={isLoading || !!error || save.isPending}
+          >
+            <option value="default">Default</option>
+            <option value="spooky">Spooky</option>
+          </select>
+        </div>
       </div>
       {(error || save.isError) && (
         <p className="report-message error" role="alert">
@@ -65,6 +69,11 @@ function ReportsCard() {
     (filename) => api.del(`/reports/${encodeURIComponent(filename)}`),
     ['reports']
   );
+  const recalculate = useApiMutation(
+    (filename) => api.post(`/reports/${encodeURIComponent(filename)}/recalculate`),
+    ['reports']
+  );
+  const isBusy = generate.isPending || load.isPending || remove.isPending || recalculate.isPending;
 
   const deleteReport = (filename) => {
     if (window.confirm(`Delete ${filename}? This cannot be undone.`)) {
@@ -74,22 +83,33 @@ function ReportsCard() {
 
   const generateReport = () => {
     load.reset();
+    recalculate.reset();
     generate.mutate(undefined, { onSuccess: setOpenReport });
   };
 
   const viewReport = (filename) => {
     generate.reset();
+    recalculate.reset();
     load.mutate(filename, { onSuccess: setOpenReport });
+  };
+
+  const recalculateReport = (filename) => {
+    generate.reset();
+    load.reset();
+    remove.reset();
+    recalculate.mutate(filename, {
+      onSuccess: ({ report }) => setOpenReport(report),
+    });
   };
 
   return (
     <div className="card">
-      <div className="row">
+      <div className="row reports-header">
         <h2 style={{ margin: 0 }}>Reports</h2>
         <div className="spacer" />
         <button
           className="btn small"
-          disabled={generate.isPending || load.isPending}
+          disabled={isBusy}
           onClick={generateReport}
         >
           {generate.isPending ? 'Generating…' : 'Generate report now'}
@@ -101,6 +121,16 @@ function ReportsCard() {
       {load.isError && (
         <p className="report-message error">The saved report could not be opened. Please try again.</p>
       )}
+      {recalculate.isError && (
+        <p className="report-message error" role="alert">
+          The report could not be recalculated. Please try again.
+        </p>
+      )}
+      {recalculate.isSuccess && (
+        <p className="report-message" role="status">
+          Report for the week of {recalculate.data.report.mondayLabel} recalculated and saved.
+        </p>
+      )}
       {isLoading && <span className="muted">Loading reports…</span>}
       {error && <span className="muted">Reports could not be loaded.</span>}
       {reports.length > 0 && (
@@ -110,7 +140,7 @@ function ReportsCard() {
               <button
                 type="button"
                 className="report-link"
-                disabled={generate.isPending || load.isPending || (remove.isPending && remove.variables === report.filename)}
+                disabled={isBusy}
                 aria-busy={load.isPending && load.variables === report.filename}
                 onClick={() => viewReport(report.filename)}
               >
@@ -121,14 +151,30 @@ function ReportsCard() {
                     ? `Allowance totals · Week of ${report.mondayLabel}`
                     : report.filename.replace(/\.(?:json|txt)$/, '').replace(/[_-]/g, ' ')}
               </button>
-              <button
-                className="btn danger small report-delete"
-                disabled={remove.isPending && remove.variables === report.filename}
-                onClick={() => deleteReport(report.filename)}
-                aria-label={`Delete ${report.filename}`}
-              >
-                {remove.isPending && remove.variables === report.filename ? 'Deleting…' : 'Delete'}
-              </button>
+              <div className="report-actions">
+                <button
+                  type="button"
+                  className="btn ghost small report-action"
+                  disabled={isBusy || report.readable === false}
+                  aria-busy={recalculate.isPending && recalculate.variables === report.filename}
+                  aria-label={`Recalculate allowance totals for the week of ${report.mondayLabel || report.filename}`}
+                  title={report.readable === false
+                    ? 'This saved report could not be read.'
+                    : 'Replace this report with totals from the current checkboxes for this week.'}
+                  onClick={() => recalculateReport(report.filename)}
+                >
+                  {recalculate.isPending && recalculate.variables === report.filename ? 'Recalculating…' : 'Recalculate'}
+                </button>
+                <button
+                  type="button"
+                  className="btn danger small report-action"
+                  disabled={isBusy}
+                  onClick={() => deleteReport(report.filename)}
+                  aria-label={`Delete ${report.filename}`}
+                >
+                  {remove.isPending && remove.variables === report.filename ? 'Deleting…' : 'Delete'}
+                </button>
+              </div>
             </div>
           ))}
         </div>

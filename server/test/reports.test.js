@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { after, before, beforeEach, test } from 'node:test';
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, utimesSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, symlinkSync, utimesSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import express from 'express';
@@ -13,7 +13,7 @@ process.env.REPORTS_DIR = reportsDir;
 process.env.DB_PATH = path.join(temporaryRoot, 'data.sqlite');
 const { db } = await import('../src/db.js');
 const { deleteSavedReport, generateAllowanceReport, generateWeeklyReport, listSavedReports,
-  migrateLegacyReports, parseLegacyReport, readSavedReport, reportFilename } = await import('../src/weeklyReports.js');
+  migrateLegacyReports, parseLegacyReport, readSavedReport, recalculateSavedReport, reportFilename } = await import('../src/weeklyReports.js');
 const { reportsRouter } = await import('../src/routes/reports.js');
 
 const legacyFilename = 'Allowance-Totals_Week-of-August-24th.txt';
@@ -240,13 +240,120 @@ test('routes list/open reports as JSON, leave Generate unsaved, and delete both 
   assert.equal((await fetch(`${baseUrl}/${jsonFilename}`)).status, 404);
 });
 
-test('invalid names and encoded traversal cannot read or delete files outside reports', async () => {
+test('recalculation replaces only the selected historical week after checks are added or removed', async () => {
+  const memberId = db.prepare('INSERT INTO members (name, weekly_allowance_cents) VALUES (?, ?)')
+    .run('Current Child', 1200).lastInsertRowid;
+  const routineId = db.prepare('INSERT INTO routines (member_id, title) VALUES (?, ?)')
+    .run(memberId, 'Routine').lastInsertRowid;
+  const insertStep = db.prepare('INSERT INTO routine_steps (routine_id, title) VALUES (?, ?)');
+  const insertCompletion = db.prepare('INSERT INTO routine_step_completions (step_id, due_date) VALUES (?, ?)');
+  const stepIds = Array.from({ length: 22 }, (_, index) => insertStep.run(routineId, `Task ${index}`).lastInsertRowid);
+  insertCompletion.run(stepIds[0], '2026-12-28');
+  const reference = new Date('2027-01-03T08:00:00Z');
+  const { filename } = generateWeeklyReport(reference);
+  const originalTime = new Date('2027-01-03T08:00:00Z');
+  utimesSync(path.join(reportsDir, filename), originalTime, originalTime);
+  const other = generateWeeklyReport(new Date('2027-01-10T08:00:00Z'));
+  const otherBytes = readFileSync(other.filePath, 'utf8');
+  const initialFiles = readdirSync(reportsDir);
+  assert.equal(readSavedReport(filename).members[0].creditedTasks, 1);
+
+  for (const [index, stepId] of stepIds.entries()) {
+    if (index > 0) insertCompletion.run(stepId, '2026-12-28');
+    if (index < 6) insertCompletion.run(stepId, '2026-12-29');
+    if (index === 0) insertCompletion.run(stepId, '2027-01-01');
+    for (const outsideDate of ['2026-12-27', '2027-01-02', '2027-01-04']) insertCompletion.run(stepId, outsideDate);
+  }
+  const response = await fetch(`${baseUrl}/${filename}/recalculate`, { method: 'POST' });
+  assert.equal(response.status, 200);
+  const result = await response.json();
+  assert.equal(result.filename, filename);
+  assert.equal(result.report.monday, '2026-12-28');
+  assert.equal(result.report.friday, '2027-01-01');
+  assert.deepEqual(result.report, { schemaVersion: 1, ...generateAllowanceReport(reference) });
+  assert.equal(result.report.members[0].creditedTasks, 27); // Monday is capped at 20.
+  assert.equal(result.report.members[0].points, 270);
+  assert.equal(result.report.members[0].percent, 27);
+  assert.equal(result.report.members[0].allowanceCents, 330);
+  assert.deepEqual(readSavedReport(filename), result.report);
+  assert.equal(statSync(path.join(reportsDir, filename)).mtime.toISOString(), originalTime.toISOString());
+  assert.equal(readFileSync(other.filePath, 'utf8'), otherBytes);
+  assert.deepEqual(readdirSync(reportsDir), initialFiles);
+
+  db.prepare('DELETE FROM routine_step_completions WHERE due_date = ?').run('2026-12-29');
+  const recalculated = recalculateSavedReport(filename);
+  assert.equal(recalculated.report.members[0].creditedTasks, 21);
+  assert.equal(recalculated.report.members[0].allowanceCents, 260);
+  assert.deepEqual(readSavedReport(filename), { schemaVersion: 1, ...generateAllowanceReport(reference) });
+  assert.equal(readFileSync(other.filePath, 'utf8'), otherBytes);
+});
+
+test('recalculation uses the dates inside legacy reports and retains one canonical saved report', async () => {
+  saveLegacy();
+  const memberId = db.prepare('INSERT INTO members (name, weekly_allowance_cents) VALUES (?, ?)')
+    .run('Everett', 1200).lastInsertRowid;
+  const routineId = db.prepare('INSERT INTO routines (member_id, title) VALUES (?, ?)')
+    .run(memberId, 'Routine').lastInsertRowid;
+  const stepId = db.prepare('INSERT INTO routine_steps (routine_id, title) VALUES (?, ?)')
+    .run(routineId, 'Task').lastInsertRowid;
+  const insertCompletion = db.prepare('INSERT INTO routine_step_completions (step_id, due_date) VALUES (?, ?)');
+  insertCompletion.run(stepId, '2026-08-24');
+  insertCompletion.run(stepId, '2026-08-28');
+  insertCompletion.run(stepId, '2037-08-24');
+  const response = await fetch(`${baseUrl}/${legacyFilename}/recalculate`, { method: 'POST' });
+  assert.equal(response.status, 200);
+  const result = await response.json();
+  assert.equal(result.filename, jsonFilename);
+  assert.equal(result.report.monday, '2026-08-24');
+  assert.equal(result.report.friday, '2026-08-28');
+  assert.equal(result.report.members[0].creditedTasks, 2);
+  assert.deepEqual(readSavedReport(legacyFilename), result.report);
+  assert.deepEqual(readSavedReport(jsonFilename), result.report);
+  assert.equal(readFileSync(path.join(reportsDir, legacyFilename), 'utf8'), legacyText);
+  assert.deepEqual(listSavedReports().map((report) => report.filename), [jsonFilename]);
+});
+
+test('recalculation rejects missing, unreadable, or invalid archived weeks without replacing them', async () => {
+  const filename = 'Allowance-Totals_Week-of-August-24th-2026.json';
+  const filePath = path.join(reportsDir, filename);
+  assert.equal((await fetch(`${baseUrl}/${filename}/recalculate`, { method: 'POST' })).status, 404);
+  assert.equal(existsSync(filePath), false);
+  for (const content of ['{broken', JSON.stringify({ ...expectedLegacyReport, monday: '2026-08-25' }),
+    JSON.stringify({ ...expectedLegacyReport, friday: '2026-09-04' }),
+    JSON.stringify({ ...expectedLegacyReport, friday: '2026-02-30' })]) {
+    writeFileSync(filePath, content);
+    const response = await fetch(`${baseUrl}/${filename}/recalculate`, { method: 'POST' });
+    assert.equal(response.status, 422);
+    assert.deepEqual(await response.json(), { error: 'This saved report could not be recalculated.' });
+    assert.equal(readFileSync(filePath, 'utf8'), content);
+  }
+  saveLegacy('damaged archive');
+  assert.equal((await fetch(`${baseUrl}/${legacyFilename}/recalculate`, { method: 'POST' })).status, 422);
+  assert.equal(existsSync(path.join(reportsDir, jsonFilename)), false);
+});
+
+test('recalculation never follows symlinks or replaces report directories', async () => {
+  const filename = 'Allowance-Totals_Week-of-August-24th-2026.json';
+  const outsideFile = path.join(temporaryRoot, 'outside.json');
+  const outsideBytes = JSON.stringify(expectedLegacyReport);
+  writeFileSync(outsideFile, outsideBytes);
+  symlinkSync(outsideFile, path.join(reportsDir, filename));
+  assert.equal((await fetch(`${baseUrl}/${filename}/recalculate`, { method: 'POST' })).status, 404);
+  assert.equal(readFileSync(outsideFile, 'utf8'), outsideBytes);
+  rmSync(path.join(reportsDir, filename));
+  mkdirSync(path.join(reportsDir, filename));
+  assert.equal((await fetch(`${baseUrl}/${filename}/recalculate`, { method: 'POST' })).status, 404);
+  assert.equal(statSync(path.join(reportsDir, filename)).isDirectory(), true);
+});
+
+test('invalid names and encoded traversal cannot read, delete, or recalculate files outside reports', async () => {
   const outsideFile = path.join(temporaryRoot, 'outside.txt');
   writeFileSync(outsideFile, 'preserve me');
   for (const filename of ['outside.txt', '..%2Foutside.txt', '..%5Coutside.txt',
     'user-report_2026-08-30.json.bak', 'user-report_2026-08-30.json%0A']) {
     assert.equal((await fetch(`${baseUrl}/${filename}`)).status, 404);
     assert.equal((await fetch(`${baseUrl}/${filename}`, { method: 'DELETE' })).status, 404);
+    assert.equal((await fetch(`${baseUrl}/${filename}/recalculate`, { method: 'POST' })).status, 404);
   }
   assert.equal(readFileSync(outsideFile, 'utf8'), 'preserve me');
   saveLegacy();
