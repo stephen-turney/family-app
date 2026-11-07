@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import completionKnife from '../assets/completion-knife.svg';
+import { useTheme } from './ThemeProvider.jsx';
 
 const SPLATTER_PATTERNS = [
   {
@@ -29,10 +30,13 @@ const SPLATTER_PATTERNS = [
 ];
 
 export default function CompletionMark() {
+  const { isSpooky } = useTheme();
   // Mounted only for a checked row: rechecking picks again, while ordinary
   // rerenders and background refreshes keep the current pattern steady.
   const [patternIndex] = useState(() => Math.floor(Math.random() * SPLATTER_PATTERNS.length));
   const pattern = SPLATTER_PATTERNS[patternIndex];
+
+  if (!isSpooky) return <span className="completion-check" aria-hidden="true">✓</span>;
 
   return (
     <>

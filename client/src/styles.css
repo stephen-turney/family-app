@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
   --bg: #e8ecf5;          /* tinted so white cards separate clearly */
   --panel: #ffffff;
   --panel-2: #e3e8f3;
@@ -36,7 +37,7 @@ body { background: var(--bg); color: var(--text); }
 
 /* Top bar */
 .topbar {
-  display: flex; align-items: center; gap: 24px;
+  display: flex; align-items: center; gap: 24px; flex-shrink: 0;
   padding: 14px 24px; background: var(--panel);
   border-bottom: 1px solid var(--border);
   box-shadow: var(--shadow);
@@ -62,7 +63,7 @@ a.brand:hover { opacity: .7; }
 .nav a.tab-member > :first-child { flex-shrink: 0; }
 
 /* Settings is an icon on the hard right, in the space the date used to hold.
-   44px square keeps a finger-sized target around the skull artwork. */
+   44px square keeps a finger-sized target around the settings icon. */
 .nav-gear {
   flex-shrink: 0; width: 44px; height: 44px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
@@ -632,39 +633,8 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   font-size: 29px; line-height: 1; background: var(--panel);
 }
-.checkline.done .box {
-  background-color: #DBAD77; border-color: #96633F;
-  background-image: repeating-linear-gradient(0deg, transparent, transparent 8px, rgba(121, 74, 40, .16) 9px, transparent 11px);
-  box-shadow: inset 0 2px 0 rgba(255, 239, 206, .55), 0 3px 0 #835536;
-}
+.checkline.done .box { background: var(--good); border-color: var(--good); color: #fff; }
 .checkline .box img { display: block; width: 100%; height: 100%; }
-.completion-splatter {
-  /* Clip only the blood to the rounded checkbox, leaving the knife above it. */
-  position: absolute; z-index: 1; top: 0; left: 0; width: 100%; height: 100%;
-  overflow: hidden; border-radius: inherit; pointer-events: none;
-}
-.completion-splatter svg { display: block; width: 100%; height: 100%; }
-.checkline .box .completion-knife {
-  /* The SVG's contact point is (64, 64): 64% of 66px = 42.24px.
-     Anchor that point to the centre of either checkbox size. */
-  position: absolute; z-index: 3; top: calc(50% - 42.24px); left: calc(50% - 42.24px);
-  width: 66px; height: 66px; filter: drop-shadow(1px 2px 1px rgba(45, 30, 23, .24));
-  pointer-events: none; animation: completion-knife-in .22s ease-out both;
-}
-.completion-entry {
-  position: absolute; z-index: 4; top: 50%; left: 50%; width: 18px; height: 5px;
-  transform: translate(-50%, -50%) rotate(-45deg); border-radius: 50%;
-  background: #57331F; box-shadow: inset 0 1px 1px #321F16;
-  pointer-events: none;
-}
-.completion-entry::after {
-  content: ''; position: absolute; left: 1px; right: 1px; bottom: -1px; height: 2px;
-  border-radius: 50%; background: #E9C28D;
-}
-@keyframes completion-knife-in {
-  from { transform: translate(-10px, -10px); opacity: 0; }
-  to { transform: translate(0, 0); opacity: 1; }
-}
 .checkline.done .label { text-decoration: line-through; color: var(--muted); }
 /* The picture a pre-reader recognises the task by. Uploaded images are cropped
    square when selected and fill this 75px frame; emoji stay centered within it. */
@@ -879,3 +849,64 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
   }
   .picture-edit-modal .expanded-panel .icon-choice { font-size: 24px; padding: 6px 0; }
 }
+
+/* Shared phone/tablet layout and reduced-motion support for both themes. */
+@media (max-width: 699px) {
+  .topbar { gap: 12px; padding: 12px 16px; }
+  .brand { font-size: 18px; }
+  .nav a { padding: 10px 12px; }
+  .content { padding: 20px 16px; }
+}
+@media (max-width: 560px) {
+  .topbar { flex-wrap: wrap; gap: 0; }
+  .brand { flex: 1; min-width: 0; overflow-wrap: break-word; margin-right: 10px; }
+  .nav { order: 3; flex-basis: 100%; margin-top: 9px; }
+  .nav a { display: block; width: 100%; text-align: center; }
+  .nav-gear { width: 44px; }
+  .home-grid { grid-template-columns: minmax(0, 1fr); }
+  .member-columns { grid-template-columns: minmax(0, 1fr); }
+  .home-tile { padding: 24px 18px; }
+  .daynav-date { width: 212px; min-width: 212px; flex-basis: 212px; font-size: 15px; }
+  .checklist-daynav { gap: 8px; }
+}
+@media (max-width: 359px) {
+  .content { padding: 16px 10px; }
+  .daynav-date { width: 188px; min-width: 188px; flex-basis: 188px; font-size: 13px; }
+  .checklist-daynav { gap: 6px; }
+}
+@supports not (container-type: inline-size) {
+  .topbar .nav { margin-left: 20px; }
+  .home-tile > * + * { margin-top: 12px; }
+  .checklist-daynav .previous { margin-right: 14px; }
+  .checklist-daynav .next { margin-left: 14px; }
+  @media (max-width: 560px) {
+    .topbar .nav { margin-left: 0; }
+    .checklist-daynav .previous { margin-right: 8px; }
+    .checklist-daynav .next { margin-left: 8px; }
+  }
+  @media (max-width: 359px) {
+    .checklist-daynav .previous { margin-right: 6px; }
+    .checklist-daynav .next { margin-left: 6px; }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spooky-ghost, .celebration-icon, .checkline .box .completion-knife,
+  .celebration-spark, .celebration-confetti, .celebration-particle { animation: none; }
+  .home-tile, .progress > span, .nav-gear { transition: none; }
+  .home-tile:hover { transform: none; }
+}
+
+/* Saved appearance setting. Native radios remain keyboard and touch friendly. */
+.theme-help { margin: 0 0 14px; font-size: 13px; }
+.theme-options { display: flex; flex-wrap: wrap; padding: 0; margin: 0; border: 0; }
+.theme-option {
+  display: flex; align-items: center; min-width: 130px; min-height: 48px;
+  margin: 0 12px 8px 0; padding: 10px 14px;
+  border: 2px solid var(--border); border-radius: 10px;
+  background: var(--panel); color: var(--text); font-size: 14px; font-weight: 600;
+  cursor: pointer;
+}
+.theme-option.selected { border-color: var(--accent); background: var(--accent-soft); }
+.theme-option input { width: 18px; height: 18px; margin: 0 10px 0 0; accent-color: var(--accent); }
+.theme-options:disabled .theme-option { cursor: wait; opacity: .7; }
+.theme-status { min-height: 18px; margin-top: 8px; color: var(--muted); font-size: 12px; }

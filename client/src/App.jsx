@@ -8,9 +8,11 @@ import { pluralizeFamily } from './lib/familyName.js';
 import overviewBlood from './assets/overview-blood.svg';
 import bloodshotEye from './assets/bloodshot-eye.svg';
 import screamingSkull from './assets/screaming-skull.svg';
+import { useTheme } from './components/ThemeProvider.jsx';
 
 export default function App() {
   const { data: settings } = useSettings();
+  const { isSpooky } = useTheme();
   const brand = pluralizeFamily(settings?.family_name) || 'Family Hub';
   const navigate = useNavigate();
 
@@ -37,23 +39,23 @@ export default function App() {
         {/* The family name doubles as the home link, the usual place people
             click to get back to a hub page. */}
         <Link to="/home" className="brand" title="Family home">
-          <span className="brand-pumpkin" aria-hidden="true">🎃</span>
+          <span className={isSpooky ? 'brand-pumpkin' : 'brand-dot'} aria-hidden="true">{isSpooky ? '🎃' : ''}</span>
           {brand}
         </Link>
         <nav className="nav">
           {/* `end` matters: without it /tasks/3 would light up Overview too. */}
-          <NavLink to="/tasks" end aria-label="overview" className={({ isActive }) => `nav-overview${isActive ? ' active' : ''}`}>
-            <img className="nav-overview-art" src={overviewBlood} alt="" aria-hidden="true" />
+          <NavLink to="/tasks" end aria-label="Overview" className={({ isActive }) => `${isSpooky ? 'nav-overview' : ''}${isActive ? ' active' : ''}`}>
+            {isSpooky ? <img className="nav-overview-art" src={overviewBlood} alt="" aria-hidden="true" /> : '✅ Overview'}
           </NavLink>
         </nav>
-        <span className="season-label" role="img" aria-label="Spooky season">
+        {isSpooky && <span className="season-label" role="img" aria-label="Spooky season">
           <span aria-hidden="true">
             <span className="season-sparkle">✦</span>{' Sp'}
             <img className="season-eye" src={bloodshotEye} alt="" />
             <img className="season-eye season-eye-second" src={bloodshotEye} alt="" />
             {'ky season'}
           </span>
-        </span>
+        </span>}
         {/* Icon only, hard right, in the space the date used to hold. */}
         <NavLink
           to="/settings"
@@ -61,7 +63,7 @@ export default function App() {
           title="Settings"
           aria-label="Settings"
         >
-          <img className="nav-skull-art" src={screamingSkull} alt="" aria-hidden="true" />
+          {isSpooky ? <img className="nav-skull-art" src={screamingSkull} alt="" aria-hidden="true" /> : <span aria-hidden="true">⚙️</span>}
         </NavLink>
       </header>
 

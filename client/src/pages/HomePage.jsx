@@ -6,6 +6,7 @@ import Avatar from '../components/Avatar.jsx';
 import HalloweenScene from '../components/HalloweenScene.jsx';
 import BoneChevron from '../components/BoneChevron.jsx';
 import { memberColor } from '../lib/theme.js';
+import { useTheme } from '../components/ThemeProvider.jsx';
 
 function parseLocalDate(iso) {
   const [y, m, d] = iso.split('-').map(Number);
@@ -21,6 +22,7 @@ function shiftDate(iso, days) {
 // Landing page reached by clicking the family name in the header: one big photo
 // per member, tapping through to that person's daily checklist.
 export default function HomePage() {
+  const { theme, isSpooky } = useTheme();
   // Read per render, not once at module load. This heading is now the only place
   // the date shows (the topbar's copy was removed), so a stale one would be the
   // page claiming to be a day it isn't — and the tile counts have to agree with it.
@@ -50,9 +52,9 @@ export default function HomePage() {
 
   return (
     <div>
-      <div className="spooky-welcome" aria-hidden="true">
+      {isSpooky && <div className="spooky-welcome" aria-hidden="true">
         <HalloweenScene className="spooky-welcome-art" />
-      </div>
+      </div>}
       <div className="home-head">
         <div className="checklist-daynav-wrap">
           <div className="checklist-daynav">
@@ -90,7 +92,7 @@ export default function HomePage() {
 
       <div className="home-grid">
         {members.map((m) => {
-          const color = memberColor(m);
+          const color = memberColor(m, theme);
           const stat = statFor(m.id);
           const hasTasks = stat && stat.expected > 0;
           const points = Math.min(stat?.points || 0, 200);

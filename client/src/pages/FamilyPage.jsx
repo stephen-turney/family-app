@@ -1,21 +1,64 @@
 import { useState, useEffect } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, useMembers, useSettings, useReports, useApiMutation } from '../api/client.js';
 import Modal from '../components/Modal.jsx';
 import Avatar from '../components/Avatar.jsx';
 import { fileToAvatarDataUrl } from '../lib/image.js';
-import { MEMBER_COLORS, memberColor } from '../lib/theme.js';
-
-// Offer black alongside the seasonal accents without changing automatic colours.
-const COLORS = [...MEMBER_COLORS, '#000000'];
+import { memberColors, memberColor } from '../lib/theme.js';
+import { useTheme } from '../components/ThemeProvider.jsx';
 
 export default function FamilyPage() {
   return (
     <div className="grid" style={{ maxWidth: 775, margin: '0 auto' }}>
       <h1>Settings</h1>
       <FamilyNameCard />
+      <ThemeCard />
       <MembersCard />
       <ReportsCard />
       <BackupRestoreCard />
+    </div>
+  );
+}
+
+function ThemeCard() {
+  const { theme } = useTheme();
+  const { isLoading, error } = useSettings();
+  const queryClient = useQueryClient();
+  const save = useMutation({
+    mutationFn: (value) => api.patch('/settings', { theme: value }),
+    onSuccess: (settings) => queryClient.setQueryData(['settings'], settings),
+  });
+
+  return (
+    <div className="card">
+      <h2 id="theme-heading">Theme</h2>
+      <p className="muted theme-help">Choose a look for your family hub. Your choice saves automatically.</p>
+      <fieldset
+        className="theme-options"
+        aria-labelledby="theme-heading"
+        disabled={isLoading || !!error || save.isPending}
+      >
+        {['default', 'spooky'].map((value) => (
+          <label key={value} className={`theme-option${theme === value ? ' selected' : ''}`}>
+            <input
+              type="radio"
+              name="theme"
+              value={value}
+              checked={theme === value}
+              onChange={() => save.mutate(value)}
+            />
+            {value === 'default' ? 'Default' : 'Spooky'}
+          </label>
+        ))}
+      </fieldset>
+      <div className="theme-status" role="status">
+        {save.isPending ? 'Saving…' : save.isSuccess ? 'Theme saved.' : ''}
+      </div>
+      {(error || save.isError) && (
+        <p className="report-message error" role="alert">
+          {error ? 'Themes could not be loaded. Reload to try again.' : 'The theme could not be saved. Please try again.'}
+        </p>
+      )}
     </div>
   );
 }
@@ -289,6 +332,7 @@ function FamilyNameCard() {
 }
 
 function MembersCard() {
+  const { theme } = useTheme();
   const { data: members = [] } = useMembers();
   const [editing, setEditing] = useState(null); // member object or {} for new
 
@@ -324,7 +368,7 @@ function MembersCard() {
               style={{
                 padding: 3,
                 borderRadius: '50%',
-                border: `3px solid ${memberColor(m)}`,
+                border: `3px solid ${memberColor(m, theme)}`,
                 display: 'inline-flex',
               }}
             >
@@ -340,10 +384,12 @@ function MembersCard() {
 }
 
 function MemberModal({ member, onClose }) {
+  const { theme } = useTheme();
+  const colors = [...memberColors(theme), '#000000'];
   const isNew = !member.id;
   const [name, setName] = useState(member.name || '');
-  const [color, setColor] = useState(member.color || COLORS[2]);
-  const displayedColor = memberColor({ ...member, color });
+  const [color, setColor] = useState(member.color || colors[2]);
+  const displayedColor = memberColor({ ...member, color }, theme);
   const [avatar, setAvatar] = useState(member.avatar || null);
   const [allowance, setAllowance] = useState(
     member.weekly_allowance_cents == null ? '' : (member.weekly_allowance_cents / 100).toFixed(2)
@@ -463,7 +509,7 @@ function MemberModal({ member, onClose }) {
       <div className="field">
         <label>Color</label>
         <div className="row">
-          {COLORS.map((c) => (
+          {colors.map((c) => (
             <span
               key={c}
               title={c === '#000000' ? 'Black' : c}

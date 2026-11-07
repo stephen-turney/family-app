@@ -1,7 +1,7 @@
 /* Halloween palette: charcoal surfaces, pumpkin orange, purple, and green.
    Keep the chosen page background and the checklist's geometry intact.
    Solid colours, ordinary gradients, and SVG work in the iOS 10 legacy build. */
-:root {
+:root[data-theme="spooky"] {
   --bg: #21172f;
   --panel: #1c1c1c;
   --panel-2: #2f2f2f;
@@ -17,7 +17,7 @@
   color-scheme: dark;
 }
 
-body {
+:root[data-theme="spooky"] body {
   color: var(--text);
   background: #21172f;
   background-image:
@@ -25,73 +25,74 @@ body {
     radial-gradient(ellipse at 95% 90%, rgba(114, 60, 61, .24), transparent 50%);
 }
 
-.topbar {
+:root[data-theme="spooky"] .topbar {
   flex-shrink: 0;
   background: var(--panel);
   color: var(--text);
   border-bottom: 1px solid var(--border);
   box-shadow: 0 4px 18px rgba(0, 0, 0, .2);
 }
-.brand { font-weight: 800; letter-spacing: -.5px; }
-.brand-dot { background: linear-gradient(135deg, #ff7518, #9932cc); }
-.brand-pumpkin { font-size: 30px; line-height: 1; margin-right: 2px; }
-a.brand:hover { opacity: 1; color: var(--accent); }
-.nav a { color: var(--text); }
-.nav a:hover, .nav-gear:hover { background: var(--accent-soft); color: var(--text); }
-.nav a.active { background: var(--accent); color: var(--panel); }
+:root[data-theme="spooky"] .brand { font-weight: 800; letter-spacing: -.5px; }
+:root[data-theme="spooky"] .brand-dot { background: linear-gradient(135deg, #ff7518, #9932cc); }
+:root[data-theme="spooky"] .brand-pumpkin { font-size: 30px; line-height: 1; margin-right: 2px; }
+:root[data-theme="spooky"] a.brand:hover { opacity: 1; color: var(--accent); }
+:root[data-theme="spooky"] .nav a { color: var(--text); }
+:root[data-theme="spooky"] .nav a:hover, :root[data-theme="spooky"] .nav-gear:hover { background: var(--accent-soft); color: var(--text); }
+:root[data-theme="spooky"] .nav a.active { background: var(--accent); color: var(--panel); }
 /* Outlined Chiller lettering and blood drips render consistently on the tablet.
    The link keeps its accessible Overview name independently of the artwork. */
-.nav a.nav-overview {
+:root[data-theme="spooky"] .nav a.nav-overview {
   display: inline-block;
   padding: 0 12px;
   line-height: 0;
 }
-.nav-overview-art { display: inline-block; width: 132px; height: 46px; vertical-align: middle; }
-.nav a.nav-overview.active {
+:root[data-theme="spooky"] .nav-overview-art { display: inline-block; width: 132px; height: 46px; vertical-align: middle; }
+:root[data-theme="spooky"] .nav a.nav-overview.active {
   background: #3b151c;
   box-shadow: inset 0 0 0 1px #9e2937;
 }
-.nav-gear.active { background: #663399; }
-.season-label {
+:root[data-theme="spooky"] .nav-gear.active { background: #663399; }
+:root[data-theme="spooky"] .season-label {
   color: var(--accent); font-size: 11px; font-weight: 800;
   letter-spacing: .12em; text-transform: uppercase; white-space: nowrap;
 }
-.season-sparkle { margin-right: 6px; }
-.season-eye {
+:root[data-theme="spooky"] .season-sparkle { margin-right: 6px; }
+:root[data-theme="spooky"] .season-eye {
   display: inline-block; width: .8em; height: .8em;
   margin: 0 .06em; vertical-align: -.04em;
 }
-.season-eye-second { transform: rotate(18deg); }
-.content > .muted { color: var(--muted); }
-.content > div > .completion-error { color: var(--danger); }
+:root[data-theme="spooky"] .season-eye-second { transform: rotate(18deg); }
+:root[data-theme="spooky"] .content > .muted { color: var(--muted); }
+:root[data-theme="spooky"] .content > div > .completion-error { color: var(--danger); }
 
-.card, .home-tile, .task-drag-preview { color: var(--text); }
-.card { border-top: 3px solid var(--accent); }
+:root[data-theme="spooky"] .card, :root[data-theme="spooky"] .home-tile, :root[data-theme="spooky"] .task-drag-preview { color: var(--text); }
+:root[data-theme="spooky"] .card { border-top: 3px solid var(--accent); }
 /* Dark labels keep the orange actions legible without bright white text. */
-.btn { color: var(--panel); box-shadow: 0 2px 0 rgba(0, 0, 0, .2); }
-.btn.ghost { box-shadow: none; }
-.btn.danger { border-color: var(--danger); }
-.btn.danger:hover { background: var(--panel-2); }
-input:focus, select:focus, textarea:focus { border-color: var(--accent); }
-input, select, textarea, .icon-current { background: var(--panel-2); border-color: #9370db; }
-input::placeholder, textarea::placeholder { color: var(--muted); opacity: .8; }
-select option { background: var(--panel-2); color: var(--text); }
-.icon-panel, .report-link, .allowance-report-empty { background: var(--panel-2); }
-.custom-image-library { border-color: #9370db; }
-.icon-picker.compact .icon-panel { box-shadow: 0 10px 24px rgba(0, 0, 0, .3); }
-.badge .swatch { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .25); }
-.task-drag-preview { box-shadow: 0 14px 30px rgba(0, 0, 0, .3), 0 4px 10px rgba(0, 0, 0, .2); }
+:root[data-theme="spooky"] .btn { color: var(--panel); box-shadow: 0 2px 0 rgba(0, 0, 0, .2); }
+:root[data-theme="spooky"] .btn.ghost { color: var(--text); box-shadow: none; }
+:root[data-theme="spooky"] .btn.danger { color: var(--danger); border-color: var(--danger); }
+:root[data-theme="spooky"] .btn.danger:hover { background: var(--panel-2); }
+:root[data-theme="spooky"] input:focus, :root[data-theme="spooky"] select:focus, :root[data-theme="spooky"] textarea:focus { border-color: var(--accent); }
+:root[data-theme="spooky"] input, :root[data-theme="spooky"] select, :root[data-theme="spooky"] textarea, :root[data-theme="spooky"] .icon-current { background: var(--panel-2); border-color: #9370db; }
+:root[data-theme="spooky"] input::placeholder, :root[data-theme="spooky"] textarea::placeholder { color: var(--muted); opacity: .8; }
+:root[data-theme="spooky"] select option { background: var(--panel-2); color: var(--text); }
+:root[data-theme="spooky"] .icon-panel, :root[data-theme="spooky"] .report-link, :root[data-theme="spooky"] .allowance-report-empty { background: var(--panel-2); }
+:root[data-theme="spooky"] .report-link:hover { background: var(--accent-soft); }
+:root[data-theme="spooky"] .custom-image-library { border-color: #9370db; }
+:root[data-theme="spooky"] .icon-picker.compact .icon-panel { box-shadow: 0 10px 24px rgba(0, 0, 0, .3); }
+:root[data-theme="spooky"] .badge .swatch { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .25); }
+:root[data-theme="spooky"] .task-drag-preview { box-shadow: 0 14px 30px rgba(0, 0, 0, .3), 0 4px 10px rgba(0, 0, 0, .2); }
 
 /* Use :focus as the fallback for older Safari; modern browsers suppress the
    ring for pointer clicks while retaining it for keyboard navigation. */
-a:focus, button:focus, input:focus, select:focus, textarea:focus {
+:root[data-theme="spooky"] a:focus, :root[data-theme="spooky"] button:focus, :root[data-theme="spooky"] input:focus, :root[data-theme="spooky"] select:focus, :root[data-theme="spooky"] textarea:focus {
   outline: 3px solid #9370db; outline-offset: 3px;
 }
 @supports selector(:focus-visible) {
-  a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
+  :root[data-theme="spooky"] a:focus:not(:focus-visible), :root[data-theme="spooky"] button:focus:not(:focus-visible) { outline: none; }
 }
 
-.spooky-welcome {
+:root[data-theme="spooky"] .spooky-welcome {
   position: relative;
   max-width: 860px; height: 170px; margin: 0 auto 22px;
   overflow: hidden; border: 1px solid #7b3daa; border-radius: 24px;
@@ -99,110 +100,110 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
   background-image: radial-gradient(ellipse at 50% 100%, #663399, transparent 75%);
   box-shadow: 0 8px 26px rgba(0, 0, 0, .2);
 }
-.spooky-welcome-art { display: block; width: 100%; height: 100%; }
+:root[data-theme="spooky"] .spooky-welcome-art { display: block; width: 100%; height: 100%; }
 
-.home-head { margin-bottom: 20px; }
-.daynav-date { color: var(--text); font-weight: 700; }
-.daynav-btn { background: var(--panel); color: var(--accent); border-color: #9370db; box-shadow: 0 3px 0 rgba(0, 0, 0, .2); }
-.daynav-btn:hover { color: #ffa500; border-color: var(--accent); }
-.daynav-btn:active { background: var(--accent-soft); }
-.daynav-arrow.bone-chevron {
+:root[data-theme="spooky"] .home-head { margin-bottom: 20px; }
+:root[data-theme="spooky"] .daynav-date { color: var(--text); font-weight: 700; }
+:root[data-theme="spooky"] .daynav-btn { background: var(--panel); color: var(--accent); border-color: #9370db; box-shadow: 0 3px 0 rgba(0, 0, 0, .2); }
+:root[data-theme="spooky"] .daynav-btn:hover { color: #ffa500; border-color: var(--accent); }
+:root[data-theme="spooky"] .daynav-btn:active { background: var(--accent-soft); }
+:root[data-theme="spooky"] .daynav-arrow.bone-chevron {
   width: 28px; height: 28px;
   fill: #f4e8cd; stroke: #a68c68; stroke-width: 1;
 }
-.daynav-btn:hover .bone-chevron { fill: #fff5dd; stroke: #c5a371; }
-.daynav-tag { background: var(--accent-soft); color: var(--text); border: 1px solid #9370db; }
-.btn.ghost.daynav-jump { padding: 0; border: none; background: transparent; }
-.checklist-title { color: var(--text); }
+:root[data-theme="spooky"] .daynav-btn:hover .bone-chevron { fill: #fff5dd; stroke: #c5a371; }
+:root[data-theme="spooky"] .daynav-tag { background: var(--accent-soft); color: var(--text); border: 1px solid #9370db; }
+:root[data-theme="spooky"] .btn.ghost.daynav-jump { padding: 0; border: none; background: transparent; }
+:root[data-theme="spooky"] .checklist-title { color: var(--text); }
 
-.home-tile { position: relative; padding-top: 25px; border: 2px solid var(--border); }
-.home-tile:hover { border-color: var(--accent); box-shadow: 0 6px 0 rgba(0, 0, 0, .22), 0 16px 30px rgba(0, 0, 0, .28); }
-.home-avatar, .checklist-avatar { box-shadow: 0 0 0 6px rgba(147, 112, 219, .18); }
-.home-name { letter-spacing: -.5px; }
-.progress { background: var(--panel-2); }
-.progress > span {
+:root[data-theme="spooky"] .home-tile { position: relative; padding-top: 25px; border: 2px solid var(--border); }
+:root[data-theme="spooky"] .home-tile:hover { border-color: var(--accent); box-shadow: 0 6px 0 rgba(0, 0, 0, .22), 0 16px 30px rgba(0, 0, 0, .28); }
+:root[data-theme="spooky"] .home-avatar, :root[data-theme="spooky"] .checklist-avatar { box-shadow: 0 0 0 6px rgba(147, 112, 219, .18); }
+:root[data-theme="spooky"] .home-name { letter-spacing: -.5px; }
+:root[data-theme="spooky"] .progress { background: var(--panel-2); }
+:root[data-theme="spooky"] .progress > span {
   background-image: repeating-linear-gradient(115deg, transparent, transparent 10px, rgba(255, 140, 105, .2) 10px, rgba(255, 140, 105, .2) 20px);
 }
-.block-panel {
+:root[data-theme="spooky"] .block-panel {
   background-image: radial-gradient(circle at 85% 18%, rgba(28, 28, 28, .15) 0, rgba(28, 28, 28, .15) 3px, transparent 4px);
   background-size: 28px 28px;
 }
-.block-label { color: var(--text); background: var(--panel); }
-.checkline .box { border-color: #9370db; background: var(--panel-2); }
-.checkline .task-icon { background: var(--panel-2); }
-.checkline.done { background: var(--panel-2); }
-.checkline:active { background: var(--accent-soft); }
-.checkline.done .label { color: var(--muted); }
-.task-edit-button, .add-task-button, .block-empty { border-color: #9370db; }
-.modal-backdrop { background: rgba(0, 0, 0, .78); }
-.allowance-report-heading { color: var(--text); background: linear-gradient(120deg, #4b0082, #663399); }
-.allowance-category { background: var(--panel-2); border-top: 3px solid var(--accent); }
-.allowance-category.savings { background: var(--panel-2); border-top-color: #32cd32; }
-.allowance-category.giving { background: var(--panel-2); border-top-color: #ff6347; }
-.allowance-category.taxes { background: var(--panel-2); border-top-color: #9370db; }
-.celebration-icon { filter: drop-shadow(0 5px 8px rgba(50, 205, 50, .32)); }
-.celebration-spark { color: #ffa500; text-shadow: 0 1px 1px rgba(0, 0, 0, .2); }
-.confetti-one { background: #ff6347; }
-.confetti-two { background: #32cd32; }
-.confetti-three { background: #9370db; }
-.confetti-four { background: #ffa500; }
-.confetti-five { background: #9932cc; }
-.confetti-six { background: #ff7518; }
+:root[data-theme="spooky"] .block-label { color: var(--text); background: var(--panel); }
+:root[data-theme="spooky"] .checkline .box { border-color: #9370db; background: var(--panel-2); }
+:root[data-theme="spooky"] .checkline .task-icon { background: var(--panel-2); }
+:root[data-theme="spooky"] .checkline.done { background: var(--panel-2); }
+:root[data-theme="spooky"] .checkline:active { background: var(--accent-soft); }
+:root[data-theme="spooky"] .checkline.done .label { color: var(--muted); }
+:root[data-theme="spooky"] .task-edit-button, :root[data-theme="spooky"] .add-task-button, :root[data-theme="spooky"] .block-empty { border-color: #9370db; }
+:root[data-theme="spooky"] .modal-backdrop { background: rgba(0, 0, 0, .78); }
+:root[data-theme="spooky"] .allowance-report-heading { color: var(--text); background: linear-gradient(120deg, #4b0082, #663399); }
+:root[data-theme="spooky"] .allowance-category { background: var(--panel-2); border-top: 3px solid var(--accent); }
+:root[data-theme="spooky"] .allowance-category.savings { background: var(--panel-2); border-top-color: #32cd32; }
+:root[data-theme="spooky"] .allowance-category.giving { background: var(--panel-2); border-top-color: #ff6347; }
+:root[data-theme="spooky"] .allowance-category.taxes { background: var(--panel-2); border-top-color: #9370db; }
+:root[data-theme="spooky"] .celebration-icon { filter: drop-shadow(0 5px 8px rgba(50, 205, 50, .32)); }
+:root[data-theme="spooky"] .celebration-spark { color: #ffa500; text-shadow: 0 1px 1px rgba(0, 0, 0, .2); }
+:root[data-theme="spooky"] .confetti-one { background: #ff6347; }
+:root[data-theme="spooky"] .confetti-two { background: #32cd32; }
+:root[data-theme="spooky"] .confetti-three { background: #9370db; }
+:root[data-theme="spooky"] .confetti-four { background: #ffa500; }
+:root[data-theme="spooky"] .confetti-five { background: #9932cc; }
+:root[data-theme="spooky"] .confetti-six { background: #ff7518; }
+
+:root[data-theme="spooky"] .checkline.done .box {
+  background-color: #DBAD77; border-color: #96633F;
+  background-image: repeating-linear-gradient(0deg, transparent, transparent 8px, rgba(121, 74, 40, .16) 9px, transparent 11px);
+  box-shadow: inset 0 2px 0 rgba(255, 239, 206, .55), 0 3px 0 #835536;
+}
+:root[data-theme="spooky"] .completion-splatter {
+  /* Clip only the blood to the rounded checkbox, leaving the knife above it. */
+  position: absolute; z-index: 1; top: 0; left: 0; width: 100%; height: 100%;
+  overflow: hidden; border-radius: inherit; pointer-events: none;
+}
+:root[data-theme="spooky"] .completion-splatter svg { display: block; width: 100%; height: 100%; }
+:root[data-theme="spooky"] .checkline .box .completion-knife {
+  /* The SVG's contact point is (64, 64): 64% of 66px = 42.24px.
+     Anchor that point to the centre of either checkbox size. */
+  position: absolute; z-index: 3; top: calc(50% - 42.24px); left: calc(50% - 42.24px);
+  width: 66px; height: 66px; filter: drop-shadow(1px 2px 1px rgba(45, 30, 23, .24));
+  pointer-events: none; animation: completion-knife-in .22s ease-out both;
+}
+:root[data-theme="spooky"] .completion-entry {
+  position: absolute; z-index: 4; top: 50%; left: 50%; width: 18px; height: 5px;
+  transform: translate(-50%, -50%) rotate(-45deg); border-radius: 50%;
+  background: #57331F; box-shadow: inset 0 1px 1px #321F16;
+  pointer-events: none;
+}
+:root[data-theme="spooky"] .completion-entry::after {
+  content: ''; position: absolute; left: 1px; right: 1px; bottom: -1px; height: 2px;
+  border-radius: 50%; background: #E9C28D;
+}
+@keyframes completion-knife-in {
+  from { transform: translate(-10px, -10px); opacity: 0; }
+  to { transform: translate(0, 0); opacity: 1; }
+}
 
 /* The ghosts float briefly and settle, keeping the wall tablet calm. */
-.spooky-ghost { animation: spooky-float 3s ease-in-out 2; }
+:root[data-theme="spooky"] .spooky-ghost { animation: spooky-float 3s ease-in-out 2; }
 @keyframes spooky-float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }
 }
 
 @media (max-width: 699px) {
-  .topbar { gap: 12px; padding: 12px 16px; }
-  .brand { font-size: 18px; }
-  .brand-pumpkin { font-size: 25px; }
-  .nav a { padding: 10px 12px; }
-  .season-label { display: none; }
-  .content { padding: 20px 16px; }
-  .spooky-welcome { height: 150px; }
+  :root[data-theme="spooky"] .brand-pumpkin { font-size: 25px; }
+  :root[data-theme="spooky"] .season-label { display: none; }
+  :root[data-theme="spooky"] .spooky-welcome { height: 150px; }
 }
 @media (max-width: 560px) {
-  .topbar { flex-wrap: wrap; gap: 0; }
-  .brand { flex: 1; min-width: 0; overflow-wrap: break-word; margin-right: 10px; }
-  .nav { order: 3; flex-basis: 100%; margin-top: 9px; }
-  .nav a { display: block; width: 100%; text-align: center; }
-  .nav-gear { width: 44px; }
-  .spooky-welcome { height: 140px; }
-  .home-grid { grid-template-columns: minmax(0, 1fr); }
-  .member-columns { grid-template-columns: minmax(0, 1fr); }
-  .home-tile { padding: 24px 18px; }
-  .daynav-date { width: 212px; min-width: 212px; flex-basis: 212px; font-size: 15px; }
-  .checklist-daynav { gap: 8px; }
-}
-@media (max-width: 359px) {
-  .content { padding: 16px 10px; }
-  .daynav-date { width: 188px; min-width: 188px; flex-basis: 188px; font-size: 13px; }
-  .checklist-daynav { gap: 6px; }
+  :root[data-theme="spooky"] .spooky-welcome { height: 140px; }
+  :root[data-theme="spooky"] .home-tile { padding-top: 24px; }
 }
 @supports not (container-type: inline-size) {
-  .brand-pumpkin { margin-right: 10px; }
-  .topbar .nav { margin-left: 20px; }
-  .season-label { margin-right: 20px; }
-  .home-tile > * + * { margin-top: 12px; }
-  .checklist-daynav .previous { margin-right: 14px; }
-  .checklist-daynav .next { margin-left: 14px; }
-  @media (max-width: 560px) {
-    .topbar .nav { margin-left: 0; }
-    .checklist-daynav .previous { margin-right: 8px; }
-    .checklist-daynav .next { margin-left: 8px; }
-  }
-  @media (max-width: 359px) {
-    .checklist-daynav .previous { margin-right: 6px; }
-    .checklist-daynav .next { margin-left: 6px; }
-  }
+  :root[data-theme="spooky"] .brand-pumpkin { margin-right: 10px; }
+  :root[data-theme="spooky"] .season-label { margin-right: 20px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .spooky-ghost, .celebration-icon, .checkline .box .completion-knife,
-  .celebration-spark, .celebration-confetti, .celebration-particle { animation: none; }
-  .home-tile, .progress > span, .nav-gear { transition: none; }
-  .home-tile:hover { transform: none; }
+  :root[data-theme="spooky"] .spooky-ghost,
+  :root[data-theme="spooky"] .checkline .box .completion-knife { animation: none; }
 }

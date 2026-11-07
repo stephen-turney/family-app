@@ -19,6 +19,7 @@ import CompletionMark from '../components/CompletionMark.jsx';
 import BoneChevron from '../components/BoneChevron.jsx';
 import { isUploadedImage, resolveCompletedIcon, resolveIcon } from '../lib/taskIcons.js';
 import { memberColor } from '../lib/theme.js';
+import { useTheme } from '../components/ThemeProvider.jsx';
 
 function TaskPicture({ picture }) {
   return isUploadedImage(picture) ? <img src={picture} alt="" /> : picture;
@@ -41,13 +42,13 @@ function shiftDate(iso, days) {
 
 // The day is split into the same three blocks as a printed kids' chore sheet, in
 // day order. `key` matches routines.time_of_day, so the grouping needs no new
-// column. Palette colors: pumpkin morning, lavender afternoon, sea-green evening.
+// column. Each theme has its own tint for the same three time-of-day blocks.
 // Keep the familiar sun/moon pictures. Blocks always render, even when empty — a checklist a kid
 // reads every day should keep the same shape.
 const BLOCKS = [
-  { key: 'morning', label: 'Morning', article: 'a', icon: '🌤️', tint: '#FF7518' },
-  { key: 'afternoon', label: 'Afternoon', article: 'an', icon: '☀️', tint: '#9370DB' },
-  { key: 'evening', label: 'Evening', article: 'an', icon: '🌙', tint: '#2E8B57' },
+  { key: 'morning', label: 'Morning', article: 'a', icon: '🌤️', tint: '#aab8d6', spookyTint: '#FF7518' },
+  { key: 'afternoon', label: 'Afternoon', article: 'an', icon: '☀️', tint: '#aec4a3', spookyTint: '#9370DB' },
+  { key: 'evening', label: 'Evening', article: 'an', icon: '🌙', tint: '#9cb0c9', spookyTint: '#2E8B57' },
 ];
 
 const CELEBRATION_PARTICLES = [
@@ -59,6 +60,11 @@ const CELEBRATION_PARTICLES = [
   [-67, -49, '#9370DB', .29], [65, -48, '#32CD32', .31], [90, 42, '#FF7518', .27],
   [-32, 56, '#FFA500', .34], [29, 49, '#C71585', .37],
 ];
+
+const DEFAULT_PARTICLE_COLORS = {
+  '#FFA500': '#f3b934', '#C71585': '#ef7c98', '#9400D3': '#58a7d7',
+  '#9370DB': '#8c78c7', '#32CD32': '#7cba8a', '#FF7518': '#ee8c57',
+};
 
 // Long enough for the surrounding rows to visibly glide into their new slots,
 // while keeping the list responsive as the pointer changes direction.
@@ -88,6 +94,7 @@ function rowsInDragOrder(rows, routineId, dragDisplayOrder) {
 // Serves both /tasks (everyone, side by side) and /tasks/:memberId (one person,
 // linked from the home page tiles).
 export default function TasksPage() {
+  const { theme, isSpooky } = useTheme();
   const { memberId } = useParams();
   const [searchParams] = useSearchParams();
   const focusId = memberId ? Number(memberId) : null;
@@ -718,7 +725,7 @@ export default function TasksPage() {
           </div>
           <span
             className="checklist-avatar"
-            style={{ background: `${memberColor(focusMember)}59`, borderColor: memberColor(focusMember) }}
+            style={{ background: `${memberColor(focusMember, theme)}59`, borderColor: memberColor(focusMember, theme) }}
           >
             <Avatar member={focusMember} size={150} />
           </span>
@@ -778,7 +785,7 @@ export default function TasksPage() {
             <strong>{focusPoints}/200 points</strong>
           </div>
           <div className="progress" aria-label={`${focusPercent}% complete`}>
-            <span style={{ width: `${focusPercent}%`, backgroundColor: memberColor(focusMember) }} />
+            <span style={{ width: `${focusPercent}%`, backgroundColor: memberColor(focusMember, theme) }} />
           </div>
         </section>
       )}
@@ -788,7 +795,7 @@ export default function TasksPage() {
           const stat = statFor(m.id);
           const memberRoutines = routines.filter((r) => r.member_id === m.id);
           const blocks = BLOCKS.map((block) => ({
-            block,
+            block: { ...block, tint: isSpooky ? block.spookyTint : block.tint },
             groups: displayGroups(memberRoutines.filter((r) => r.time_of_day === block.key)),
           }));
 
@@ -826,7 +833,7 @@ export default function TasksPage() {
                     </span>
                   </div>
                   <div className="progress">
-                    <span style={{ width: `${shownPct}%`, backgroundColor: memberColor(m) }} />
+                    <span style={{ width: `${shownPct}%`, backgroundColor: memberColor(m, theme) }} />
                   </div>
                 </div>
               )}
@@ -882,7 +889,7 @@ export default function TasksPage() {
                                   className="celebration-particle"
                                   style={{
                                     '--burst-x': `${x}px`, '--burst-y': `${y}px`,
-                                    '--particle-color': color, '--particle-delay': `${delay}s`,
+                                    '--particle-color': isSpooky ? color : DEFAULT_PARTICLE_COLORS[color], '--particle-delay': `${delay}s`,
                                   }}
                                 />
                               ))}

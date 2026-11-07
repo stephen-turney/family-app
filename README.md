@@ -38,7 +38,13 @@ Calendar merging and iCal sync were removed in August 2026 to keep this focused 
 The code and the removed data are parked in [`_archive/`](_archive/README.md) if they're ever wanted
 back. Chores exist in the database and the API but are hidden from the UI.
 
-The Halloween skin adds a purple night sky, charcoal cards, pumpkin accents, and friendly Minecraft
+**Settings → Theme** offers **Default** (the original light appearance) and **Spooky**. Selecting
+either option applies it immediately and saves the choice in the shared family settings, so it
+survives reloads and is used by other devices when they next load the app. Existing installations
+keep Spooky until a different theme is selected. Switching themes preserves saved member colours
+and task pictures.
+
+The Spooky skin adds a purple night sky, charcoal cards, pumpkin accents, and friendly Minecraft
 characters and bats across Home, checklists, Settings, and dialogs. The skin lives in
 `client/src/halloween.css`, applies seasonal member colours without changing saved values,
 keeps member photos, and respects reduced-motion preferences.
