@@ -5,7 +5,6 @@ import TasksPage from './pages/TasksPage.jsx';
 import FamilyPage from './pages/FamilyPage.jsx';
 import { useSettings } from './api/client.js';
 import { pluralizeFamily } from './lib/familyName.js';
-import overviewBlood from './assets/overview-blood.svg';
 import bloodshotEye from './assets/bloodshot-eye.svg';
 import screamingSkull from './assets/screaming-skull.svg';
 import { useTheme } from './components/ThemeProvider.jsx';
@@ -42,12 +41,6 @@ export default function App() {
           <span className={isSpooky ? 'brand-pumpkin' : 'brand-dot'} aria-hidden="true">{isSpooky ? '🎃' : ''}</span>
           {brand}
         </Link>
-        <nav className="nav">
-          {/* `end` matters: without it /tasks/3 would light up Overview too. */}
-          <NavLink to="/tasks" end aria-label="Overview" className={({ isActive }) => `${isSpooky ? 'nav-overview' : ''}${isActive ? ' active' : ''}`}>
-            {isSpooky ? <img className="nav-overview-art" src={overviewBlood} alt="" aria-hidden="true" /> : '✅ Overview'}
-          </NavLink>
-        </nav>
         {isSpooky && <span className="season-label" role="img" aria-label="Spooky season">
           <span aria-hidden="true">
             <span className="season-sparkle">✦</span>{' Sp'}
@@ -71,6 +64,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<HomePage />} />
+          {/* Overview is retained for direct access, but retired from navigation. */}
           <Route path="/tasks" element={<TasksPage />} />
           {/* Same page, narrowed to one person (linked from the home tiles) */}
           <Route path="/tasks/:memberId" element={<TasksPage />} />

@@ -12,10 +12,10 @@ export default function FamilyPage() {
     <div className="grid" style={{ maxWidth: 775, margin: '0 auto' }}>
       <h1>Settings</h1>
       <FamilyNameCard />
-      <ThemeCard />
       <MembersCard />
       <ReportsCard />
       <BackupRestoreCard />
+      <ThemeCard />
     </div>
   );
 }
@@ -32,27 +32,18 @@ function ThemeCard() {
   return (
     <div className="card">
       <h2 id="theme-heading">Theme</h2>
-      <p className="muted theme-help">Choose a look for your family hub. Your choice saves automatically.</p>
-      <fieldset
-        className="theme-options"
+      <select
+        className="theme-select"
         aria-labelledby="theme-heading"
+        value={theme}
+        onChange={(event) => save.mutate(event.target.value)}
         disabled={isLoading || !!error || save.isPending}
       >
-        {['default', 'spooky'].map((value) => (
-          <label key={value} className={`theme-option${theme === value ? ' selected' : ''}`}>
-            <input
-              type="radio"
-              name="theme"
-              value={value}
-              checked={theme === value}
-              onChange={() => save.mutate(value)}
-            />
-            {value === 'default' ? 'Default' : 'Spooky'}
-          </label>
-        ))}
-      </fieldset>
+        <option value="default">Default</option>
+        <option value="spooky">Spooky</option>
+      </select>
       <div className="theme-status" role="status">
-        {save.isPending ? 'Saving…' : save.isSuccess ? 'Theme saved.' : ''}
+        {save.isPending ? 'Saving…' : ''}
       </div>
       {(error || save.isError) && (
         <p className="report-message error" role="alert">

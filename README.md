@@ -10,8 +10,9 @@ Built as an MVP with a React (Vite) frontend and a Node/Express + SQLite backend
 
 - **Home** — the landing page: today's date, then one large photo per family member with their
   progress. Tap someone to open their checklist. The family name in the header returns here.
-- **A tab per person** — the top bar carries *Overview* (everyone side by side) and a tab for each
-  family member, with Settings as a gear on the far right.
+- **Navigation** — open a person's checklist from Home, with Settings as a gear on the far right
+  of the top bar. Overview (everyone side by side) is retired from navigation but retained at
+  `/tasks` for direct access.
 - **Daily checklist** — each person's day split into Morning / Afternoon / Evening, with a tinted
   graphic panel beside each block, exactly as tall as the rows next to it. A routine's own name
   ("Before School") is the block heading. The whole row is the tap target, sized for a tablet.
