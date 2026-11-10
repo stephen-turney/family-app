@@ -924,8 +924,12 @@ html.modal-open, .modal-open body, .modal-open .content { overflow: hidden; }
 .theme-status { color: var(--muted); font-size: 12px; }
 .theme-status:not(:empty) { margin-left: 12px; }
 
-.range-month { justify-content: space-between; margin-bottom: 14px; }
-.report-calendar { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; text-align: center; }
+.range-month { justify-content: center; flex-wrap: nowrap; gap: 8px; margin-bottom: 14px; }
+.range-month-label { position: relative; white-space: nowrap; text-align: center; }
+.range-month-sizer { visibility: hidden; }
+.range-month-current { position: absolute; top: 0; left: 0; width: 100%; }
+/* Reserve six weeks, leaving unused rows empty for shorter months. */
+.report-calendar { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: auto repeat(6, minmax(38px, auto)); gap: 4px; text-align: center; }
 .report-calendar > span { font-size: 12px; padding: 5px 0; }
 .calendar-day { min-height: 38px; border: 1px solid transparent; border-radius: 6px; color: var(--text); background: var(--panel-2); cursor: pointer; font: inherit; }
 .calendar-day.adjacent-month { color: var(--muted); background: var(--bg); }

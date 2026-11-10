@@ -17,10 +17,13 @@ export default function ReportRangePicker({ onClose, onGenerate, pending, error 
     } else setEnd(date);
   };
   return (
-    <Modal title="Custom report" onClose={pending ? () => {} : onClose}>
+    <Modal onClose={pending ? () => {} : onClose}>
       <div className="row range-month">
         <button className="btn ghost small" aria-label="Previous month" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}>‹</button>
-        <strong aria-live="polite">{month.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</strong>
+        <strong className="range-month-label">
+          <span className="range-month-sizer" aria-hidden="true">September 20XX</span>
+          <span className="range-month-current" aria-live="polite">{month.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
+        </strong>
         <button className="btn ghost small" aria-label="Next month" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))}>›</button>
       </div>
       <div className="report-calendar" style={{ marginBottom: 18 }}>
@@ -38,7 +41,6 @@ export default function ReportRangePicker({ onClose, onGenerate, pending, error 
       </div>
       {error && <p className="report-message error" role="alert">The report could not be generated. Please try again.</p>}
       <div className="row" style={{ justifyContent: 'flex-end' }}>
-        <button className="btn ghost" disabled={pending} onClick={onClose}>Cancel</button>
         <button className="btn" disabled={!startDate || !endDate || pending} onClick={() => onGenerate({ startDate, endDate })}>{pending ? 'Generating…' : 'Generate Report'}</button>
       </div>
     </Modal>

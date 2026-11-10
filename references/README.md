@@ -52,3 +52,16 @@ Use Monday–Sunday weeks and fill partial weeks with selectable dates from the
 previous and next months. Remove the date summary and explanatory text below the
 calendar. Highlight the full range only once the end date is selected. Keep the
 Cancel and Generate Report buttons.
+
+## Custom report calendar sizing — November 9, 2026
+
+User-provided [six-week calendar reference](reports/calendar-six-week-sizing.png).
+
+Keep the selector the same size across months by reserving six week rows. Render
+only the four, five, or six weeks the month needs, leaving unused rows blank.
+Remove the visible "Custom report" title. Center the month navigation and size its
+label space from "September 20XX" so the arrows sit close to the label and stay in
+fixed positions when changing months.
+
+Follow-up: remove the bottom Cancel button, leaving Generate Report as the only
+footer action. Keep the existing close button at the top.
