@@ -42,3 +42,13 @@ User-provided [deployment and npm error log](npm-vulnerabilities/deployment-log.
 The log reports five client and three server vulnerabilities, followed by ENOLOCK
 when npm audit fix was run at the repository root. Audit/install commands belong
 in client/ and server/, which each contain their own package-lock.json.
+
+## Custom report calendar — November 9, 2026
+
+- [Original custom report dialog](reports/custom-report-original.png)
+- [Adjacent-month calendar reference](reports/calendar-adjacent-month-reference.png)
+
+Use Monday–Sunday weeks and fill partial weeks with selectable dates from the
+previous and next months. Remove the date summary and explanatory text below the
+calendar. Highlight the full range only once the end date is selected. Keep the
+Cancel and Generate Report buttons.
