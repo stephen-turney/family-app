@@ -8,3 +8,4 @@
 /server/data.sqlite*
 /hosting/restic.env
 /hosting/restic-password.txt
+/update-server-git.sh
