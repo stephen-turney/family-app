@@ -87,6 +87,7 @@ let server;
 let baseUrl;
 before(async () => {
   const app = express();
+  app.use(express.json());
   app.use('/api/reports', reportsRouter);
   server = app.listen(0, '127.0.0.1');
   await new Promise((resolve) => server.once('listening', resolve));
@@ -360,4 +361,38 @@ test('invalid names and encoded traversal cannot read, delete, or recalculate fi
   deleteSavedReport(legacyFilename);
   assert.equal(existsSync(path.join(reportsDir, legacyFilename)), false);
   assert.throws(() => deleteSavedReport('../outside.txt'), /report not found/);
+});
+
+test('custom ranges include both boundaries and weekends, save, reopen, recalculate and delete', async () => {
+  const member = db.prepare('INSERT INTO members (name, weekly_allowance_cents) VALUES (?, ?)').run('Child', 1000).lastInsertRowid;
+  const routine = db.prepare('INSERT INTO routines (member_id, title) VALUES (?, ?)').run(member, 'Routine').lastInsertRowid;
+  const step = db.prepare('INSERT INTO routine_steps (routine_id, title) VALUES (?, ?)').run(routine, 'Task').lastInsertRowid;
+  const complete = db.prepare('INSERT INTO routine_step_completions (step_id, due_date) VALUES (?, ?)');
+  for (const day of ['2026-10-30', '2026-10-31', '2026-11-01', '2026-11-02', '2026-11-03']) complete.run(step, day);
+  const response = await fetch(`${baseUrl}/custom`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ startDate: '2026-10-31', endDate: '2026-11-02' }) });
+  assert.equal(response.status, 200);
+  const report = await response.json();
+  assert.equal(report.custom, true);
+  assert.equal(report.taskTarget, 60);
+  assert.equal(report.members[0].creditedTasks, 3);
+  assert.equal(report.members[0].allowanceCents, 30);
+  const [saved] = listSavedReports();
+  assert.equal(saved.custom, true);
+  assert.equal(saved.filename, 'Allowance-Totals_Custom-2026-10-31_2026-11-02.json');
+  assert.equal(readSavedReport(saved.filename).members[0].creditedTasks, 3);
+  db.prepare('DELETE FROM routine_step_completions WHERE due_date = ?').run('2026-11-01');
+  assert.equal(recalculateSavedReport(saved.filename).report.members[0].creditedTasks, 2);
+  deleteSavedReport(saved.filename);
+  assert.deepEqual(listSavedReports(), []);
+});
+
+test('custom reports reject invalid ranges and support a single day', async () => {
+  for (const range of [{}, { startDate: '2026-02-30', endDate: '2026-03-01' }, { startDate: '2026-11-02', endDate: '2026-11-01' }]) {
+    const response = await fetch(`${baseUrl}/custom`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(range) });
+    assert.equal(response.status, 422);
+  }
+  assert.deepEqual(listSavedReports(), []);
+  const response = await fetch(`${baseUrl}/custom`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ startDate: '2026-11-01', endDate: '2026-11-01' }) });
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).taskTarget, 20);
 });

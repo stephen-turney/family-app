@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, useMembers, useSettings, useReports, useApiMutation } from '../api/client.js';
 import Modal from '../components/Modal.jsx';
+import ReportRangePicker from '../components/ReportRangePicker.jsx';
 import Avatar from '../components/Avatar.jsx';
 import { fileToAvatarDataUrl } from '../lib/image.js';
 import { memberColors, memberColor } from '../lib/theme.js';
@@ -62,6 +63,8 @@ function ThemeCard() {
 function ReportsCard() {
   const { data: reports = [], isLoading, error } = useReports();
   const [openReport, setOpenReport] = useState(null);
+  const [customOpen, setCustomOpen] = useState(false);
+  const custom = useApiMutation((range) => api.post('/reports/custom', range), ['reports']);
   const generate = useApiMutation(() => api.post('/reports'), ['reports']);
   const load = useApiMutation(
     (filename) => api.get(`/reports/${encodeURIComponent(filename)}`)
@@ -74,7 +77,7 @@ function ReportsCard() {
     (filename) => api.post(`/reports/${encodeURIComponent(filename)}/recalculate`),
     ['reports']
   );
-  const isBusy = generate.isPending || load.isPending || remove.isPending || recalculate.isPending;
+  const isBusy = custom.isPending || generate.isPending || load.isPending || remove.isPending || recalculate.isPending;
 
   const deleteReport = (filename) => {
     if (window.confirm(`Delete ${filename}? This cannot be undone.`)) {
@@ -108,6 +111,7 @@ function ReportsCard() {
       <div className="row reports-header">
         <h2 style={{ margin: 0 }}>Reports</h2>
         <div className="spacer" />
+        <button className="btn ghost small" disabled={isBusy} onClick={() => { custom.reset(); setCustomOpen(true); }}>Custom report</button>
         <button
           className="btn small"
           disabled={isBusy}
@@ -129,7 +133,7 @@ function ReportsCard() {
       )}
       {recalculate.isSuccess && (
         <p className="report-message" role="status">
-          Report for the week of {recalculate.data.report.mondayLabel} recalculated and saved.
+          {reportTitle(recalculate.data.report)} recalculated and saved.
         </p>
       )}
       {isLoading && <span className="muted">Loading reports…</span>}
@@ -148,7 +152,9 @@ function ReportsCard() {
                 <span aria-hidden="true">📄</span>
                 {load.isPending && load.variables === report.filename
                   ? 'Opening report…'
-                  : report.mondayLabel
+                  : report.custom
+                    ? reportTitle(report)
+                    : report.mondayLabel
                     ? `Allowance totals · Week of ${report.mondayLabel}`
                     : report.filename.replace(/\.(?:json|txt)$/, '').replace(/[_-]/g, ' ')}
               </button>
@@ -158,10 +164,10 @@ function ReportsCard() {
                   className="btn ghost small report-action"
                   disabled={isBusy || report.readable === false}
                   aria-busy={recalculate.isPending && recalculate.variables === report.filename}
-                  aria-label={`Recalculate allowance totals for the week of ${report.mondayLabel || report.filename}`}
+                  aria-label={`Recalculate ${reportTitle(report)}`}
                   title={report.readable === false
                     ? 'This saved report could not be read.'
-                    : 'Replace this report with totals from the current checkboxes for this week.'}
+                    : 'Replace this report with totals from the current checkboxes for these dates.'}
                   onClick={() => recalculateReport(report.filename)}
                 >
                   {recalculate.isPending && recalculate.variables === report.filename ? 'Recalculating…' : 'Recalculate'}
@@ -183,11 +189,22 @@ function ReportsCard() {
       {remove.isError && (
         <p className="report-message error">The report could not be deleted.</p>
       )}
+      {customOpen && <ReportRangePicker pending={custom.isPending} error={custom.isError}
+        onClose={() => setCustomOpen(false)}
+        onGenerate={(range) => custom.mutate(range, { onSuccess: (report) => {
+          setCustomOpen(false); setOpenReport(report);
+        } })} />}
       {openReport && (
         <AllowanceReportModal report={openReport} onClose={() => setOpenReport(null)} />
       )}
     </div>
   );
+}
+
+function reportTitle(report) {
+  return report.custom
+    ? `Allowance Totals ${report.monday} - ${report.friday}`
+    : `Allowance totals · Week of ${report.mondayLabel || report.filename}`;
 }
 
 const REPORT_CATEGORIES = [
@@ -203,9 +220,9 @@ function reportMoney(cents) {
 
 function AllowanceReportModal({ report, onClose }) {
   return (
-    <Modal title="Allowance report" onClose={onClose} className="allowance-report-modal">
+    <Modal title={report.custom ? reportTitle(report) : "Allowance report"} onClose={onClose} className="allowance-report-modal">
       <div className="allowance-report-heading">
-        <span className="allowance-report-kicker">Weekly totals</span>
+        <span className="allowance-report-kicker">{report.custom ? 'Custom totals' : 'Weekly totals'}</span>
         <strong>{report.mondayLabel} – {report.fridayLabel}</strong>
       </div>
 

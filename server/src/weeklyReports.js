@@ -14,7 +14,7 @@ const WEEKLY_TASK_TARGET = TASKS_PER_DAY * WEEKDAYS_PER_WEEK;
 const WEEKLY_POINT_TARGET = WEEKLY_TASK_TARGET * POINTS_PER_TASK;
 
 // The final assertion requires the actual end of the string, including rejecting a trailing newline.
-export const REPORT_NAME = /^(?:Allowance-Totals_Week-of-[A-Za-z]+-\d{1,2}(?:st|nd|rd|th)(?:-\d{4})?|user-report_\d{4}-\d{2}-\d{2}(?:_\d{3})?)\.(?:txt|json)(?![\s\S])/;
+export const REPORT_NAME = /^(?:Allowance-Totals_Custom-\d{4}-\d{2}-\d{2}_\d{4}-\d{2}-\d{2}|Allowance-Totals_Week-of-[A-Za-z]+-\d{1,2}(?:st|nd|rd|th)(?:-\d{4})?|user-report_\d{4}-\d{2}-\d{2}(?:_\d{3})?)\.(?:txt|json)(?![\s\S])/;
 
 function reportPath(filename) {
   if (!REPORT_NAME.test(filename)) throw new Error('report not found');
@@ -99,7 +99,29 @@ export function generateAllowanceReport(referenceDate = new Date()) {
   return calculateAllowanceReport(reportWeek(referenceDate));
 }
 
-function calculateAllowanceReport({ monday, friday }) {
+function validateRange(startDate, endDate) {
+  const valid = (value) => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
+    && Number.isFinite(Date.parse(`${value}T00:00:00Z`))
+    && new Date(`${value}T00:00:00Z`).toISOString().slice(0, 10) === value;
+  if (!valid(startDate) || !valid(endDate) || startDate > endDate) {
+    throw new Error('Select a valid start and end date in order.');
+  }
+}
+
+export function generateCustomReport(startDate, endDate) {
+  validateRange(startDate, endDate);
+  const report = calculateAllowanceReport({ monday: startDate, friday: endDate, custom: true });
+  const filename = `Allowance-Totals_Custom-${startDate}_${endDate}.json`;
+  mkdirSync(REPORTS_DIR, { recursive: true });
+  const filePath = reportPath(filename);
+  if (existsSync(filePath) && !isReportFile(filename)) throw new Error('Invalid report destination');
+  writeSnapshot(filePath, report);
+  return report;
+}
+
+function calculateAllowanceReport({ monday, friday, custom = false }) {
+  const days = Math.round((Date.parse(`${friday}T00:00:00Z`) - Date.parse(`${monday}T00:00:00Z`)) / 86400000) + 1;
+  const taskTarget = custom ? days * TASKS_PER_DAY : WEEKLY_TASK_TARGET;
   const members = db.prepare(
     `SELECT id, name, weekly_allowance_cents FROM members
       WHERE weekly_allowance_cents IS NOT NULL ORDER BY id`
@@ -114,17 +136,18 @@ function calculateAllowanceReport({ monday, friday }) {
   );
 
   return {
+    ...(custom ? { custom: true, startDate: monday, endDate: friday } : {}),
     monday,
     friday,
     mondayLabel: displayDate(monday),
     fridayLabel: displayDate(friday),
-    taskTarget: WEEKLY_TASK_TARGET,
-    pointTarget: WEEKLY_POINT_TARGET,
+    taskTarget,
+    pointTarget: taskTarget * POINTS_PER_TASK,
     members: members.map((member) => {
       const creditedTasks = dailyCounts.all(member.id, monday, friday)
         .reduce((sum, row) => sum + Math.min(Number(row.completed), TASKS_PER_DAY), 0);
       const points = creditedTasks * POINTS_PER_TASK;
-      const percent = Math.round((creditedTasks / WEEKLY_TASK_TARGET) * 100);
+      const percent = Math.round((creditedTasks / taskTarget) * 100);
       const allowanceCents = Math.ceil(
         (member.weekly_allowance_cents * creditedTasks) / WEEKLY_TASK_TARGET / 10
       ) * 10;
@@ -377,8 +400,9 @@ export function readSavedReport(filename) {
 export function recalculateSavedReport(filename) {
   const saved = readSavedReport(filename);
   // Use the archived week itself, avoiding UTC-midnight shifts into the prior week.
-  if (new Date(`${saved.monday}T00:00:00Z`).getUTCDay() !== 1
-    || saved.friday !== addDays(saved.monday, 4)) {
+  if (saved.custom) validateRange(saved.monday, saved.friday);
+  if (!saved.custom && (new Date(`${saved.monday}T00:00:00Z`).getUTCDay() !== 1
+    || saved.friday !== addDays(saved.monday, 4))) {
     throw new Error('Invalid saved report week');
   }
   const jsonFilename = filename.replace(/\.txt$/, '.json');
@@ -451,7 +475,7 @@ export function reportInfo(filename) {
   const info = { filename, size: stat.size, created_at: stat.mtime.toISOString() };
   try {
     const report = readSavedReport(filename);
-    return { ...info, readable: true, monday: report.monday, friday: report.friday,
+    return { ...info, custom: report.custom === true, readable: true, monday: report.monday, friday: report.friday,
       mondayLabel: report.mondayLabel, fridayLabel: report.fridayLabel };
   } catch {
     // Keep unreadable files visible so a damaged archive never silently disappears.

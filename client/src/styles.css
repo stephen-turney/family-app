@@ -916,3 +916,11 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 .theme-select:disabled { cursor: wait; opacity: .7; }
 .theme-status { color: var(--muted); font-size: 12px; }
 .theme-status:not(:empty) { margin-left: 12px; }
+
+.range-month { justify-content: space-between; margin-bottom: 14px; }
+.report-calendar { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; text-align: center; }
+.report-calendar > span { font-size: 12px; padding: 5px 0; }
+.calendar-day { min-height: 38px; border: 1px solid transparent; border-radius: 6px; color: var(--text); background: var(--panel-2); cursor: pointer; font: inherit; }
+.calendar-day.in-range { background: var(--accent); color: var(--bg); opacity: .75; }
+.calendar-day.selected { background: var(--accent); color: var(--bg); opacity: 1; border-color: currentColor; font-weight: 700; }
+.calendar-day:hover, .calendar-day:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }

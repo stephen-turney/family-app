@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { REPORT_NAME, deleteSavedReport, generateAllowanceReport, listSavedReports, readSavedReport, recalculateSavedReport } from '../weeklyReports.js';
+import { REPORT_NAME, generateCustomReport, deleteSavedReport, generateAllowanceReport, listSavedReports, readSavedReport, recalculateSavedReport } from '../weeklyReports.js';
 
 export const reportsRouter = Router();
 
@@ -7,7 +7,15 @@ reportsRouter.post('/', (req, res) => {
   res.json(generateAllowanceReport(new Date()));
 });
 
-reportsRouter.get('/', (req, res) => {
+reportsRouter.post('/custom', (req, res) => {
+  try {
+    res.json(generateCustomReport(req.body?.startDate, req.body?.endDate));
+  } catch (error) {
+    res.status(422).json({ error: error.message });
+  }
+});
+
+reportsRouter.get('/',  (req, res) => {
   res.json(listSavedReports());
 });
 
