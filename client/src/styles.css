@@ -129,7 +129,7 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 .report-message.error { color: var(--danger); }
 
 /* On-demand allowance report */
-.modal.allowance-report-modal { width: 680px; padding: 0; overflow: hidden; }
+.modal.allowance-report-modal { width: 680px; padding: 0; overflow-x: hidden; overflow-y: auto; }
 .allowance-report-modal > .row:first-child { margin: 0 !important; padding: 18px 22px; }
 .allowance-report-modal > .row:first-child h2 { font-size: 20px; }
 .allowance-report-heading {
@@ -173,7 +173,7 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
   .report-link { flex-basis: 100%; }
   .report-actions { margin-top: 8px; margin-left: auto; }
   .report-action { min-height: 40px; }
-  .modal.allowance-report-modal { width: 100%; max-width: none; max-height: none; overflow-y: auto; }
+  .modal.allowance-report-modal { width: 100%; max-width: none; }
   .allowance-category-grid { grid-template-columns: repeat(2, 1fr); }
   .allowance-member-summary > strong { font-size: 25px; }
 }
@@ -708,11 +708,18 @@ label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px
 .section-title { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 14px 0 4px; }
 
 /* Modal */
+/* The main page scrolls inside .content, independently of the document. */
+html.modal-open, .modal-open body, .modal-open .content { overflow: hidden; }
 .modal-backdrop {
-  position: fixed; inset: 0; background: rgba(0,0,0,.55);
+  position: fixed; top: 0; right: 0; bottom: 0; left: 0; background: rgba(0,0,0,.55);
   display: flex; align-items: center; justify-content: center; z-index: 50;
 }
-.modal { width: 440px; max-width: calc(100vw - 32px); max-height: calc(100vh - 32px); overflow: auto; }
+.modal {
+  width: 440px; max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px);
+  overflow: auto; overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
 .modal .field { margin-bottom: 12px; }
 .modal .field input, .modal .field select, .modal .field textarea { width: 100%; }
 
