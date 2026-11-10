@@ -1,0 +1,258 @@
+Last login: Mon Nov  9 21:52:22 on ttys001
+stephenturney@Beccas-Laptop ~ % ssh family-app
+ssh: Could not resolve hostname family-app: nodename nor servname provided, or not known
+stephenturney@Beccas-Laptop ~ % ssh family-hub
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+
+A newer release of "Amazon Linux" is available.
+  Version 2023.12.20261012:
+  Version 2023.12.20261013:
+  Version 2023.12.20261014:
+  Version 2023.12.20261016:
+  Version 2023.12.20261021:
+  Version 2023.12.20261026:
+  Version 2023.12.20261028:
+  Version 2023.12.20261029:
+  Version 2023.12.20261102:
+  Version 2023.12.20261109:
+Run "/usr/bin/dnf check-release-update" for full release and version update info
+   ,     #_
+   ~\_  ####_        Amazon Linux 2023
+  ~~  \_#####\
+  ~~     \###|
+  ~~       \#/ ___   https://aws.amazon.com/linux/amazon-linux-2023
+   ~~       V~' '->
+    ~~~         /
+      ~~._.   _/
+         _/ _/
+       _/m/'
+Last login: Tue Nov 10 03:53:47 2026 from 136.58.40.137
+[ec2-user@ip-172-31-43-206 ~]$ ls
+family-app  family-app-restic-install  update-family-app.sh
+[ec2-user@ip-172-31-43-206 ~]$ exit
+logout
+Connection to ec2-18-235-233-49.compute-1.amazonaws.com closed.
+stephenturney@Beccas-Laptop ~ % 
+stephenturney@Beccas-Laptop ~ % 
+stephenturney@Beccas-Laptop ~ % cd documents
+stephenturney@Beccas-Laptop documents % ls
+Adobe				something to consider.txt
+GitHub				SSH
+stephenturney@Beccas-Laptop documents % cd github
+stephenturney@Beccas-Laptop github % ls
+family-app		stephenturney.com	virtual-stage
+stephenturney@Beccas-Laptop github % cd family-app
+stephenturney@Beccas-Laptop family-app % ls
+_archive		logs			server
+backups			output			start.command
+CLAUDE.md		PUNCH_LIST.md		update-server-git.sh
+client			README.md
+hosting			references
+stephenturney@Beccas-Laptop family-app % bash update-server-git.sh
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+remote: Enumerating objects: 34, done.
+remote: Counting objects: 100% (34/34), done.
+remote: Compressing objects: 100% (5/5), done.
+remote: Total 19 (delta 13), reused 19 (delta 13), pack-reused 0 (from 0)
+Unpacking objects: 100% (19/19), 5.01 KiB | 732.00 KiB/s, done.
+From https://github.com/stephen-turney/family-app
+   207e1d6..3d7dd9e  main       -> origin/main
+Updating 207e1d6..3d7dd9e
+Fast-forward
+ .gitignore                                  |  1 +
+ client/src/components/ReportRangePicker.jsx | 51 +++++++++++++++++++++++++++++
+ client/src/pages/FamilyPage.jsx             | 31 ++++++++++++++----
+ client/src/styles.css                       |  8 +++++
+ server/src/routes/reports.js                | 12 +++++--
+ server/src/weeklyReports.js                 | 40 +++++++++++++++++-----
+ server/test/reports.test.js                 | 35 ++++++++++++++++++++
+ 7 files changed, 161 insertions(+), 17 deletions(-)
+ create mode 100644 client/src/components/ReportRangePicker.jsx
+
+added 181 packages, and audited 182 packages in 7s
+
+20 packages are looking for funding
+  run `npm fund` for details
+
+5 vulnerabilities (2 moderate, 3 high)
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.
+
+> family-organizer-client@1.0.0 build
+> vite build
+
+vite v6.4.3 building for production...
+✓ 411 modules transformed.
+dist/assets/polyfills-legacy-SBs5VhkY.js  119.86 kB │ gzip:  44.72 kB
+dist/assets/index-legacy-GCk-vex3.js      366.94 kB │ gzip: 108.23 kB
+dist/index.html                                        1.66 kB │ gzip:   0.79 kB
+dist/assets/minecraft-jack-o-lantern-CQ8laLlk.png     27.90 kB
+dist/assets/thanksgiving-sprites-Dy1KDGA6.png      1,256.15 kB
+dist/assets/autumn-background-D9QnAhX_.png         1,572.42 kB
+dist/assets/index-w8gqPpcP.css                        48.72 kB │ gzip:   9.81 kB
+dist/assets/index-DmG_NLsX.js                        320.52 kB │ gzip: 100.41 kB
+✓ built in 18.15s
+
+added 70 packages, and audited 71 packages in 962ms
+
+16 packages are looking for funding
+  run `npm fund` for details
+
+3 vulnerabilities (1 moderate, 1 high, 1 critical)
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.
+● family-app.service - Family App
+     Loaded: loaded (/etc/systemd/system/family-app.service; enabled; preset: disabled)
+     Active: active (running) since Tue 2026-11-10 04:08:53 UTC; 82ms ago
+   Main PID: 1212974 (MainThread)
+      Tasks: 6 (limit: 2255)
+     Memory: 6.5M
+        CPU: 41ms
+     CGroup: /system.slice/family-app.service
+             └─1212974 /usr/bin/node-24 src/index.js
+
+Nov 10 04:08:53 ip-172-31-43-206.ec2.internal systemd[1]: Started family-app.…p.
+Hint: Some lines were ellipsized, use -l to show in full.
+Connection to ec2-18-235-233-49.compute-1.amazonaws.com closed.
+stephenturney@Beccas-Laptop family-app % ssh family-app
+ssh: Could not resolve hostname family-app: nodename nor servname provided, or not known
+stephenturney@Beccas-Laptop family-app % ssh family-hub
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+
+A newer release of "Amazon Linux" is available.
+  Version 2023.12.20261012:
+  Version 2023.12.20261013:
+  Version 2023.12.20261014:
+  Version 2023.12.20261016:
+  Version 2023.12.20261021:
+  Version 2023.12.20261026:
+  Version 2023.12.20261028:
+  Version 2023.12.20261029:
+  Version 2023.12.20261102:
+  Version 2023.12.20261109:
+Run "/usr/bin/dnf check-release-update" for full release and version update info
+   ,     #_
+   ~\_  ####_        Amazon Linux 2023
+  ~~  \_#####\
+  ~~     \###|
+  ~~       \#/ ___   https://aws.amazon.com/linux/amazon-linux-2023
+   ~~       V~' '->
+    ~~~         /
+      ~~._.   _/
+         _/ _/
+       _/m/'
+Last login: Tue Nov 10 04:08:26 2026 from 136.58.40.137
+[ec2-user@ip-172-31-43-206 ~]$ ls
+family-app  family-app-restic-install  update-family-app.sh
+[ec2-user@ip-172-31-43-206 ~]$ nano update-family-app.sh
+[ec2-user@ip-172-31-43-206 ~]$ nano update-family-app.sh
+[ec2-user@ip-172-31-43-206 ~]$ sudo systemctl status family-app --no-pager
+● family-app.service - Family App
+     Loaded: loaded (/etc/systemd/system/family-app.service; enabled; preset: disabled)
+     Active: active (running) since Tue 2026-11-10 04:08:53 UTC; 1min 26s ago
+   Main PID: 1212974 (MainThread)
+      Tasks: 7 (limit: 2255)
+     Memory: 26.5M
+        CPU: 357ms
+     CGroup: /system.slice/family-app.service
+             └─1212974 /usr/bin/node-24 src/index.js
+
+Nov 10 04:08:53 ip-172-31-43-206.ec2.internal systemd[1]: Started family-app.…p.
+Nov 10 04:08:54 ip-172-31-43-206.ec2.internal node-24[1212974]: [server] Daily…1
+Hint: Some lines were ellipsized, use -l to show in full.
+[ec2-user@ip-172-31-43-206 ~]$ sudo systemctl stop family-app
+[ec2-user@ip-172-31-43-206 ~]$ sudo systemctl status family-app --no-pager
+○ family-app.service - Family App
+     Loaded: loaded (/etc/systemd/system/family-app.service; enabled; preset: disabled)
+     Active: inactive (dead) since Tue 2026-11-10 04:10:45 UTC; 4s ago
+   Duration: 1min 51.455s
+    Process: 1212974 ExecStart=/usr/bin/node-24 src/index.js (code=killed, signal=TERM)
+   Main PID: 1212974 (code=killed, signal=TERM)
+        CPU: 364ms
+
+Nov 10 04:08:53 ip-172-31-43-206.ec2.internal systemd[1]: Started family-app.…p.
+Nov 10 04:08:54 ip-172-31-43-206.ec2.internal node-24[1212974]: [server] Daily…1
+Nov 10 04:10:45 ip-172-31-43-206.ec2.internal systemd[1]: Stopping family-app…..
+Nov 10 04:10:45 ip-172-31-43-206.ec2.internal systemd[1]: family-app.service:…y.
+Nov 10 04:10:45 ip-172-31-43-206.ec2.internal systemd[1]: Stopped family-app.…p.
+Hint: Some lines were ellipsized, use -l to show in full.
+[ec2-user@ip-172-31-43-206 ~]$ nano update-family-app.sh
+[ec2-user@ip-172-31-43-206 ~]$ (cd client && npm ci --include=dev && npm run build)
+(cd server && npm ci --omit=dev)
+-bash: cd: client: No such file or directory
+-bash: cd: server: No such file or directory
+[ec2-user@ip-172-31-43-206 ~]$ ls
+family-app  family-app-restic-install  update-family-app.sh
+[ec2-user@ip-172-31-43-206 ~]$ cd family-app
+[ec2-user@ip-172-31-43-206 family-app]$ (cd client && npm ci --include=dev && npm run build)
+
+added 181 packages, and audited 182 packages in 7s
+
+20 packages are looking for funding
+  run `npm fund` for details
+
+5 vulnerabilities (2 moderate, 3 high)
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.
+
+> family-organizer-client@1.0.0 build
+> vite build
+
+vite v6.4.3 building for production...
+✓ 411 modules transformed.
+dist/assets/polyfills-legacy-SBs5VhkY.js  119.86 kB │ gzip:  44.72 kB
+dist/assets/index-legacy-GCk-vex3.js      366.94 kB │ gzip: 108.23 kB
+dist/index.html                                        1.66 kB │ gzip:   0.79 kB
+dist/assets/minecraft-jack-o-lantern-CQ8laLlk.png     27.90 kB
+dist/assets/thanksgiving-sprites-Dy1KDGA6.png      1,256.15 kB
+dist/assets/autumn-background-D9QnAhX_.png         1,572.42 kB
+dist/assets/index-w8gqPpcP.css                        48.72 kB │ gzip:   9.81 kB
+dist/assets/index-DmG_NLsX.js                        320.52 kB │ gzip: 100.41 kB
+✓ built in 19.15s
+[ec2-user@ip-172-31-43-206 family-app]$ npm audit fix
+npm error code ENOLOCK
+npm error audit This command requires an existing lockfile.
+npm error audit Try creating one first with: npm i --package-lock-only
+npm error audit Original error: loadVirtual requires existing shrinkwrap file
+npm error A complete log of this run can be found in: /home/ec2-user/.npm/_logs/2026-11-10T04_12_32_536Z-debug-0.log
+[ec2-user@ip-172-31-43-206 family-app]$ nano /home/ec2-user/.npm/_logs/2026-11-10T04_12_32_536Z-debug-0.log
+
+    /home/ec2-user/.npm/_logs/2026-11-10T04_12_32_536Z-debug-0.log              
+13 verbose stack Error: loadVirtual requires existing shrinkwrap file
+13 verbose stack     at Arborist.loadVirtual (/usr/lib/nodejs18/lib/node_module>
+13 verbose stack     at async Arborist.audit (/usr/lib/nodejs18/lib/node_module>
+13 verbose stack     at async Audit.auditAdvisories (/usr/lib/nodejs18/lib/node>
+13 verbose stack     at async Audit.exec (/usr/lib/nodejs18/lib/node_modules/np>
+13 verbose stack     at async Npm.exec (/usr/lib/nodejs18/lib/node_modules/npm/>
+13 verbose stack     at async module.exports (/usr/lib/nodejs18/lib/node_module>
+14 error code ENOLOCK
+15 error audit This command requires an existing lockfile.
+16 error audit Try creating one first with: npm i --package-lock-only
+17 error audit Original error: loadVirtual requires existing shrinkwrap file
+18 silly unfinished npm timer audit 1794283952898
+19 verbose cwd /home/ec2-user/family-app
+20 verbose os Linux 6.18.51-120.163.amzn2023.x86_64
+21 verbose node v18.20.8
+22 verbose npm  v10.8.2
+23 verbose exit 1
+24 verbose code 1
+25 error A complete log of this run can be found in: /home/ec2-user/.npm/_logs/>
+
+
+^G Help      ^O Write Out ^F Where Is  ^K Cut       ^T Execute   ^C Location
+^X Exit      ^R Read File ^\ Replace   ^U Paste     ^J Justify   ^/ Go To Line

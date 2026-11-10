@@ -35,3 +35,10 @@ as sprite-sheet cells, preserving the original generated artwork.
 
 Follow-up: keep the banner as artwork only, with no overlaid text. The top bar's
 seasonal label reads “Give Thanks”.
+
+## npm vulnerability warnings — November 9, 2026
+
+User-provided [deployment and npm error log](npm-vulnerabilities/deployment-log.txt).
+The log reports five client and three server vulnerabilities, followed by ENOLOCK
+when npm audit fix was run at the repository root. Audit/install commands belong
+in client/ and server/, which each contain their own package-lock.json.
